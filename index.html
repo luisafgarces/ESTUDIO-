@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="APA 7">
+<title>APA 7 · Formateador Académico</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg: #0d0d0f;
+  --surface: #141416;
+  --surface2: #1c1c20;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e4dc;
+  --muted: rgba(232,228,220,0.4);
+  --accent: #d4a843;
+  --accent2: #8f6e2a;
+  --green: #4a9e6b;
+  --red: #b85050;
+  --glow: rgba(212,168,67,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', 'Courier New', monospace;
+  min-height: 100vh;
+  font-size: 13px;
+  line-height: 1.6;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 70% 10%, rgba(212,168,67,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(74,158,107,0.03) 0%, transparent 70%);
+}
+
+/* ─── HEADER ─── */
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(13,13,15,0.85);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  height: 52px;
+  display: flex; align-items: center; gap: 1rem;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.logo span { color: var(--accent); }
+
+.topbar-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+}
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.8rem; }
+
+.api-indicator {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.7rem; letter-spacing: 0.08em; color: var(--muted);
+  cursor: pointer; padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border); border-radius: 3px;
+  background: none; color: var(--muted);
+  transition: all 0.2s;
+}
+.api-indicator:hover { border-color: var(--accent2); color: var(--accent); }
+.api-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.api-dot.ok { background: var(--green); box-shadow: 0 0 6px rgba(74,158,107,0.5); }
+
+/* ─── LAYOUT ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  min-height: calc(100vh - 52px);
+}
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 1.5rem;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  background: var(--surface);
+}
+
+.section-label {
+  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Drop zone */
+.drop-zone {
+  border: 1px dashed var(--border2);
+  border-radius: 6px;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.01);
+}
+.drop-zone::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, var(--glow) 0%, transparent 70%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.drop-zone:hover::before, .drop-zone.dragging::before { opacity: 1; }
+.drop-zone:hover, .drop-zone.dragging {
+  border-color: var(--accent2);
+  background: rgba(212,168,67,0.03);
+}
+.drop-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.drop-icon-wrap {
+  width: 44px; height: 44px; margin: 0 auto 1rem;
+  border: 1px solid var(--border2); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2); font-size: 1.2rem;
+  transition: all 0.25s;
+}
+.drop-zone:hover .drop-icon-wrap { border-color: var(--accent2); background: rgba(212,168,67,0.08); }
+.drop-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic;
+  color: var(--text); margin-bottom: 0.3rem;
+}
+.drop-sub { font-size: 0.7rem; color: var(--muted); }
+
+/* File list */
+.file-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.file-chip {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 4px; animation: pop 0.2s ease;
+  transition: border-color 0.2s;
+}
+.file-chip:hover { border-color: var(--border2); }
+@keyframes pop { from { opacity:0; transform: scale(0.96); } to { opacity:1; transform: scale(1); } }
+.file-chip-icon { font-size: 0.9rem; flex-shrink: 0; }
+.file-chip-name { flex: 1; font-size: 0.78rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-chip-size { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
+.file-chip-rm {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 1rem; padding: 0 0.1rem; line-height: 1; transition: color 0.2s;
+  flex-shrink: 0;
+}
+.file-chip-rm:hover { color: var(--red); }
+
+/* ─── MAIN ─── */
+.main-area {
+  padding: 2rem;
+  display: flex; flex-direction: column; gap: 2rem;
+}
+
+/* API Key panel */
+.api-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.5rem; animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.api-panel h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 600;
+  margin-bottom: 0.3rem; color: var(--text);
+}
+.api-panel p { font-size: 0.75rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.7; }
+
+.input-row { display: flex; gap: 0.6rem; align-items: center; }
+
+.api-input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.8rem;
+  padding: 0.65rem 0.9rem; border-radius: 4px; outline: none;
+  transition: border-color 0.2s;
+}
+.api-input:focus { border-color: var(--accent2); }
+.api-input::placeholder { color: var(--muted); }
+
+/* Buttons */
+.btn {
+  font-family: 'DM Mono', monospace; font-size: 0.78rem;
+  letter-spacing: 0.06em; padding: 0.65rem 1.2rem;
+  border: none; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s; text-transform: uppercase; white-space: nowrap;
+}
+.btn-gold {
+  background: var(--accent); color: #0d0d0f;
+  box-shadow: 0 0 20px rgba(212,168,67,0.2);
+}
+.btn-gold:hover:not(:disabled) {
+  background: #e0b54e;
+  box-shadow: 0 0 30px rgba(212,168,67,0.35);
+  transform: translateY(-1px);
+}
+.btn-gold:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border); font-size: 0.72rem;
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+.btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+
+/* Format row */
+.format-row {
+  display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap;
+}
+
+/* Progress */
+.progress-wrap {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 1.2rem 1.5rem;
+}
+.progress-label {
+  font-size: 0.72rem; color: var(--muted);
+  display: flex; justify-content: space-between;
+}
+.progress-bar-bg {
+  height: 2px; background: var(--border2); border-radius: 1px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent));
+  border-radius: 1px; transition: width 0.5s ease;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Output */
+.output-wrap { display: flex; flex-direction: column; gap: 1rem; animation: fadeUp 0.4s ease; }
+
+.output-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.output-card-head {
+  padding: 0.8rem 1.2rem; background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.output-card-name { font-size: 0.78rem; color: var(--text); }
+.output-card-actions { display: flex; gap: 0.5rem; }
+.output-card-body {
+  padding: 1.8rem 2rem;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1rem; line-height: 1.9; color: var(--text);
+  white-space: pre-wrap;
+  max-height: 55vh; overflow-y: auto;
+}
+.output-card-body::-webkit-scrollbar { width: 3px; }
+.output-card-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.output-success-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: rgba(74,158,107,0.06);
+  border-top: 1px solid rgba(74,158,107,0.15);
+  font-size: 0.7rem; color: var(--green); letter-spacing: 0.06em;
+}
+
+/* Error */
+.error-card {
+  background: rgba(184,80,80,0.06); border: 1px solid rgba(184,80,80,0.2);
+  border-radius: 6px; padding: 1rem 1.2rem;
+  font-size: 0.78rem; color: var(--red);
+}
+
+/* Spinner */
+.spin {
+  display: inline-block; width: 12px; height: 12px;
+  border: 1.5px solid rgba(13,13,15,0.3);
+  border-top-color: #0d0d0f;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 0.4rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Empty state */
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem; padding: 4rem 2rem; text-align: center;
+  color: var(--muted);
+}
+.empty-state .big-icon { font-size: 2.5rem; opacity: 0.25; margin-bottom: 0.5rem; }
+.empty-state h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: 1.3rem;
+  font-style: italic; font-weight: 300; color: rgba(232,228,220,0.3);
+}
+.empty-state p { font-size: 0.72rem; color: var(--muted); max-width: 280px; line-height: 1.8; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 0.8rem 1.2rem;
+  font-size: 0.78rem; color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  animation: toastIn 0.25s ease;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+@keyframes toastIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+/* Links */
+.link-small { font-size: 0.68rem; color: var(--accent2); text-decoration: none; }
+.link-small:hover { color: var(--accent); }
+
+@media (max-width: 480px) {
+  .main-area { padding: 1rem; }
+  .sidebar { padding: 1rem; }
+  .topbar { padding: 0 1rem; }
+  .output-card-body { font-size: 0.92rem; padding: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">APA<span>7</span></div>
+  <div class="topbar-tag">Séptima edición</div>
+  <div class="topbar-right">
+    <button class="api-indicator" onclick="toggleApiPanel()" id="apiIndicatorBtn">
+      <span class="api-dot" id="apiDot"></span>
+      <span id="apiLabel">API key</span>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="section-label">Documentos</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".docx" multiple>
+        <div class="drop-icon-wrap">📄</div>
+        <div class="drop-title">Sube tus archivos</div>
+        <div class="drop-sub">Arrastra o haz clic · Solo .docx</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Cola de archivos</div>
+      <div class="file-list" id="fileList">
+        <div style="font-size:0.72rem;color:var(--muted);text-align:center;padding:1rem 0">
+          Ningún archivo cargado
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:auto">
+      <div class="format-row">
+        <button class="btn btn-gold" id="formatBtn" onclick="formatAll()" disabled>
+          Formatear en APA 7
+        </button>
+        <button class="btn btn-ghost" onclick="clearAll()">Limpiar</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-area" id="mainArea">
+
+    <!-- API PANEL -->
+    <div class="api-panel" id="apiPanel">
+      <h3>Configura tu API Key de Google</h3>
+      <p>
+        Ingresa tu API key de Google AI Studio (Gemini) para usar la aplicación en todos tus dispositivos.<br>
+        Se guarda localmente en este navegador.
+        <a class="link-small" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">→ Obtener API key gratis</a>
+      </p>
+      <div class="input-row">
+        <input type="password" class="api-input" id="apiKeyInput" placeholder="AIzaSy..." autocomplete="off" spellcheck="false">
+        <button class="btn btn-gold" onclick="saveApiKey()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE (shown when no files / no results) -->
+    <div class="empty-state" id="emptyState">
+      <div class="big-icon">📑</div>
+      <h2>Listo para formatear</h2>
+      <p>Sube uno o más documentos .docx en el panel izquierdo y haz clic en "Formatear en APA 7"</p>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-label">
+        <span id="progressText">Procesando...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="output-wrap" id="outputWrap" style="display:none"></div>
+
+  </main>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const files = [];
+const results = [];
+
+// ─── API KEY ─────────────────────────────────────────────
+function loadApiKey() {
+  try {
+    const k = localStorage.getItem('gemini_api_key') || '';
+    if (k) {
+      document.getElementById('apiKeyInput').value = k;
+      setApiKeyStatus(true);
+      document.getElementById('apiPanel').style.display = 'none';
+    }
+    return k;
+  } catch(e) { return ''; }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val) return showToast('⚠ Ingresa una API key válida');
+  try {
+    localStorage.setItem('gemini_api_key', val);
+  } catch(e) {}
+  setApiKeyStatus(true);
+  document.getElementById('apiPanel').style.display = 'none';
+  showToast('✓ API key guardada en este dispositivo');
+  updateFormatBtn();
+}
+
+function setApiKeyStatus(ok) {
+  document.getElementById('apiDot').className = 'api-dot' + (ok ? ' ok' : '');
+  document.getElementById('apiLabel').textContent = ok ? 'Gemini ·  conectado' : 'API key';
+}
+
+function toggleApiPanel() {
+  const p = document.getElementById('apiPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function getApiKey() {
+  try { return localStorage.getItem('gemini_api_key') || ''; } catch(e) { return ''; }
+}
+
+// ─── FILES ───────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragging'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragging'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragging'); addFiles([...e.dataTransfer.files]); });
+document.getElementById('fileInput').addEventListener('change', e => { addFiles([...e.target.files]); e.target.value=''; });
+
+function addFiles(newFiles) {
+  newFiles.filter(f => f.name.endsWith('.docx')).forEach(f => {
+    if (!files.find(x => x.name === f.name && x.size === f.size)) files.push(f);
+  });
+  renderFiles();
+  updateFormatBtn();
+}
+
+function removeFile(i) { files.splice(i, 1); renderFiles(); updateFormatBtn(); }
+
+function renderFiles() {
+  const el = document.getElementById('fileList');
+  if (!files.length) {
+    el.innerHTML = '<div style="font-size:0.72rem;color:var(--muted);text-align:center;padding:1rem 0">Ningún archivo cargado</div>';
+    return;
+  }
+  el.innerHTML = files.map((f, i) => `
+    <div class="file-chip">
+      <span class="file-chip-icon">📄</span>
+      <span class="file-chip-name" title="${f.name}">${f.name}</span>
+      <span class="file-chip-size">${(f.size/1024).toFixed(0)}kb</span>
+      <button class="file-chip-rm" onclick="removeFile(${i})">×</button>
+    </div>`).join('');
+}
+
+function updateFormatBtn() {
+  const btn = document.getElementById('formatBtn');
+  btn.disabled = files.length === 0 || !getApiKey();
+}
+
+function clearAll() {
+  files.length = 0; results.length = 0;
+  renderFiles(); updateFormatBtn();
+  document.getElementById('outputWrap').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+}
+
+// ─── EXTRACT TEXT ─────────────────────────────────────────
+async function extractText(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const r = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+        res(r.value);
+      } catch(err) { rej(err); }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ─── FORMAT ALL ───────────────────────────────────────────
+async function formatAll() {
+  const key = getApiKey();
+  if (!key) { toggleApiPanel(); return; }
+
+  const btn = document.getElementById('formatBtn');
+  const pw = document.getElementById('progressWrap');
+  const pf = document.getElementById('progressFill');
+  const pt = document.getElementById('progressText');
+  const pp = document.getElementById('progressPct');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Procesando...';
+  pw.style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('outputWrap').style.display = 'none';
+  results.length = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    const pct = Math.round((i / files.length) * 100);
+    pf.style.width = pct + '%';
+    pt.textContent = `Procesando: ${files[i].name}`;
+    pp.textContent = pct + '%';
+    try {
+      const text = await extractText(files[i]);
+      const formatted = await callGemini(text, files[i].name, key);
+      results.push({ name: files[i].name, content: formatted, error: null });
+    } catch(err) {
+      results.push({ name: files[i].name, content: null, error: err.message });
+    }
+  }
+
+  pf.style.width = '100%'; pp.textContent = '100%'; pt.textContent = '¡Listo!';
+  setTimeout(() => {
+    pw.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = 'Formatear en APA 7';
+    renderResults();
+  }, 700);
+}
+
+// ─── GEMINI API ───────────────────────────────────────────
+async function callGemini(text, filename, apiKey) {
+  const prompt = `Eres un experto en normas APA 7ª edición. Reorganiza y formatea el siguiente documento académico según APA 7 de manera completa y precisa.
+
+REGLAS APA 7 A APLICAR:
+
+1. ESTRUCTURA: Título (centrado, en negrita), Nombre del autor/a, Afiliación institucional, Nota del autor (si aplica), Resumen (máx. 250 palabras), Palabras clave (3-5), Introducción (sin encabezado "Introducción"), cuerpo del texto con encabezados por niveles, Conclusiones, Referencias.
+
+2. ENCABEZADOS:
+   - Nivel 1: Centrado, Negrita, Mayúscula inicial
+   - Nivel 2: Izquierda, Negrita, Mayúscula inicial  
+   - Nivel 3: Izquierda, Negrita Cursiva, Mayúscula inicial
+
+3. CITAS: Formato (Apellido, año) o Apellido (año). Citas ≥40 palabras en bloque independiente con sangría.
+
+4. REFERENCIAS (al final, orden alfabético, sangría francesa):
+   - Libro: Apellido, I. (año). Título en cursiva. Editorial.
+   - Artículo: Apellido, I. (año). Título. Nombre de la Revista en cursiva, vol(núm), pp. https://doi.org/...
+   - Web: Apellido, I. (año, día mes). Título. Sitio web. URL
+
+5. FORMATO GENERAL: Times New Roman 12pt, doble espacio, márgenes 2.54 cm, sangría 1.27 cm. (Indica estas especificaciones como nota al inicio entre corchetes).
+
+6. Corrige ortografía y gramática sin alterar el contenido.
+
+7. Donde falte información (autor, año, afiliación) usa: [COMPLETAR: descripción]
+
+8. IMPORTANTE: Devuelve ÚNICAMENTE el documento formateado, sin explicaciones ni comentarios extra.
+
+DOCUMENTO (${filename}):
+---
+${text.substring(0, 14000)}
+---`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const msg = err.error?.message || `Error HTTP ${response.status}`;
+    if (response.status === 400 && msg.includes('API_KEY')) throw new Error('API key inválida. Verifica en AI Studio.');
+    throw new Error(msg);
+  }
+
+  const data = await response.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!content) throw new Error('Respuesta vacía de la API');
+  return content;
+}
+
+// ─── RENDER RESULTS ───────────────────────────────────────
+function renderResults() {
+  const wrap = document.getElementById('outputWrap');
+  wrap.innerHTML = '';
+  wrap.style.display = 'flex';
+
+  const ok = results.filter(r => !r.error).length;
+  const summaryEl = document.createElement('div');
+  summaryEl.style.cssText = 'font-size:0.72rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;';
+  summaryEl.textContent = `${ok} de ${results.length} documento${results.length>1?'s':''} formateado${ok>1?'s':''}`;
+  wrap.appendChild(summaryEl);
+
+  results.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'output-card';
+    if (r.error) {
+      card.innerHTML = `
+        <div class="output-card-head">
+          <span class="output-card-name">⚠ ${r.name}</span>
+        </div>
+        <div class="error-card" style="margin:1rem;border-radius:4px">${r.error}</div>`;
+    } else {
+      card.innerHTML = `
+        <div class="output-card-head">
+          <span class="output-card-name">📄 ${r.name}</span>
+          <div class="output-card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="copyResult(${i}, this)">Copiar</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadResult(${i})">↓ .txt</button>
+          </div>
+        </div>
+        <div class="output-card-body">${escHtml(r.content)}</div>
+        <div class="output-success-bar">✓ Formateado en APA 7 · Séptima edición · Verifica los marcadores [COMPLETAR]</div>`;
+    }
+    wrap.appendChild(card);
+  });
+
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── UTILS ────────────────────────────────────────────────
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyResult(i, btn) {
+  navigator.clipboard.writeText(results[i].content).then(() => {
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => btn.textContent = 'Copiar', 1800);
+  });
+}
+
+function downloadResult(i) {
+  const blob = new Blob([results[i].content], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = results[i].name.replace('.docx', '_APA7.txt');
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+loadApiKey();
+</script>
+</body>
+</html>
