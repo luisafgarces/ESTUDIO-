@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanIA — Planificador para TDAH + TOC</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --surface: #10101a;
+  --card: #14141f;
+  --border: #1f1f30;
+  --border2: #2a2a40;
+  --accent: #6c63ff;
+  --accent-glow: rgba(108,99,255,0.25);
+  --accent2: #ff6b6b;
+  --accent3: #63ffda;
+  --warn: #ffd166;
+  --text: #ece9ff;
+  --muted: #6b6880;
+  --muted2: #9b98b0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* GRAIN */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* GLOW BG */
+.glow-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+.glow-1 { width: 600px; height: 600px; background: rgba(108,99,255,0.08); top: -200px; left: -200px; }
+.glow-2 { width: 500px; height: 500px; background: rgba(99,255,218,0.05); bottom: -200px; right: -200px; }
+
+.app { position: relative; z-index: 1; }
+
+/* HEADER */
+.header {
+  padding: 50px 24px 40px;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.logo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  padding: 6px 16px;
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 100px;
+  background: rgba(108,99,255,0.07);
+}
+
+.logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(32px, 7vw, 56px);
+  line-height: 1.1;
+  font-weight: 400;
+  margin-bottom: 14px;
+  letter-spacing: -1px;
+}
+h1 em { color: var(--accent3); font-style: italic; }
+
+.header-sub {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.badge-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.badge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+}
+.badge.active { border-color: rgba(255,107,107,0.4); color: var(--accent2); background: rgba(255,107,107,0.07); }
+
+/* UPLOAD ZONE */
+.upload-section {
+  max-width: 680px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
+}
+
+.drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 24px;
+  padding: 60px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.drop-zone::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.08) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.05);
+}
+.drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
+
+.drop-icon {
+  font-size: 52px;
+  display: block;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.drop-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.drop-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+.formats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fmt-tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+}
+
+#fileInput { display: none; }
+
+/* FILE PREVIEW */
+.file-preview {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  align-items: center;
+  gap: 14px;
+}
+.file-preview.show { display: flex; }
+.file-icon-box {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: rgba(108,99,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.file-info { flex: 1; min-width: 0; }
+.file-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-size { font-size: 12px; color: var(--muted); }
+.remove-btn {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 18px; padding: 4px;
+  border-radius: 6px; transition: color 0.2s;
+}
+.remove-btn:hover { color: var(--accent2); }
+
+/* CONTEXT INPUT */
+.context-section {
+  max-width: 680px;
+  margin: 0 auto 30px;
+  padding: 0 24px;
+}
+
+.context-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.context-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+.context-textarea:focus { outline: none; border-color: var(--accent); }
+.context-textarea::placeholder { color: var(--muted); }
+
+/* ANALYZE BTN */
+.analyze-section {
+  max-width: 680px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+}
+
+.analyze-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), #9b6bff);
+  border: none;
+  border-radius: 16px;
+  padding: 18px 32px;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.analyze-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.analyze-btn:hover::before { opacity: 1; }
+.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(108,99,255,0.3); }
+.analyze-btn:active { transform: translateY(0); }
+.analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-inner { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* LOADING STATE */
+.loading-section {
+  display: none;
+  max-width: 680px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
+}
+.loading-section.show { display: block; }
+
+.loading-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+}
+
+.loading-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+
+.loading-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--muted);
+  transition: all 0.4s;
+}
+.loading-step.active { color: var(--text); background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2); }
+.loading-step.done { color: var(--accent3); }
+.step-icon { font-size: 16px; }
+
+/* RESULT */
+#result {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+  display: none;
+}
+#result.show { display: block; }
+
+.result-header {
+  text-align: center;
+  padding: 20px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+
+.result-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent3);
+  background: rgba(99,255,218,0.07);
+  border: 1px solid rgba(99,255,218,0.2);
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+}
+
+.result-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(22px, 5vw, 34px);
+  font-weight: 400;
+}
+
+#plan-content {
+  line-height: 1.8;
+}
+
+/* Rendered plan styles */
+#plan-content h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 36px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#plan-content h2::after { content: ''; flex: 1; }
+
+#plan-content h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin: 24px 0 12px;
+}
+
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 20px 0; }
+
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 18px;
+}
+.info-card .ic-label { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.info-card .ic-value { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); }
+.info-card.warn { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.05); }
+.info-card.warn .ic-value { color: var(--warn); }
+.info-card.accent { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
+.info-card.accent .ic-value { color: var(--accent); }
+
+.task-block {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 12px 0;
+}
+.task-block.focus { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
+.task-block.action { border-color: rgba(99,255,218,0.25); background: rgba(99,255,218,0.05); }
+.task-block.warn { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.05); }
+
+.task-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.task-emoji { font-size: 18px; }
+.task-title { font-weight: 500; font-size: 15px; }
+.task-body { font-size: 13px; color: var(--muted2); padding-left: 28px; }
+.task-note { font-size: 12px; color: var(--muted); margin-top: 6px; padding-left: 28px; font-style: italic; }
+
+.week-block {
+  position: relative;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  margin: 16px 0;
+}
+.week-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.week-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.week-dates-tag {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 3px 10px;
+  background: var(--surface);
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+.checklist {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 20px;
+  margin: 20px 0;
+}
+.checklist-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent3);
+  margin-bottom: 14px;
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--muted2);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { color: var(--text); }
+.check-box {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border2);
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all 0.2s;
+}
+.check-item.checked .check-box {
+  background: var(--accent3);
+  border-color: var(--accent3);
+  color: #000;
+}
+.check-item.checked { color: var(--muted); text-decoration: line-through; }
+
+.tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.tip-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 16px;
+}
+.tip-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.tip-label.tdah { color: var(--accent); }
+.tip-label.toc { color: var(--accent3); }
+.tip-text { font-size: 13px; color: var(--muted2); line-height: 1.6; }
+
+/* ACTIONS */
+.result-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border2);
+  background: var(--card);
+  color: var(--muted2);
+  text-align: center;
+}
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.action-btn.primary:hover { opacity: 0.85; }
+
+/* RAW TEXT */
+#raw-text-output {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--muted2);
+}
+
+/* API KEY SECTION */
+.apikey-section {
+  max-width: 680px;
+  margin: 0 auto 32px;
+  padding: 0 24px;
+}
+
+.apikey-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  padding: 20px 24px;
+  transition: border-color 0.3s;
+}
+.apikey-card.configured {
+  border-color: rgba(99,255,218,0.3);
+  background: rgba(99,255,218,0.04);
+}
+
+.apikey-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.apikey-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apikey-status {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+}
+.apikey-status.ok {
+  background: rgba(99,255,218,0.08);
+  border-color: rgba(99,255,218,0.25);
+  color: var(--accent3);
+}
+
+.apikey-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.apikey-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  transition: border-color 0.2s;
+}
+.apikey-input:focus { outline: none; border-color: var(--accent); }
+.apikey-input::placeholder { color: var(--muted); letter-spacing: 0; }
+
+.apikey-save-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 11px 18px;
+  color: white;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.apikey-save-btn:hover { opacity: 0.85; }
+
+.apikey-clear-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.apikey-clear-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+.apikey-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.apikey-hint a { color: var(--accent); text-decoration: none; }
+.apikey-hint a:hover { text-decoration: underline; }
+
+/* ERROR */
+.error-box {
+  background: rgba(255,107,107,0.08);
+  border: 1px solid rgba(255,107,107,0.25);
+  border-radius: 14px;
+  padding: 20px;
+  color: var(--accent2);
+  font-size: 14px;
+  display: none;
+  margin: 0 24px;
+  max-width: 680px;
+  margin: 0 auto 30px;
+}
+.error-box.show { display: block; }
+
+@media (max-width: 540px) {
+  .tip-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr 1fr; }
+  .result-actions { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="glow-orb glow-1"></div>
+<div class="glow-orb glow-2"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-tag">
+      <span class="logo-dot"></span>
+      PlanIA
+    </div>
+    <h1>Tu asistente<br>académico <em>inteligente</em></h1>
+    <p class="header-sub">Sube cualquier guía o documento universitario y obtén un plan de acción completo, adaptado especialmente para TDAH y TOC.</p>
+    <div class="badge-row">
+      <span class="badge active">✦ TDAH</span>
+      <span class="badge active">✦ TOC</span>
+      <span class="badge">PDF · Word · Imagen · Texto</span>
+    </div>
+  </header>
+
+  <!-- API KEY -->
+  <div class="apikey-section">
+    <div class="apikey-card" id="apikeyCard">
+      <div class="apikey-top">
+        <div class="apikey-label">🔑 API Key de Anthropic</div>
+        <div class="apikey-status" id="apikeyStatus">Sin configurar</div>
+      </div>
+      <div class="apikey-input-row">
+        <input type="password" class="apikey-input" id="apikeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
+        <button class="apikey-save-btn" onclick="saveApiKey()">Guardar</button>
+        <button class="apikey-clear-btn" onclick="clearApiKey()" title="Borrar API key">🗑</button>
+      </div>
+      <div class="apikey-hint">
+        Obtén tu key en <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Get API Key. Se guarda solo en este navegador.
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="upload-section">
+    <div class="drop-zone" id="dropZone">
+      <span class="drop-icon">📄</span>
+      <div class="drop-title">Arrastra tu documento aquí</div>
+      <div class="drop-sub">o haz clic para seleccionar</div>
+      <div class="formats">
+        <span class="fmt-tag">PDF</span>
+        <span class="fmt-tag">DOCX</span>
+        <span class="fmt-tag">PNG</span>
+        <span class="fmt-tag">JPG</span>
+        <span class="fmt-tag">TXT</span>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp">
+    </div>
+    <div class="file-preview" id="filePreview">
+      <div class="file-icon-box" id="fileTypeIcon">📄</div>
+      <div class="file-info">
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-size" id="fileSize">—</div>
+      </div>
+      <button class="remove-btn" id="removeFile">✕</button>
+    </div>
+  </div>
+
+  <!-- CONTEXT -->
+  <div class="context-section">
+    <label class="context-label" for="contextInput">Contexto adicional (opcional)</label>
+    <textarea class="context-textarea" id="contextInput"
+      placeholder="Ej: Tengo 10 días para entregar, el trabajo es en grupo de 4 personas, estoy en 3er semestre de Psicología..."></textarea>
+  </div>
+
+  <!-- BUTTON -->
+  <div class="analyze-section">
+    <button class="analyze-btn" id="analyzeBtn" disabled>
+      <div class="btn-inner">
+        <div class="btn-spinner" id="btnSpinner"></div>
+        <span id="btnText">⚡ Sube un documento para analizar</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-section" id="loadingSection">
+    <div class="loading-card">
+      <div style="font-size: 36px; margin-bottom: 12px;">🧠</div>
+      <div style="font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;">Analizando tu documento...</div>
+      <div style="font-size: 13px; color: var(--muted); margin-top: 6px;">Esto puede tomar unos segundos</div>
+      <div class="loading-steps">
+        <div class="loading-step" id="step1"><span class="step-icon">📖</span> Leyendo el documento</div>
+        <div class="loading-step" id="step2"><span class="step-icon">🔍</span> Extrayendo fechas y requisitos</div>
+        <div class="loading-step" id="step3"><span class="step-icon">🗓️</span> Construyendo tu plan semanal</div>
+        <div class="loading-step" id="step4"><span class="step-icon">🧩</span> Adaptando para TDAH + TOC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- RESULT -->
+  <div id="result">
+    <div class="result-header">
+      <div class="result-tag">✦ Plan generado</div>
+      <div class="result-title" id="resultTitle">Tu Plan de Acción Personalizado</div>
+    </div>
+    <div id="plan-content"></div>
+    <div class="result-actions">
+      <button class="action-btn" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="action-btn" onclick="resetApp()">↩ Nuevo documento</button>
+      <button class="action-btn primary" onclick="copyPlan()">📋 Copiar plan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// API KEY MANAGEMENT
+const API_KEY_STORAGE = 'planIA_apikey';
+
+function loadApiKey() {
+  const stored = localStorage.getItem(API_KEY_STORAGE);
+  if (stored) {
+    document.getElementById('apikeyInput').value = stored;
+    setApikeyUI(true);
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apikeyInput').value.trim();
+  if (val.length < 10) {
+    document.getElementById('apikeyStatus').textContent = '⚠ Key muy corta';
+    document.getElementById('apikeyStatus').className = 'apikey-status';
+    return;
+  }
+  localStorage.setItem(API_KEY_STORAGE, val);
+  setApikeyUI(true);
+}
+
+function clearApiKey() {
+  localStorage.removeItem(API_KEY_STORAGE);
+  document.getElementById('apikeyInput').value = '';
+  setApikeyUI(false);
+}
+
+function setApikeyUI(configured) {
+  const card = document.getElementById('apikeyCard');
+  const status = document.getElementById('apikeyStatus');
+  if (configured) {
+    card.classList.add('configured');
+    status.className = 'apikey-status ok';
+    status.textContent = '✓ Configurada';
+  } else {
+    card.classList.remove('configured');
+    status.className = 'apikey-status';
+    status.textContent = 'Sin configurar';
+  }
+}
+
+function getApiKey() {
+  return localStorage.getItem(API_KEY_STORAGE) || document.getElementById('apikeyInput').value.trim();
+}
+
+loadApiKey();
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const btnText = document.getElementById('btnText');
+const btnSpinner = document.getElementById('btnSpinner');
+const loadingSection = document.getElementById('loadingSection');
+const result = document.getElementById('result');
+const errorBox = document.getElementById('errorBox');
+
+let currentFile = null;
+let rawPlanText = '';
+
+// FILE ICONS
+const fileIcons = { pdf: '📕', doc: '📘', docx: '📘', txt: '📄', png: '🖼️', jpg: '🖼️', jpeg: '🖼️', webp: '🖼️' };
+
+function getExt(name) { return name.split('.').pop().toLowerCase(); }
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
+
+document.getElementById('removeFile').addEventListener('click', () => {
+  currentFile = null;
+  filePreview.classList.remove('show');
+  fileInput.value = '';
+  analyzeBtn.disabled = true;
+  btnText.textContent = '⚡ Sube un documento para analizar';
+});
+
+function setFile(file) {
+  currentFile = file;
+  const ext = getExt(file.name);
+  document.getElementById('fileTypeIcon').textContent = fileIcons[ext] || '📄';
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatSize(file.size);
+  filePreview.classList.add('show');
+  analyzeBtn.disabled = false;
+  btnText.textContent = '⚡ Generar mi plan personalizado';
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  if (!currentFile) return;
+  await analyzeDocument();
+});
+
+async function animateSteps() {
+  const steps = ['step1','step2','step3','step4'];
+  const delays = [0, 1200, 2400, 3800];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('active');
+      if (i > 0) {
+        const prev = document.getElementById(steps[i-1]);
+        prev.classList.remove('active');
+        prev.classList.add('done');
+        prev.querySelector('.step-icon').textContent = '✅';
+      }
+    }, delays[i]);
+  });
+}
+
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(',')[1]);
+    reader.onerror = () => rej(new Error('Error leyendo archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fileToText(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = () => rej(new Error('Error leyendo archivo'));
+    reader.readAsText(file);
+  });
+}
+
+async function analyzeDocument() {
+  const apiKey = getApiKey();
+  if (!apiKey || apiKey.length < 10) {
+    errorBox.textContent = '❌ Necesitas ingresar tu API Key de Google AI Studio primero.';
+    errorBox.classList.add('show');
+    document.getElementById('apikeyInput').focus();
+    return;
+  }
+
+  // UI: loading state
+  analyzeBtn.disabled = true;
+  btnSpinner.style.display = 'block';
+  btnText.textContent = 'Analizando...';
+  loadingSection.classList.add('show');
+  result.classList.remove('show');
+  errorBox.classList.remove('show');
+  animateSteps();
+
+  const ext = getExt(currentFile.name);
+  const context = document.getElementById('contextInput').value.trim();
+  const today = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  try {
+    const isImage = ['png','jpg','jpeg','webp'].includes(ext);
+    const isPdf = ext === 'pdf';
+
+    const systemPrompt = `Eres un asistente académico experto en planificación para estudiantes universitarios con TDAH y TOC.
+Tu trabajo es analizar documentos académicos (guías de aprendizaje, syllabus, actividades) y generar un plan de acción COMPLETO y VISUAL.
+
+HOY ES: ${today}
+
+Debes responder ÚNICAMENTE en formato JSON con esta estructura exacta (sin markdown, sin backticks, solo el JSON):
+{
+  "titulo": "nombre del curso o actividad",
+  "resumen": "descripción breve de qué es la actividad (2 oraciones)",
+  "alerta": "mensaje urgente si hay poco tiempo o la actividad ya inició, o null si no aplica",
+  "fechas": {
+    "inicio": "fecha de inicio",
+    "entrega": "fecha de entrega",
+    "diasRestantes": número o null,
+    "horasEstudio": número estimado total
+  },
+  "puntaje": "puntaje y tipo de actividad",
+  "entregables": [
+    { "numero": 1, "descripcion": "qué se entrega", "nota": "detalle extra o null" }
+  ],
+  "bloques": [
+    {
+      "nombre": "nombre del bloque (ej: Bloque 1 — Arranque)",
+      "emoji": "🔴",
+      "fechas": "rango de fechas",
+      "urgencia": "alta|media|baja",
+      "tareas": [
+        { "emoji": "📚", "titulo": "título corto", "descripcion": "qué hacer exactamente", "nota": "consejo TDAH/TOC o null", "tipo": "focus|action|warn|normal" }
+      ]
+    }
+  ],
+  "checklist": ["ítem 1", "ítem 2", "ítem 3", "ítem 4", "ítem 5", "ítem 6"],
+  "consejos": {
+    "tdah": ["consejo 1", "consejo 2"],
+    "toc": ["consejo 1", "consejo 2"]
+  }
+}
+
+Genera entre 3 y 5 bloques según el tiempo disponible. Los bloques deben ser CONCRETOS y ACCIONABLES.
+Adapta cada consejo específicamente a TDAH (enfoque, hiperfoco, impulsividad, olvido) y TOC (rituales, perfeccionismo, revisión excesiva, ansiedad).
+Si el documento está en imagen o PDF, extrae toda la información visible.`;
+
+    const GEMINI_MODEL = 'gemini-2.5-flash';
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+
+    let parts = [];
+
+    if (isImage) {
+      const b64 = await fileToBase64(currentFile);
+      const mediaType = currentFile.type || 'image/jpeg';
+      parts = [
+        { inline_data: { mime_type: mediaType, data: b64 } },
+        { text: `Analiza este documento académico y genera el plan JSON.\n${context ? 'Contexto adicional: ' + context : ''}` }
+      ];
+    } else if (isPdf) {
+      const b64 = await fileToBase64(currentFile);
+      parts = [
+        { inline_data: { mime_type: 'application/pdf', data: b64 } },
+        { text: `Analiza este documento académico y genera el plan JSON.\n${context ? 'Contexto adicional: ' + context : ''}` }
+      ];
+    } else {
+      const text = await fileToText(currentFile);
+      parts = [
+        { text: `Analiza este documento académico y genera el plan JSON.\n\nCONTENIDO:\n${text}\n${context ? '\nContexto adicional: ' + context : ''}` }
+      ];
+    }
+
+    const requestBody = {
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: 'user', parts }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 3000 }
+    };
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error?.message || 'Error de la API de Google');
+
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    rawPlanText = rawText;
+
+    // Parse JSON
+    let plan;
+    try {
+      const clean = rawText.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+      plan = JSON.parse(clean);
+    } catch (e) {
+      throw new Error('No se pudo interpretar la respuesta. Intenta con otro formato de archivo.');
+    }
+
+    // Finish loading steps
+    setTimeout(() => {
+      const last = document.getElementById('step4');
+      last.classList.remove('active');
+      last.classList.add('done');
+      last.querySelector('.step-icon').textContent = '✅';
+    }, 4500);
+
+    setTimeout(() => {
+      loadingSection.classList.remove('show');
+      renderPlan(plan);
+      btnSpinner.style.display = 'none';
+      btnText.textContent = '⚡ Analizar otro documento';
+      analyzeBtn.disabled = false;
+    }, 5000);
+
+  } catch (err) {
+    loadingSection.classList.remove('show');
+    errorBox.textContent = '❌ Error: ' + err.message;
+    errorBox.classList.add('show');
+    btnSpinner.style.display = 'none';
+    btnText.textContent = '⚡ Intentar de nuevo';
+    analyzeBtn.disabled = false;
+  }
+}
+
+function renderPlan(plan) {
+  document.getElementById('resultTitle').textContent = plan.titulo || 'Tu Plan Personalizado';
+
+  let html = '';
+
+  // ALERTA
+  if (plan.alerta) {
+    html += `<div style="background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:14px;padding:16px 20px;margin-bottom:28px;display:flex;gap:12px;align-items:flex-start;">
+      <span style="font-size:20px;flex-shrink:0">⚠️</span>
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#ff6b6b;margin-bottom:4px;">ATENCIÓN</div>
+        <div style="font-size:14px;color:#c8c0d0;">${plan.alerta}</div>
+      </div>
+    </div>`;
+  }
+
+  // RESUMEN
+  html += `<p style="font-size:15px;color:var(--muted2);margin-bottom:28px;padding:18px;background:var(--card);border-radius:12px;border:1px solid var(--border2)">${plan.resumen}</p>`;
+
+  // FECHAS
+  html += `<h2>📅 Fechas clave</h2><div class="info-grid">`;
+  html += `<div class="info-card"><div class="ic-label">Inicio</div><div class="ic-value">${plan.fechas?.inicio || '—'}</div></div>`;
+  html += `<div class="info-card warn"><div class="ic-label">⏰ Entrega</div><div class="ic-value">${plan.fechas?.entrega || '—'}</div></div>`;
+  if (plan.fechas?.diasRestantes !== null && plan.fechas?.diasRestantes !== undefined) {
+    const urgColor = plan.fechas.diasRestantes <= 7 ? 'var(--accent2)' : plan.fechas.diasRestantes <= 14 ? 'var(--warn)' : 'var(--accent3)';
+    html += `<div class="info-card"><div class="ic-label">Días restantes</div><div class="ic-value" style="color:${urgColor}">${plan.fechas.diasRestantes} días</div></div>`;
+  }
+  if (plan.puntaje) html += `<div class="info-card accent"><div class="ic-label">Puntaje</div><div class="ic-value">${plan.puntaje}</div></div>`;
+  html += `</div>`;
+
+  // ENTREGABLES
+  html += `<h2>📦 Qué debes entregar</h2>`;
+  html += `<div style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:20px;margin-bottom:8px;">`;
+  (plan.entregables || []).forEach(e => {
+    html += `<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;">
+      <div style="width:26px;height:26px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;">${e.numero}</div>
+      <div>
+        <div style="font-size:14px;">${e.descripcion}</div>
+        ${e.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;">${e.nota}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // BLOQUES / PLAN
+  html += `<h2>🗓️ Tu plan de acción</h2>`;
+  (plan.bloques || []).forEach(bloque => {
+    const urgColors = { alta: 'rgba(255,107,107,0.3)', media: 'rgba(255,209,102,0.25)', baja: 'rgba(99,255,218,0.2)' };
+    const urgBg = { alta: 'rgba(255,107,107,0.07)', media: 'rgba(255,209,102,0.05)', baja: 'rgba(99,255,218,0.04)' };
+    const borderColor = urgColors[bloque.urgencia] || 'var(--border2)';
+    const bgColor = urgBg[bloque.urgencia] || 'var(--card)';
+
+    html += `<div class="week-block" style="border-color:${borderColor};background:${bgColor};">
+      <div class="week-label">
+        <div class="week-name">${bloque.emoji || ''} ${bloque.nombre}</div>
+        <div class="week-dates-tag">${bloque.fechas}</div>
+      </div>`;
+
+    (bloque.tareas || []).forEach(t => {
+      const tipoBorder = { focus: 'rgba(108,99,255,0.35)', action: 'rgba(99,255,218,0.25)', warn: 'rgba(255,209,102,0.3)', normal: 'var(--border2)' };
+      const tipoBg = { focus: 'rgba(108,99,255,0.07)', action: 'rgba(99,255,218,0.05)', warn: 'rgba(255,209,102,0.05)', normal: 'var(--surface)' };
+      html += `<div style="background:${tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;">
+        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
+          <span style="font-size:18px;flex-shrink:0">${t.emoji}</span>
+          <div style="font-weight:500;font-size:14px;">${t.titulo}</div>
+        </div>
+        <div style="font-size:13px;color:var(--muted2);padding-left:28px;">${t.descripcion}</div>
+        ${t.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px;font-style:italic;">💡 ${t.nota}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // CHECKLIST INTERACTIVO
+  if (plan.checklist && plan.checklist.length) {
+    html += `<h2>✅ Lista de verificación final</h2>
+    <div class="checklist" id="checklistContainer">
+      <div class="checklist-title">Marca cada ítem cuando esté listo — cuando todos estén marcados, el trabajo está completo</div>`;
+    plan.checklist.forEach((item, i) => {
+      html += `<div class="check-item" id="ci-${i}" onclick="toggleCheck(${i})">
+        <div class="check-box" id="cb-${i}"></div>
+        <span>${item}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // CONSEJOS TDAH / TOC
+  if (plan.consejos) {
+    html += `<h2>🧠 Estrategias personalizadas</h2><div class="tip-grid">`;
+    if (plan.consejos.tdah?.length) {
+      html += `<div class="tip-box"><div class="tip-label tdah">TDAH — Enfoque</div>`;
+      plan.consejos.tdah.forEach(c => { html += `<div class="tip-text" style="margin-bottom:8px;">• ${c}</div>`; });
+      html += `</div>`;
+    }
+    if (plan.consejos.toc?.length) {
+      html += `<div class="tip-box"><div class="tip-label toc">TOC — Control</div>`;
+      plan.consejos.toc.forEach(c => { html += `<div class="tip-text" style="margin-bottom:8px;">• ${c}</div>`; });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  document.getElementById('plan-content').innerHTML = html;
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleCheck(i) {
+  const item = document.getElementById('ci-' + i);
+  const box = document.getElementById('cb-' + i);
+  const isChecked = item.classList.contains('checked');
+  item.classList.toggle('checked');
+  box.textContent = isChecked ? '' : '✓';
+}
+
+function copyPlan() {
+  const text = document.getElementById('plan-content').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.action-btn.primary');
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => { btn.textContent = '📋 Copiar plan'; }, 2000);
+  });
+}
+
+function resetApp() {
+  currentFile = null;
+  filePreview.classList.remove('show');
+  fileInput.value = '';
+  document.getElementById('contextInput').value = '';
+  analyzeBtn.disabled = true;
+  btnText.textContent = '⚡ Sube un documento para analizar';
+  result.classList.remove('show');
+  errorBox.classList.remove('show');
+  // Reset steps
+  ['step1','step2','step3','step4'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+    const icons = { step1: '📖', step2: '🔍', step3: '🗓️', step4: '🧩' };
+    el.querySelector('.step-icon').textContent = icons[id];
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
