@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="APA 7">
+<title>APA 7 Formateador</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+:root{--bg:#0d0d0f;--surf:#141416;--surf2:#1c1c20;--b:rgba(255,255,255,0.07);--b2:rgba(255,255,255,0.12);--tx:#e8e4dc;--mu:rgba(232,228,220,0.4);--ac:#d4a843;--ac2:#8f6e2a;--gr:#4a9e6b;--rd:#b85050;--gl:rgba(212,168,67,0.15)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono','Courier New',monospace;min-height:100vh;font-size:13px;line-height:1.6;background-image:radial-gradient(ellipse 60% 40% at 70% 10%,rgba(212,168,67,.04) 0%,transparent 70%),radial-gradient(ellipse 40% 60% at 10% 80%,rgba(74,158,107,.03) 0%,transparent 70%)}
+.bar{position:sticky;top:0;z-index:200;background:rgba(13,13,15,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--b);padding:0 1.5rem;height:52px;display:flex;align-items:center;gap:1rem}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;letter-spacing:-.03em}.logo span{color:var(--ac)}
+.tag{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mu);padding:.2rem .6rem;border:1px solid var(--b2);border-radius:2px}
+.bar-r{margin-left:auto;display:flex;align-items:center;gap:.8rem}
+.abtn{display:flex;align-items:center;gap:.4rem;font-size:.7rem;letter-spacing:.08em;cursor:pointer;padding:.3rem .7rem;border:1px solid var(--b);border-radius:3px;background:none;color:var(--mu);transition:all .2s;font-family:'DM Mono',monospace}.abtn:hover{border-color:var(--ac2);color:var(--ac)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--rd);flex-shrink:0;transition:background .3s}.dot.ok{background:var(--gr);box-shadow:0 0 6px rgba(74,158,107,.5)}
+.layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 52px)}
+@media(max-width:768px){.layout{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--b);padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;background:var(--surf)}
+.lbl{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mu);margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}.lbl::after{content:'';flex:1;height:1px;background:var(--b)}
+.dz{border:1px dashed var(--b2);border-radius:6px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;background:rgba(255,255,255,.01)}
+.dz::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--gl) 0%,transparent 70%);opacity:0;transition:opacity .3s}
+.dz:hover::before,.dz.ov::before{opacity:1}.dz:hover,.dz.ov{border-color:var(--ac2);background:rgba(212,168,67,.03)}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dico{width:44px;height:44px;margin:0 auto 1rem;border:1px solid var(--b2);border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--surf2);font-size:1.2rem;transition:all .25s}.dz:hover .dico{border-color:var(--ac2)}
+.dtit{font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--tx);margin-bottom:.3rem}
+.dsub{font-size:.7rem;color:var(--mu)}
+.fl{display:flex;flex-direction:column;gap:.5rem}
+.fc{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;background:var(--surf2);border:1px solid var(--b);border-radius:4px;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.fn{flex:1;font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fs{font-size:.68rem;color:var(--mu);flex-shrink:0}
+.frm{background:none;border:none;color:var(--mu);cursor:pointer;font-size:1rem;padding:0 .1rem;line-height:1;transition:color .2s;flex-shrink:0}.frm:hover{color:var(--rd)}
+.main{padding:2rem;display:flex;flex-direction:column;gap:2rem}
+.pan{background:var(--surf);border:1px solid var(--b);border-radius:8px;padding:1.5rem;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.pan h3{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;margin-bottom:.3rem}
+.pan p{font-size:.75rem;color:var(--mu);margin-bottom:1rem;line-height:1.7}
+.ir{display:flex;gap:.6rem;align-items:center}
+.ai{flex:1;background:var(--surf2);border:1px solid var(--b2);color:var(--tx);font-family:'DM Mono',monospace;font-size:.8rem;padding:.65rem .9rem;border-radius:4px;outline:none;transition:border-color .2s}.ai:focus{border-color:var(--ac2)}.ai::placeholder{color:var(--mu)}
+.btn{font-family:'DM Mono',monospace;font-size:.78rem;letter-spacing:.06em;padding:.65rem 1.2rem;border:none;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
+.gld{background:var(--ac);color:#0d0d0f;box-shadow:0 0 20px rgba(212,168,67,.2)}.gld:hover:not(:disabled){background:#e0b54e;box-shadow:0 0 30px rgba(212,168,67,.35);transform:translateY(-1px)}.gld:disabled{opacity:.35;cursor:not-allowed;transform:none!important}
+.gho{background:transparent;color:var(--mu);border:1px solid var(--b);font-size:.72rem}.gho:hover{border-color:var(--b2);color:var(--tx)}
+.sm{padding:.4rem .8rem;font-size:.7rem}
+.fr{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.pw{display:flex;flex-direction:column;gap:.5rem;background:var(--surf);border:1px solid var(--b);border-radius:8px;padding:1.2rem 1.5rem}
+.pl{font-size:.72rem;color:var(--mu);display:flex;justify-content:space-between}
+.pb{height:2px;background:var(--b2);border-radius:1px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,var(--ac2),var(--ac));border-radius:1px;transition:width .5s ease;box-shadow:0 0 8px var(--ac)}
+.ow{display:flex;flex-direction:column;gap:1rem;animation:up .4s ease}
+.oc{background:var(--surf);border:1px solid var(--b);border-radius:8px;overflow:hidden}
+.oh{padding:.8rem 1.2rem;background:var(--surf2);border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.on{font-size:.78rem}.oa{display:flex;gap:.5rem}
+.ob{padding:1.5rem 2rem;font-family:'Cormorant Garamond',Georgia,serif;font-size:.98rem;line-height:1.9;color:var(--tx);max-height:55vh;overflow-y:auto}.ob::-webkit-scrollbar{width:3px}.ob::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.ok2{display:flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;background:rgba(74,158,107,.06);border-top:1px solid rgba(74,158,107,.15);font-size:.7rem;color:var(--gr);letter-spacing:.06em}
+.er{background:rgba(184,80,80,.06);border:1px solid rgba(184,80,80,.2);border-radius:6px;padding:1rem 1.2rem;font-size:.78rem;color:var(--rd);margin:1rem}
+.sp{display:inline-block;width:12px;height:12px;border:1.5px solid rgba(13,13,15,.3);border-top-color:#0d0d0f;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.em{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:4rem 2rem;text-align:center}
+.em .ic{font-size:2.5rem;opacity:.2}.em h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-style:italic;font-weight:300;color:rgba(232,228,220,.25)}.em p{font-size:.72rem;color:var(--mu);max-width:280px;line-height:1.8}
+.tst{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;background:var(--surf2);border:1px solid var(--b2);border-radius:6px;padding:.8rem 1.2rem;font-size:.78rem;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:up .25s ease}
+.al{font-size:.68rem;color:var(--ac2);text-decoration:none}.al:hover{color:var(--ac)}
+@media(max-width:480px){.main,.side{padding:1rem}.bar{padding:0 1rem}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="logo">APA<span>7</span></div>
+  <div class="tag">Séptima edición</div>
+  <div class="bar-r">
+    <button class="abtn" onclick="togglePanel()"><span class="dot" id="dot"></span><span id="aLbl">API key</span></button>
+  </div>
+</header>
+<div class="layout">
+  <aside class="side">
+    <div>
+      <div class="lbl">Documentos</div>
+      <div class="dz" id="dz">
+        <input type="file" id="fi" accept=".docx" multiple>
+        <div class="dico">📄</div>
+        <div class="dtit">Sube tus archivos</div>
+        <div class="dsub">Arrastra o haz clic · Solo .docx</div>
+      </div>
+    </div>
+    <div>
+      <div class="lbl">Cola de archivos</div>
+      <div class="fl" id="flist"><div style="font-size:.72rem;color:var(--mu);text-align:center;padding:1rem 0">Ningún archivo cargado</div></div>
+    </div>
+    <div style="margin-top:auto">
+      <div class="fr">
+        <button class="btn gld" id="fBtn" onclick="formatAll()" disabled>Formatear en APA 7</button>
+        <button class="btn gho" onclick="clearAll()">Limpiar</button>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="pan" id="apiPanel">
+      <h3>Configura tu API Key de Google</h3>
+      <p>Ingresa tu API key de Google AI Studio (Gemini). Se guarda en este navegador.<br><a class="al" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">→ Obtener API key gratis</a></p>
+      <div class="ir"><input type="password" class="ai" id="apiIn" placeholder="AIzaSy..." autocomplete="off" spellcheck="false"><button class="btn gld" onclick="saveKey()">Guardar</button></div>
+    </div>
+    <div class="em" id="emSt"><div class="ic">📑</div><h2>Listo para formatear</h2><p>Sube documentos .docx y haz clic en "Formatear en APA 7"</p></div>
+    <div class="pw" id="pWrap" style="display:none"><div class="pl"><span id="pTxt">Procesando...</span><span id="pPct">0%</span></div><div class="pb"><div class="pf" id="pFill" style="width:0%"></div></div></div>
+    <div class="ow" id="oWrap" style="display:none"></div>
+  </main>
+</div>
+<script>
+const FILES=[],RESULTS=[];
+
+// ── API KEY ──────────────────────────────────────────────────────────────────
+function loadKey(){try{const k=localStorage.getItem('gk')||'';if(k){document.getElementById('apiIn').value=k;setDot(true);document.getElementById('apiPanel').style.display='none';}}catch(e){}}
+function saveKey(){const v=document.getElementById('apiIn').value.trim();if(!v)return toast('⚠ Ingresa una API key válida');try{localStorage.setItem('gk',v);}catch(e){}setDot(true);document.getElementById('apiPanel').style.display='none';toast('✓ API key guardada');updateBtn();}
+function getKey(){try{return localStorage.getItem('gk')||'';}catch(e){return '';}}
+function setDot(ok){document.getElementById('dot').className='dot'+(ok?' ok':'');document.getElementById('aLbl').textContent=ok?'Gemini · conectado':'API key';}
+function togglePanel(){const p=document.getElementById('apiPanel');p.style.display=p.style.display==='none'?'block':'none';}
+
+// ── FILES ────────────────────────────────────────────────────────────────────
+const dz=document.getElementById('dz');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('ov');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('ov'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('ov');addFiles([...e.dataTransfer.files]);});
+document.getElementById('fi').addEventListener('change',e=>{addFiles([...e.target.files]);e.target.value='';});
+function addFiles(list){list.filter(f=>f.name.endsWith('.docx')).forEach(f=>{if(!FILES.find(x=>x.name===f.name&&x.size===f.size))FILES.push(f);});renderFiles();updateBtn();}
+function removeFile(i){FILES.splice(i,1);renderFiles();updateBtn();}
+function renderFiles(){const el=document.getElementById('flist');if(!FILES.length){el.innerHTML='<div style="font-size:.72rem;color:var(--mu);text-align:center;padding:1rem 0">Ningún archivo cargado</div>';return;}el.innerHTML=FILES.map((f,i)=>`<div class="fc"><span>📄</span><span class="fn" title="${f.name}">${f.name}</span><span class="fs">${(f.size/1024).toFixed(0)}kb</span><button class="frm" onclick="removeFile(${i})">×</button></div>`).join('');}
+function updateBtn(){document.getElementById('fBtn').disabled=!FILES.length||!getKey();}
+function clearAll(){FILES.length=0;RESULTS.length=0;renderFiles();updateBtn();document.getElementById('oWrap').style.display='none';document.getElementById('emSt').style.display='flex';}
+function extractText(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=async e=>{try{const x=await mammoth.extractRawText({arrayBuffer:e.target.result});res(x.value);}catch(err){rej(err);}};r.readAsArrayBuffer(file);});}
+
+// ── FORMAT ALL ───────────────────────────────────────────────────────────────
+async function formatAll(){
+  const key=getKey();if(!key){togglePanel();return;}
+  const btn=document.getElementById('fBtn');
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span>Procesando...';
+  document.getElementById('pWrap').style.display='block';
+  document.getElementById('emSt').style.display='none';
+  document.getElementById('oWrap').style.display='none';
+  RESULTS.length=0;
+  for(let i=0;i<FILES.length;i++){
+    const pct=Math.round(i/FILES.length*100);
+    document.getElementById('pFill').style.width=pct+'%';
+    document.getElementById('pTxt').textContent='Procesando: '+FILES[i].name;
+    document.getElementById('pPct').textContent=pct+'%';
+    try{
+      setProgress(pct,'Extrayendo texto: '+FILES[i].name);
+      const text=await extractText(FILES[i]);
+      setProgress(pct+10,'Enviando a Gemini...');
+      const data=await callGeminiComplete(text,FILES[i].name,key);
+      RESULTS.push({name:FILES[i].name,data,error:null});
+    }catch(err){RESULTS.push({name:FILES[i].name,data:null,error:err.message});}
+  }
+  document.getElementById('pFill').style.width='100%';
+  document.getElementById('pPct').textContent='100%';
+  document.getElementById('pTxt').textContent='¡Listo!';
+  setTimeout(()=>{document.getElementById('pWrap').style.display='none';btn.disabled=false;btn.innerHTML='Formatear en APA 7';renderResults();},600);
+}
+
+function setProgress(pct,txt){
+  document.getElementById('pFill').style.width=Math.min(pct,99)+'%';
+  document.getElementById('pTxt').textContent=txt;
+  document.getElementById('pPct').textContent=Math.min(pct,99)+'%';
+}
+
+// ── GEMINI: procesa el documento COMPLETO en dos llamadas si es largo ─────────
+async function callGeminiComplete(text,filename,key){
+  const LIMIT=28000; // Gemini 1.5 Pro puede manejar mucho más
+
+  // Si el texto cabe en una sola llamada, lo hacemos directo
+  if(text.length<=LIMIT){
+    return await callGeminiSingle(text,filename,key,'completo');
+  }
+
+  // Si es muy largo, lo dividimos en: portada+resumen+intro / cuerpo+conclusiones+referencias
+  // Intentamos dividir en un punto natural (doble salto de línea cerca de la mitad)
+  const mid=Math.floor(text.length/2);
+  let cut=text.lastIndexOf('\n\n',mid);
+  if(cut<1000)cut=mid;
+
+  const part1=text.substring(0,cut);
+  const part2=text.substring(cut);
+
+  setProgress(20,'Procesando parte 1/2...');
+  const data1=await callGeminiSingle(part1,filename,key,'primera_parte');
+  setProgress(55,'Procesando parte 2/2...');
+  const data2=await callGeminiSingle(part2,filename,key,'segunda_parte');
+
+  // Unir los dos resultados
+  return mergeParts(data1,data2);
+}
+
+function mergeParts(d1,d2){
+  // d1 tiene portada, resumen, palabras clave, inicio del cuerpo
+  // d2 tiene el resto del cuerpo y las referencias
+  // Usamos referencias de d2 si existen (están al final del doc original)
+  const refs=d2.referencias&&d2.referencias.length>0?d2.referencias:d1.referencias||[];
+  const secs=[...(d1.secciones||[]),...(d2.secciones||[])];
+  // Eliminar referencias duplicadas que Gemini a veces añade dentro de secciones
+  return {
+    titulo:d1.titulo||d2.titulo||'',
+    autores:d1.autores||(d2.autores||[]),
+    institucion:d1.institucion||d2.institucion||'',
+    curso:d1.curso||d2.curso||'',
+    docente:d1.docente||d2.docente||'',
+    fecha:d1.fecha||d2.fecha||'',
+    resumen:d1.resumen||d2.resumen||'',
+    palabras_clave:d1.palabras_clave||d2.palabras_clave||'',
+    secciones:secs,
+    referencias:refs
+  };
+}
+
+async function callGeminiSingle(text,filename,key,parte){
+  const esPrimera=parte==='primera_parte';
+  const esSegunda=parte==='segunda_parte';
+
+  const instrParte=esSegunda
+    ?`IMPORTANTE: Este es el FRAGMENTO FINAL del documento. Puede que no tenga página de título ni resumen completo — déjalos vacíos ("") si no aparecen en este fragmento. Extrae TODAS las secciones del cuerpo y las referencias completas que aparezcan.`
+    :esPrimera
+    ?`IMPORTANTE: Este es el FRAGMENTO INICIAL del documento. Puede que no incluya las secciones finales ni las referencias — déjalos como arreglo vacío [] si no aparecen.`
+    :`Procesa el documento COMPLETO.`;
+
+  const prompt=`Eres un experto en normas APA 7 para trabajos universitarios de PREGRADO. ${instrParte}
+
+REGLAS APA 7 ESTRICTAS (nivel especialización):
+1. TÍTULO: Solo mayúscula en la primera palabra y nombres propios. Ejemplo: "Factores psicosociales que inciden en la vulneración de derechos en la comunidad".
+2. PÁGINA DE TÍTULO: título (centrado, negrita), autores CADA UNO EN SU PROPIA LÍNEA (array), institución, nombre del curso con código entre paréntesis, nombre del docente, fecha. SIN "Nota del autor".
+3. RESUMEN: SIN sangría de primera línea, máximo 250 palabras. NO dupliques el encabezado "Resumen". Redacción impersonal formal.
+4. PALABRAS CLAVE: mínimo 3, solo los términos separados por coma.
+5. CUERPO: empieza DIRECTAMENTE sin encabezado "Introducción".
+6. ENCABEZADOS — REGLA CRÍTICA DE NIVELES:
+   - Nivel 1 (h1): secciones principales del documento → Resumen, título del trabajo, Contexto institucional, Vulneraciones de derechos identificadas, Población afectada, Factores contextuales, Acciones de atención y prevención, Análisis crítico, Conclusiones, Referencias.
+   - Nivel 2 (h2): subsecciones directas de un h1, SIN subsecciones propias. Ejemplo: si "Población afectada" es h1, entonces "Afectación directa" y "Afectación indirecta" son h2.
+   - Nivel 3 (h3): subsecciones de un h2. Ejemplo: si "Acciones de atención y prevención" es h1 y tiene varias subsecciones como "Protocolo de atención", "Articulación interinstitucional", "Limitaciones en la acción preventiva", estas van como h2 (no h3) porque son subsecciones directas del h1. SOLO usa h3 si hay una subsección dentro de una subsección.
+   - REGLA PRÁCTICA: en un documento de informe de campo típico casi siempre solo hay h1 y h2, rara vez h3. Cuando dudes entre h2 y h3, usa h2.
+7. REDACCIÓN ACADÉMICA FORMAL: Elimina expresiones informales. Específicamente:
+   - "evidenció la necesidad" → "señaló la necesidad"
+   - "encontramos", "evidenciamos", "nos permitió", "vemos que", "nos muestra", "nos señalan" → redacción impersonal
+   - Reemplaza por: "se identificó", "permitió identificar", "se observa", "señalan", "indica", "sostiene", etc.
+8. LISTAS Y VIÑETAS: APA 7 NO usa viñetas. Convierte cualquier lista en párrafo corrido con punto y coma entre elementos.
+9. REFERENCIAS (orden alfabético, sangría francesa):
+   - Usa "&" (no "y") entre autores dentro de la lista de referencias.
+   - Títulos de libros y revistas en *cursiva* (con asteriscos).
+   - CAPÍTULOS EN LIBROS COMPILADOS (OBLIGATORIO): Si una referencia es un capítulo dentro de un libro, el formato es: Apellido, I. (año). Título del capítulo. En A. Apellido (Ed.), *Título del libro* (pp. xx-xx). Editorial. URL. EJEMPLO 1 — Quijano: 'Quijano, A. (2014). Colonialidad del poder, eurocentrismo y América Latina. En A. Quijano (Ed.), *Cuestiones y horizontes: de la dependencia histórico-estructural a la colonialidad/descolonialidad del poder* (pp. 778-827). CLACSO. URL'. EJEMPLO 2 — Vera Martínez: 'Vera Martínez, J., & Ceballos Villada, Z. (2021). Capítulo 1: Autogestión comunitaria: una apuesta para la investigación y la intervención. En J. Vera Martínez & Z. Ceballos Villada (Eds.), *Acciones de psicología desde los escenarios académicos, comunitarios e investigativos*. Sello Editorial UNAD. URL'. NUNCA omitas el bloque "En Apellido (Ed.)," en este tipo de referencias.
+   - Conserva las URLs/DOIs del original.
+10. NO agregues [COMPLETAR], NO pongas notas de formato, NO inventes datos. Si falta un dato en las referencias, déjalo como está.
+11. PÁRRAFOS DUPLICADOS: Si el original tiene párrafos repetidos, inclúyelos UNA SOLA VEZ con la versión más completa.
+12. CONCLUSIONES: OBLIGATORIO presentarlas en DOS párrafos separados, cada uno como elemento "p" independiente en el array. Nunca en un solo bloque.
+13. CITAS EN EL CUERPO DEL TEXTO: Dentro del texto narrativo usa SIEMPRE "y" entre autores, NUNCA "&". Ejemplo correcto: "(Polo y Gómez, 2018)", "(Vera y Ceballos, 2021)". El "&" solo va en la lista de Referencias al final.
+14. TÍTULOS DE ENCABEZADOS: Conserva los títulos descriptivos del original. No los acortes. Si el original dice "Contexto institucional: Comisaría de Familia de Barbosa, Antioquia", escríbelo completo. Si dice "Factores contextuales que aumentan la vulnerabilidad", escríbelo completo.
+
+El campo "autores" del JSON debe ser un ARRAY: ["Nombre Apellido 1", "Nombre Apellido 2"].
+
+DEVUELVE ÚNICAMENTE ESTE JSON (sin markdown, sin texto adicional):
+{"titulo":"título solo mayúscula inicial","autores":["Nombre Apellido 1","Nombre Apellido 2"],"institucion":"institución","curso":"Nombre Curso (código)","docente":"Nombre Docente","fecha":"fecha","resumen":"texto resumen sin sangría","palabras_clave":"p1, p2, p3","secciones":[{"tipo":"p","texto":"párrafo"},{"tipo":"h1","texto":"Título Sección"},{"tipo":"h2","texto":"Subtítulo"},{"tipo":"h3","texto":"Sub-subtítulo"},{"tipo":"cita_bloque","texto":"cita larga"}],"referencias":["Apellido, I., & Apellido, J. (año). *Título*. Editorial. URL"]}
+
+Tipos válidos en secciones: "p", "h1", "h2", "h3", "cita_bloque".
+Corrige ortografía y gramática sin cambiar el contenido sustancial.
+
+DOCUMENTO (${filename}):
+---
+${text}
+---`;
+
+  // Modelos en orden de preferencia — si uno falla por demanda, prueba el siguiente
+  const MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash'
+  ];
+
+  const body = JSON.stringify({
+    contents:[{parts:[{text:prompt}]}],
+    generationConfig:{
+      temperature:0.1,
+      maxOutputTokens:16000,
+      responseMimeType:'application/json'
+    }
+  });
+
+  let lastError = '';
+  for(const model of MODELS){
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+    try{
+      // Hasta 2 reintentos por modelo ante errores de demanda
+      for(let attempt=1; attempt<=2; attempt++){
+        const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body});
+        if(!resp.ok){
+          const e=await resp.json().catch(()=>({}));
+          const msg=e.error?.message||'Error HTTP '+resp.status;
+          // Si es error de demanda, esperar y reintentar
+          if(msg.toLowerCase().includes('demand')||msg.toLowerCase().includes('quota')||resp.status===429||resp.status===503){
+            lastError=`${model}: ${msg}`;
+            if(attempt<2){
+              setProgress(30,`Alta demanda en ${model}, reintentando...`);
+              await new Promise(r=>setTimeout(r,3000));
+              continue;
+            }
+            break; // pasar al siguiente modelo
+          }
+          throw new Error(msg);
+        }
+        const d=await resp.json();
+        let raw=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+        if(!raw){lastError=`${model}: respuesta vacía`;break;}
+        raw=raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
+        try{return JSON.parse(raw);}
+        catch(e){
+          const m=raw.match(/\{[\s\S]*\}/);
+          if(m)try{return JSON.parse(m[0]);}catch(e2){}
+          throw new Error('Error al procesar la respuesta. Intenta de nuevo.');
+        }
+      }
+    }catch(err){
+      // Si no es error de demanda, lanzar inmediatamente
+      if(!err.message?.toLowerCase().includes('demand')&&!err.message?.toLowerCase().includes('quota')){
+        throw err;
+      }
+      lastError=err.message;
+    }
+  }
+  throw new Error(`Todos los modelos están con alta demanda. Espera unos minutos e intenta de nuevo. (${lastError})`);
+}
+
+// ── RENDER PREVIEW ───────────────────────────────────────────────────────────
+function renderResults(){
+  const wrap=document.getElementById('oWrap');wrap.innerHTML='';wrap.style.display='flex';
+  const ok=RESULTS.filter(r=>!r.error).length;
+  const sum=document.createElement('div');
+  sum.style.cssText='font-size:.72rem;color:var(--mu);letter-spacing:.08em;text-transform:uppercase';
+  sum.textContent=`${ok} de ${RESULTS.length} documento${RESULTS.length>1?'s':''} formateado${ok>1?'s':''}`;
+  wrap.appendChild(sum);
+  RESULTS.forEach((r,i)=>{
+    const card=document.createElement('div');card.className='oc';
+    if(r.error){
+      card.innerHTML=`<div class="oh"><span class="on">⚠ ${r.name}</span></div><div class="er">${r.error}</div>`;
+    }else{
+      card.innerHTML=`<div class="oh"><span class="on">📄 ${r.name}</span><div class="oa"><button class="btn gld sm" onclick="downloadDocx(${i},this)">↓ Descargar .docx</button></div></div><div class="ob">${buildPreview(r.data)}</div><div class="ok2">✓ Formateado en APA 7 · Listo para entregar</div>`;
+    }
+    wrap.appendChild(card);
+  });
+  wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function buildPreview(d){
+  const e=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*(.*?)\*/g,'<em>$1</em>');
+  let h='';
+  h+=`<div style="text-align:center;font-weight:bold;margin-bottom:.4rem">${e(d.titulo)}</div>`;
+  // autores: puede ser array o string (compatibilidad)
+  const autArr=Array.isArray(d.autores)?d.autores:(d.autores||'').split(',').map(a=>a.trim()).filter(Boolean);
+  autArr.forEach(a=>{h+=`<div style="text-align:center">${e(a)}</div>`;});
+  h+=`<div style="text-align:center">${e(d.institucion)}</div>`;
+  h+=`<div style="text-align:center">${e(d.curso)}</div>`;
+  h+=`<div style="text-align:center">${e(d.docente)}</div>`;
+  h+=`<div style="text-align:center;margin-bottom:1rem">${e(d.fecha)}</div>`;
+  h+=`<div style="font-weight:bold;text-align:center;margin:.5rem 0">Resumen</div>`;
+  h+=`<div style="margin-bottom:.4rem">${e(d.resumen)}</div>`;
+  h+=`<div style="margin-bottom:1rem"><em>Palabras clave:</em> ${e(d.palabras_clave)}</div>`;
+  (d.secciones||[]).forEach(s=>{
+    const t=e(s.texto);
+    if(s.tipo==='h1')h+=`<div style="font-weight:bold;text-align:center;margin:.8rem 0 .3rem">${t}</div>`;
+    else if(s.tipo==='h2')h+=`<div style="font-weight:bold;margin:.6rem 0 .2rem">${t}</div>`;
+    else if(s.tipo==='h3')h+=`<div style="font-weight:bold;font-style:italic;margin:.5rem 0 .2rem;text-indent:1.5em">${t}</div>`;
+    else if(s.tipo==='cita_bloque')h+=`<div style="margin:.4rem 2rem;font-style:italic">${t}</div>`;
+    else h+=`<div style="text-indent:1.5em;margin:.15rem 0">${t}</div>`;
+  });
+  if(d.referencias&&d.referencias.length){
+    h+=`<div style="font-weight:bold;text-align:center;margin:.8rem 0 .4rem">Referencias</div>`;
+    d.referencias.forEach(ref=>{h+=`<div style="padding-left:1.5em;text-indent:-1.5em;margin:.15rem 0">${e(ref)}</div>`;});
+  }
+  return h;
+}
+
+// ── DOWNLOAD DOCX ────────────────────────────────────────────────────────────
+async function downloadDocx(i,btn){
+  const orig=btn.textContent;btn.textContent='Generando...';btn.disabled=true;
+  try{
+    const{Document,Packer,Paragraph,TextRun,AlignmentType,convertInchesToTwip,PageBreak}=docx;
+    const TNR='Times New Roman',SZ=24,DBL=480,IND=convertInchesToTwip(0.5);
+    const d=RESULTS[i].data;
+    const R=(text,opts={})=>new TextRun({text:String(text||''),font:TNR,size:SZ,...opts});
+    const sp=(extra={})=>({line:DBL,before:0,after:0,...extra});
+
+    // Parsea *cursiva* en línea
+    function inline(text){
+      const parts=String(text||'').split(/\*(.*?)\*/g);
+      const runs=[];
+      parts.forEach((p,idx)=>{if(p)runs.push(R(p,{italics:idx%2===1}));});
+      return runs.length?runs:[R('')];
+    }
+
+    const CENTER=(runs,extra={})=>new Paragraph({alignment:AlignmentType.CENTER,spacing:sp(extra),children:runs});
+    const BODY=runs=>new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:sp(),indent:{firstLine:IND},children:runs});
+    const H1=text=>new Paragraph({alignment:AlignmentType.CENTER,spacing:sp({before:DBL}),children:[R(text,{bold:true})]});
+    const H2=text=>new Paragraph({alignment:AlignmentType.LEFT,spacing:sp({before:DBL}),children:[R(text,{bold:true})]});
+    const H3=text=>new Paragraph({alignment:AlignmentType.LEFT,spacing:sp({before:DBL}),indent:{firstLine:IND},children:[R(text,{bold:true,italics:true})]});
+    const REF=runs=>new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:sp(),indent:{left:IND,hanging:IND},children:runs});
+    const BLOCK=text=>new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:sp(),indent:{left:IND,right:IND},children:[R(text)]});
+    const EMPTY=()=>new Paragraph({children:[R('')],spacing:sp()});
+    const BREAK=()=>new Paragraph({children:[new PageBreak()],spacing:sp()});
+
+    // Espaciado exacto en twips (1440 = 1 pulgada)
+    const SPACER=(twips)=>new Paragraph({children:[R('')],spacing:{line:240,before:0,after:twips}});
+
+    const ch=[];
+
+    // ── Página de título — distribuida en tercios verticales ─────────────
+    // Título en el tercio superior: 2.5 pulgadas desde el top (margen 1" + 1.5" de espacio)
+    ch.push(new Paragraph({
+      alignment:AlignmentType.CENTER,
+      spacing:{line:DBL,before:2160,after:0}, // before=1.5" en twips
+      children:[R(d.titulo||'',{bold:true})]
+    }));
+    ch.push(EMPTY());
+    // Autores centrados justo debajo del título
+    const autArr=Array.isArray(d.autores)?d.autores:(d.autores||'').split(',').map(a=>a.trim()).filter(Boolean);
+    autArr.forEach(a=>{ch.push(CENTER([R(a)]));});
+
+    // Bloque institución en el tercio inferior: empuja hacia abajo con espaciado grande
+    ch.push(new Paragraph({
+      alignment:AlignmentType.CENTER,
+      spacing:{line:DBL,before:2880,after:0}, // before=2" separa autores de institución
+      children:[R(d.institucion||'')]
+    }));
+    ch.push(EMPTY());
+    ch.push(CENTER([R(d.curso||'')]));
+    ch.push(CENTER([R(d.docente||'')]));
+    ch.push(EMPTY());
+    ch.push(CENTER([R(d.fecha||'')]));
+
+    // ── Resumen (página nueva) — SIN sangría de primera línea ─────────────
+    ch.push(BREAK());
+    ch.push(H1('Resumen'));
+    ch.push(new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:sp(),children:[R(d.resumen||'')]}));
+    ch.push(EMPTY());
+    ch.push(new Paragraph({alignment:AlignmentType.JUSTIFIED,spacing:sp(),children:[R('Palabras clave: ',{italics:true}),R(d.palabras_clave||'')]}));
+
+    // ── Cuerpo (página nueva) ─────────────────────────────────────────────
+    ch.push(BREAK());
+    for(const s of(d.secciones||[])){
+      // Saltar si Gemini incluyó "Referencias" como h1 dentro de secciones (se genera aparte)
+      if(s.tipo==='h1'&&/^referencias$/i.test((s.texto||'').trim())) continue;
+      switch(s.tipo){
+        case 'h1': ch.push(H1(s.texto)); break;
+        case 'h2': ch.push(H2(s.texto)); break;
+        case 'h3': ch.push(H3(s.texto)); break;
+        case 'cita_bloque': ch.push(BLOCK(s.texto)); break;
+        default: ch.push(BODY(inline(s.texto)));
+      }
+    }
+
+    // ── Referencias (página nueva) ────────────────────────────────────────
+    if(d.referencias&&d.referencias.length){
+      ch.push(BREAK());
+      ch.push(H1('Referencias'));
+      for(const ref of d.referencias){
+        ch.push(REF(inline(ref)));
+        ch.push(EMPTY());
+      }
+    }
+
+    const wordDoc=new Document({
+      styles:{default:{document:{run:{font:TNR,size:SZ,color:'000000'}}}},
+      sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:1440,right:1440,bottom:1440,left:1440}}},children:ch}]
+    });
+    const blob=await Packer.toBlob(wordDoc);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=RESULTS[i].name.replace(/\.docx$/i,'')+'_APA7.docx';
+    a.click();URL.revokeObjectURL(a.href);
+    toast('✓ Descargando '+a.download);
+  }catch(err){toast('⚠ Error: '+err.message);console.error(err);}
+  finally{btn.textContent=orig;btn.disabled=false;}
+}
+
+function toast(msg){const t=document.createElement('div');t.className='tst';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+loadKey();
+</script>
+</body>
+</html>
