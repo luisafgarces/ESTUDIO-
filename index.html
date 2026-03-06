@@ -2239,16 +2239,6 @@ function formatSize(bytes) {
   return (bytes/1024/1024).toFixed(1) + ' MB';
 }
 
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
-
 // ===== MULTI-FILE SYSTEM =====
 
 function renderFileList() {
