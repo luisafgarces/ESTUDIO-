@@ -3215,26 +3215,22 @@ function savePlanManual() {
   const btn = document.getElementById('savePlanBtn');
   if (!currentPlan) return;
 
-  // If already saved (has currentHistoryId), just confirm
-  if (currentHistoryId) {
-    btn.textContent = '✅ ¡Ya guardado!';
-    btn.classList.add('saved');
-    setTimeout(() => {
-      btn.textContent = '💾 Guardar plan';
-      btn.classList.remove('saved');
-    }, 2000);
-    return;
+  // Save if not already saved
+  if (!currentHistoryId) {
+    currentHistoryId = addToHistory(currentPlan);
+    updateHistoryBadge();
+    renderWeeklyAlerts();
   }
 
-  // Save fresh
-  currentHistoryId = addToHistory(currentPlan);
-  updateHistoryBadge();
-  btn.textContent = '✅ Guardado en historial';
+  // Show confirmation then reset
+  btn.textContent = '✅ Guardado — preparando nuevo plan...';
   btn.classList.add('saved');
+  btn.disabled = true;
+
   setTimeout(() => {
-    btn.textContent = '💾 Guardar plan';
-    btn.classList.remove('saved');
-  }, 2500);
+    resetApp();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 1500);
 }
 
 function resetApp() {
