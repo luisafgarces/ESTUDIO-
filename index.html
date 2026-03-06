@@ -1306,8 +1306,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   <div class="upload-section">
     <div class="drop-zone" id="dropZone">
       <span class="drop-icon">📄</span>
-      <div class="drop-title">Arrastra tu documento aquí</div>
-      <div class="drop-sub">o haz clic para seleccionar</div>
+      <div class="drop-title">Arrastra tus documentos aquí</div>
+      <div class="drop-sub">o haz clic para seleccionar • puedes subir varios a la vez</div>
       <div class="formats">
         <span class="fmt-tag">PDF</span>
         <span class="fmt-tag">DOCX</span>
@@ -1317,27 +1317,12 @@ h1 em { color: var(--accent3); font-style: italic; }
       </div>
       <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" multiple>
     </div>
-    <div style="margin-top:14px;text-align:center;">
-      <button onclick="document.getElementById('fileInput2').click()" style="background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:10px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
-        ➕ Agregar segundo documento (misma materia)
+    <!-- Lista dinámica de archivos -->
+    <div id="fileListContainer" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="margin-top:10px;text-align:center;">
+      <button onclick="document.getElementById('fileInput').click()" id="addMoreBtn" style="display:none;background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:8px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted2)'">
+        ➕ Agregar más documentos
       </button>
-      <input type="file" id="fileInput2" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" style="display:none">
-    </div>
-    <div class="file-preview" id="filePreview2" style="margin-top:10px;">
-      <div class="file-icon-box">📄</div>
-      <div class="file-info">
-        <div class="file-name" id="fileName2">—</div>
-        <div class="file-size" id="fileSize2">—</div>
-      </div>
-      <button class="remove-btn" onclick="removeFile2()">✕</button>
-    </div>
-    <div class="file-preview" id="filePreview">
-      <div class="file-icon-box" id="fileTypeIcon">📄</div>
-      <div class="file-info">
-        <div class="file-name" id="fileName">—</div>
-        <div class="file-size" id="fileSize">—</div>
-      </div>
-      <button class="remove-btn" id="removeFile">✕</button>
     </div>
   </div>
 
@@ -2233,7 +2218,6 @@ renderWeeklyAlerts();
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-const filePreview = document.getElementById('filePreview');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const btnText = document.getElementById('btnText');
 const btnSpinner = document.getElementById('btnSpinner');
@@ -2241,8 +2225,7 @@ const loadingSection = document.getElementById('loadingSection');
 const result = document.getElementById('result');
 const errorBox = document.getElementById('errorBox');
 
-let currentFile = null;
-let currentFile2 = null;
+let uploadedFiles = []; // array of File objects — replaces currentFile/currentFile2
 let rawPlanText = '';
 let currentPlan = null;
 
@@ -2266,46 +2249,65 @@ dropZone.addEventListener('drop', e => {
 });
 fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
 
-// SECOND FILE
-const fileInput2 = document.getElementById('fileInput2');
-const filePreview2 = document.getElementById('filePreview2');
-fileInput2.addEventListener('change', () => { if (fileInput2.files.length) setFile2(fileInput2.files[0]); });
+// ===== MULTI-FILE SYSTEM =====
 
-function setFile2(file) {
-  currentFile2 = file;
-  const ext = file.name.split('.').pop().toLowerCase();
-  document.getElementById('fileName2').textContent = file.name;
-  document.getElementById('fileSize2').textContent = (file.size / 1024).toFixed(1) + ' KB';
-  filePreview2.classList.add('show');
-}
-
-function removeFile2() {
-  currentFile2 = null;
-  fileInput2.value = '';
-  filePreview2.classList.remove('show');
-}
-
-document.getElementById('removeFile').addEventListener('click', () => {
-  currentFile = null;
-  filePreview.classList.remove('show');
-  fileInput.value = '';
-  analyzeBtn.disabled = true;
-  btnText.textContent = '⚡ Sube un documento para analizar';
-});
-
-function setFile(file) {
-  currentFile = file;
-  const ext = getExt(file.name);
-  document.getElementById('fileTypeIcon').textContent = fileIcons[ext] || '📄';
-  document.getElementById('fileName').textContent = file.name;
-  document.getElementById('fileSize').textContent = formatSize(file.size);
-  filePreview.classList.add('show');
+function renderFileList() {
+  const container = document.getElementById('fileListContainer');
+  const addBtn = document.getElementById('addMoreBtn');
+  if (!container) return;
+  if (!uploadedFiles.length) {
+    container.innerHTML = '';
+    if (addBtn) addBtn.style.display = 'none';
+    analyzeBtn.disabled = true;
+    btnText.textContent = '⚡ Sube un documento para analizar';
+    return;
+  }
+  if (addBtn) addBtn.style.display = 'inline-block';
   analyzeBtn.disabled = false;
-  btnText.textContent = '⚡ Generar mi plan personalizado';
+  btnText.textContent = `⚡ Generar plan (${uploadedFiles.length} documento${uploadedFiles.length>1?'s':''})`;
+
+  container.innerHTML = uploadedFiles.map((f, i) => {
+    const ext = getExt(f.name);
+    const icon = fileIcons[ext] || '📄';
+    return `<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;">
+      <span style="font-size:20px;flex-shrink:0;">${icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px;">${formatSize(f.size)}</div>
+      </div>
+      <button onclick="removeUploadedFile(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>`;
+  }).join('');
 }
+
+function removeUploadedFile(index) {
+  uploadedFiles.splice(index, 1);
+  renderFileList();
+}
+
+function addFiles(fileList) {
+  const allowed = ['.pdf','.doc','.docx','.txt','.png','.jpg','.jpeg','.webp'];
+  Array.from(fileList).forEach(f => {
+    const ext = '.' + getExt(f.name);
+    if (allowed.includes(ext) && !uploadedFiles.find(u => u.name===f.name && u.size===f.size)) {
+      uploadedFiles.push(f);
+    }
+  });
+  renderFileList();
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) { addFiles(fileInput.files); fileInput.value=''; } });
 
 analyzeBtn.addEventListener('click', async () => {
-  if (!currentFile) return;
+  if (!uploadedFiles.length) return;
   await analyzeDocument();
 });
 
@@ -2361,13 +2363,10 @@ async function analyzeDocument() {
   errorBox.classList.remove('show');
   animateSteps();
 
-  const ext = getExt(currentFile.name);
   const context = document.getElementById('contextInput').value.trim();
   const today = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   try {
-    const isImage = ['png','jpg','jpeg','webp'].includes(ext);
-    const isPdf = ext === 'pdf';
 
     const systemPrompt = `Eres un planificador académico para estudiantes con TDAH y TOC. HOY: ${today}.
 
@@ -2435,15 +2434,18 @@ Reglas:
       }
     }
 
-    const parts1 = await buildPartsForFile(currentFile);
-    let allParts = [...parts1];
-
-    if (currentFile2) {
-      const parts2 = await buildPartsForFile(currentFile2);
-      allParts = [...allParts, { text: '\n\n--- SEGUNDO DOCUMENTO DE LA MISMA MATERIA ---\n' }, ...parts2];
+    let allParts = [];
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      if (i > 0) allParts.push({ text: `\n\n--- DOCUMENTO ${i+1}: ${uploadedFiles[i].name} ---\n` });
+      else allParts.push({ text: `--- DOCUMENTO 1: ${uploadedFiles[0].name} ---\n` });
+      const parts_i = await buildPartsForFile(uploadedFiles[i]);
+      allParts = [...allParts, ...parts_i];
     }
 
-    allParts.push({ text: `\nAnaliza TODOS los documentos anteriores juntos y genera UN SOLO plan JSON integrado.${context ? '\nContexto adicional: ' + context : ''}` });
+    const multiMsg = uploadedFiles.length > 1
+      ? `\nAnaliza TODOS los ${uploadedFiles.length} documentos anteriores juntos y genera UN SOLO plan JSON integrado.`
+      : `\nAnaliza el documento anterior y genera el plan JSON.`;
+    allParts.push({ text: `${multiMsg}${context ? '\nContexto adicional: ' + context : ''}` });
     parts = allParts;
 
     const requestBody = {
@@ -2452,11 +2454,23 @@ Reglas:
       generationConfig: { temperature: 0.3, maxOutputTokens: 65536, responseMimeType: 'application/json' }
     };
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+
+    let response;
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
+      });
+    } catch(fetchErr) {
+      if (fetchErr.name === 'AbortError') throw new Error('El análisis tardó demasiado. Intenta con documentos más pequeños o uno a la vez.');
+      throw fetchErr;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     const data = await response.json();
     console.log('=== RESPUESTA COMPLETA DE GEMINI ===');
@@ -3235,12 +3249,10 @@ function savePlanManual() {
 
 function resetApp() {
   currentHistoryId = null;
-  currentFile = null;
-  filePreview.classList.remove('show');
+  uploadedFiles = [];
+  renderFileList();
   fileInput.value = '';
   document.getElementById('contextInput').value = '';
-  analyzeBtn.disabled = true;
-  btnText.textContent = '⚡ Sube un documento para analizar';
   result.classList.remove('show');
   errorBox.classList.remove('show');
   // Reset steps
