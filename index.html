@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -8,22 +9,54 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: “AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o”,
+authDomain: “plania-f7102.firebaseapp.com”,
+projectId: “plania-f7102”,
+storageBucket: “plania-f7102.firebasestorage.app”,
+messagingSenderId: “23905844105”,
+appId: “1:23905844105:web:496a619d394688847dff58”,
+measurementId: “G-EYJQ501KGS”
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Expose globally so the rest of the app can use them
+window._fbAuth = auth;
+window._fbDb = db;
+window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged };
+
+// Listen for auth state changes
+onAuthStateChanged(auth, (user) => {
+window._fbUser = user || null;
+if (typeof window._onAuthReady === ‘function’) window._onAuthReady(user);
+});
+</script>
+
 <style>
 
 :root {
-  --bg: #e8f5fb;
-  --surface: #f0f9fd;
-  --card: #ffffff;
-  --border: #c2e4f5;
-  --border2: #a8d8ee;
-  --accent: #1a9ad4;
-  --accent-glow: rgba(26,154,212,0.18);
-  --accent2: #e05a7a;
-  --accent3: #0dab8b;
-  --warn: #d4920a;
-  --text: #0d2d3f;
-  --muted: #5a8fa8;
-  --muted2: #3a6d87;
+  --bg: #080810;
+  --surface: #10101a;
+  --card: #14141f;
+  --border: #1f1f30;
+  --border2: #2a2a40;
+  --accent: #6c63ff;
+  --accent-glow: rgba(108,99,255,0.25);
+  --accent2: #ff6b6b;
+  --accent3: #63ffda;
+  --warn: #ffd166;
+  --text: #ece9ff;
+  --muted: #6b6880;
+  --muted2: #9b98b0;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,7 +76,7 @@ body::before {
   content: '';
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.15;
+  opacity: 0.5;
 }
 
 /* GLOW BG */
@@ -54,8 +87,8 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
-.glow-1 { width: 700px; height: 700px; background: rgba(26,154,212,0.08); top: -200px; left: -200px; }
-.glow-2 { width: 600px; height: 600px; background: rgba(13,171,139,0.06); bottom: -200px; right: -200px; }
+.glow-1 { width: 600px; height: 600px; background: rgba(108,99,255,0.08); top: -200px; left: -200px; }
+.glow-2 { width: 500px; height: 500px; background: rgba(99,255,218,0.05); bottom: -200px; right: -200px; }
 
 .app { position: relative; z-index: 1; }
 
@@ -79,9 +112,9 @@ body::before {
   color: var(--accent);
   margin-bottom: 24px;
   padding: 6px 16px;
-  border: 1px solid rgba(26,154,212,0.3);
+  border: 1px solid rgba(108,99,255,0.3);
   border-radius: 100px;
-  background: rgba(26,154,212,0.07);
+  background: rgba(108,99,255,0.07);
 }
 
 .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
@@ -126,26 +159,26 @@ h1 em { color: var(--accent3); font-style: italic; }
 .badge.active { border-color: rgba(255,107,107,0.4); color: var(--accent2); background: rgba(255,107,107,0.07); }
 
 .save-btn {
-  border-color: rgba(26,154,212,0.5) !important;
+  border-color: rgba(108,99,255,0.5) !important;
   color: var(--accent) !important;
-  background: rgba(26,154,212,0.08) !important;
+  background: rgba(108,99,255,0.08) !important;
 }
-.save-btn:hover { background: rgba(26,154,212,0.18) !important; }
+.save-btn:hover { background: rgba(108,99,255,0.18) !important; }
 .save-btn.saved {
-  border-color: rgba(126,236,212,0.5) !important;
+  border-color: rgba(99,255,218,0.5) !important;
   color: var(--accent3) !important;
-  background: rgba(126,236,212,0.08) !important;
+  background: rgba(99,255,218,0.08) !important;
 }
 
 .history-btn {
   cursor: pointer;
-  background: rgba(26,154,212,0.08) !important;
-  border-color: rgba(26,154,212,0.35) !important;
+  background: rgba(108,99,255,0.08) !important;
+  border-color: rgba(108,99,255,0.35) !important;
   color: var(--accent) !important;
   font-family: inherit;
   transition: all 0.2s;
 }
-.history-btn:hover { background: rgba(26,154,212,0.18) !important; }
+.history-btn:hover { background: rgba(108,99,255,0.18) !important; }
 
 /* HISTORY OVERLAY */
 .history-overlay {
@@ -213,8 +246,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   cursor: pointer; transition: all 0.2s;
   position: relative;
 }
-.history-item:hover { border-color: var(--accent); background: rgba(26,154,212,0.06); }
-.history-item.completed { border-color: rgba(126,236,212,0.4); background: rgba(126,236,212,0.04); }
+.history-item:hover { border-color: var(--accent); background: rgba(108,99,255,0.06); }
+.history-item.completed { border-color: rgba(99,255,218,0.4); background: rgba(99,255,218,0.04); }
 
 .hi-title {
   font-family: 'Syne', sans-serif; font-size: 13px;
@@ -268,14 +301,14 @@ h1 em { color: var(--accent3); font-style: italic; }
 .drop-zone::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(26,154,212,0.08) 0%, transparent 70%);
+  background: radial-gradient(ellipse at 50% 0%, rgba(108,99,255,0.08) 0%, transparent 70%);
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .drop-zone:hover, .drop-zone.drag-over {
   border-color: var(--accent);
-  background: rgba(26,154,212,0.05);
+  background: rgba(108,99,255,0.05);
 }
 .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
 
@@ -334,7 +367,7 @@ h1 em { color: var(--accent3); font-style: italic; }
 .file-icon-box {
   width: 44px; height: 44px;
   border-radius: 10px;
-  background: rgba(26,154,212,0.15);
+  background: rgba(108,99,255,0.15);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; flex-shrink: 0;
 }
@@ -414,7 +447,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   opacity: 0; transition: opacity 0.3s;
 }
 .analyze-btn:hover::before { opacity: 1; }
-.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(26,154,212,0.3); }
+.analyze-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(108,99,255,0.3); }
 .analyze-btn:active { transform: translateY(0); }
 .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -459,7 +492,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   color: var(--muted);
   transition: all 0.4s;
 }
-.loading-step.active { color: var(--text); background: rgba(26,154,212,0.1); border: 1px solid rgba(26,154,212,0.2); }
+.loading-step.active { color: var(--text); background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2); }
 .loading-step.done { color: var(--accent3); }
 .step-icon { font-size: 16px; }
 
@@ -486,8 +519,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--accent3);
-  background: rgba(126,236,212,0.07);
-  border: 1px solid rgba(126,236,212,0.2);
+  background: rgba(99,255,218,0.07);
+  border: 1px solid rgba(99,255,218,0.2);
   padding: 5px 14px;
   border-radius: 100px;
   margin-bottom: 16px;
@@ -540,7 +573,7 @@ h1 em { color: var(--accent3); font-style: italic; }
 .info-card .ic-value { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); }
 .info-card.warn { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.05); }
 .info-card.warn .ic-value { color: var(--warn); }
-.info-card.accent { border-color: rgba(26,154,212,0.3); background: rgba(26,154,212,0.06); }
+.info-card.accent { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
 .info-card.accent .ic-value { color: var(--accent); }
 
 .task-block {
@@ -550,8 +583,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   padding: 20px;
   margin: 12px 0;
 }
-.task-block.focus { border-color: rgba(26,154,212,0.3); background: rgba(26,154,212,0.06); }
-.task-block.action { border-color: rgba(126,236,212,0.25); background: rgba(126,236,212,0.05); }
+.task-block.focus { border-color: rgba(108,99,255,0.3); background: rgba(108,99,255,0.06); }
+.task-block.action { border-color: rgba(99,255,218,0.25); background: rgba(99,255,218,0.05); }
 .task-block.warn { border-color: rgba(255,209,102,0.3); background: rgba(255,209,102,0.05); }
 
 .task-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -597,57 +630,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   padding: 20px;
   margin: 20px 0;
 }
-
-/* PREGUNTAS Y NOTAS */
-.pq-section {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 14px;
-  padding: 18px 20px;
-  margin: 0 0 20px;
-}
-.pq-header {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
-}
-.pq-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-}
-.pq-add-btn {
-  background: none; border: 1.5px solid var(--border2);
-  border-radius: 8px; padding: 4px 12px;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-  color: var(--accent); transition: all 0.2s;
-}
-.pq-add-btn:hover { background: rgba(26,154,212,0.08); border-color: var(--accent); }
-.pq-item {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 7px 0; border-bottom: 1px solid var(--border);
-}
-.pq-item:last-of-type { border-bottom: none; }
-.pq-item-text {
-  flex: 1; font-size: 13px; color: var(--text);
-  background: none; border: none; outline: none;
-  font-family: 'DM Sans', sans-serif; resize: none;
-  min-height: 20px; line-height: 1.5;
-  padding: 0;
-}
-.pq-item-text::placeholder { color: var(--muted); }
-.pq-del-btn {
-  background: none; border: none; cursor: pointer;
-  color: var(--muted); font-size: 14px; padding: 0 4px;
-  flex-shrink: 0; margin-top: 1px; transition: color 0.2s;
-}
-.pq-del-btn:hover { color: var(--accent2); }
-.pq-empty { font-size: 12px; color: var(--muted); font-style: italic; text-align: center; padding: 8px 0; }
-.notes-area {
-  width: 100%; background: none; border: none; outline: none;
-  font-family: 'DM Sans', sans-serif; font-size: 13px;
-  color: var(--text); resize: none; line-height: 1.7;
-  min-height: 80px;
-}
-.notes-area::placeholder { color: var(--muted); }
 .checklist-title {
   font-family: 'Syne', sans-serif;
   font-size: 12px;
@@ -754,8 +736,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   transition: border-color 0.3s;
 }
 .apikey-card.configured {
-  border-color: rgba(126,236,212,0.3);
-  background: rgba(126,236,212,0.04);
+  border-color: rgba(99,255,218,0.3);
+  background: rgba(99,255,218,0.04);
 }
 
 .apikey-top {
@@ -787,8 +769,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   color: var(--muted);
 }
 .apikey-status.ok {
-  background: rgba(126,236,212,0.08);
-  border-color: rgba(126,236,212,0.25);
+  background: rgba(99,255,218,0.08);
+  border-color: rgba(99,255,218,0.25);
   color: var(--accent3);
 }
 
@@ -898,7 +880,7 @@ h1 em { color: var(--accent3); font-style: italic; }
 .tab-btn.active {
   background: var(--accent); color: white;
   border-color: var(--accent);
-  box-shadow: 0 0 20px rgba(26,154,212,0.3);
+  box-shadow: 0 0 20px rgba(108,99,255,0.3);
 }
 .tab-btn:not(.active):hover { border-color: var(--accent); color: var(--accent); }
 
@@ -936,7 +918,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   transition: all 0.25s; position: relative; overflow: hidden;
   background: rgba(255,255,255,0.01);
 }
-.apa-dz:hover, .apa-dz.ov { border-color: var(--accent); background: rgba(26,154,212,0.05); }
+.apa-dz:hover, .apa-dz.ov { border-color: var(--accent); background: rgba(108,99,255,0.05); }
 .apa-dz input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .apa-dico { font-size: 2rem; margin-bottom: 10px; }
 .apa-dtit { font-family: 'Instrument Serif', serif; font-size: 15px; font-style: italic; margin-bottom: 4px; }
@@ -964,7 +946,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
   padding: 13px 20px; cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 0 20px rgba(26,154,212,0.25);
+  box-shadow: 0 0 20px rgba(108,99,255,0.25);
 }
 .apa-btn-gold:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
 .apa-btn-gold:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
@@ -1014,8 +996,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   display: flex; align-items: center; gap: 8px;
   padding: 10px 20px; font-size: 12px;
   color: var(--accent3); letter-spacing: 1px;
-  border-top: 1px solid rgba(126,236,212,0.15);
-  background: rgba(126,236,212,0.04);
+  border-top: 1px solid rgba(99,255,218,0.15);
+  background: rgba(99,255,218,0.04);
 }
 .apa-result-error {
   margin: 16px; padding: 14px 16px;
@@ -1070,7 +1052,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   transition: all 0.25s; position: relative; overflow: hidden;
 }
 .plag-dropzone:hover, .plag-dropzone.ov {
-  border-color: var(--accent); background: rgba(26,154,212,0.05);
+  border-color: var(--accent); background: rgba(108,99,255,0.05);
 }
 .plag-dropzone input {
   position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
@@ -1090,16 +1072,16 @@ h1 em { color: var(--accent3); font-style: italic; }
   border: 1px solid var(--border2); cursor: pointer;
   transition: all 0.2s; background: var(--surface);
 }
-.plag-option:hover { border-color: var(--accent); background: rgba(26,154,212,0.05); }
+.plag-option:hover { border-color: var(--accent); background: rgba(108,99,255,0.05); }
 .plag-option input[type=checkbox] { display: none; }
 .plag-option.active {
-  border-color: rgba(26,154,212,0.5);
-  background: rgba(26,154,212,0.07);
+  border-color: rgba(108,99,255,0.5);
+  background: rgba(108,99,255,0.07);
 }
 .plag-opt-check {
   width: 22px; height: 22px; flex-shrink: 0;
-  border: 2px solid rgba(26,154,212,0.5);
-  border-radius: 6px; background: rgba(26,154,212,0.15);
+  border: 2px solid rgba(108,99,255,0.5);
+  border-radius: 6px; background: rgba(108,99,255,0.15);
   color: var(--accent); font-size: 13px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s; margin-top: 2px;
@@ -1116,7 +1098,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
   cursor: pointer; transition: all 0.2s; margin-bottom: 24px;
-  box-shadow: 0 0 24px rgba(26,154,212,0.3);
+  box-shadow: 0 0 24px rgba(108,99,255,0.3);
   display: flex; align-items: center; justify-content: center; gap: 10px;
 }
 .plag-analyze-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
@@ -1139,7 +1121,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800;
   padding: 4px 14px; border-radius: 100px; letter-spacing: 1px;
 }
-.plag-score-low { background: rgba(126,236,212,0.15); color: var(--accent3); border: 1px solid rgba(126,236,212,0.3); }
+.plag-score-low { background: rgba(99,255,218,0.15); color: var(--accent3); border: 1px solid rgba(99,255,218,0.3); }
 .plag-score-mid { background: rgba(255,209,102,0.15); color: var(--warn); border: 1px solid rgba(255,209,102,0.3); }
 .plag-score-high { background: rgba(255,107,107,0.15); color: var(--accent2); border: 1px solid rgba(255,107,107,0.3); }
 
@@ -1193,8 +1175,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   border: 1px solid var(--border2);
 }
 .danger-item { background: rgba(255,107,107,0.05); border-color: rgba(255,107,107,0.2); }
-.ok-item     { background: rgba(126,236,212,0.05);  border-color: rgba(126,236,212,0.2); }
-.info-item   { background: rgba(26,154,212,0.05);  border-color: rgba(26,154,212,0.2); }
+.ok-item     { background: rgba(99,255,218,0.05);  border-color: rgba(99,255,218,0.2); }
+.info-item   { background: rgba(108,99,255,0.05);  border-color: rgba(108,99,255,0.2); }
 .warn-item   { background: rgba(255,209,102,0.05); border-color: rgba(255,209,102,0.2); }
 
 .guide-item-header {
@@ -1235,6 +1217,7 @@ h1 em { color: var(--accent3); font-style: italic; }
 .ann-tooltip { font-family: 'DM Sans', sans-serif !important; }
 
 </style>
+
 </head>
 <body>
 
@@ -1256,35 +1239,46 @@ h1 em { color: var(--accent3); font-style: italic; }
       <span class="badge">PDF · Word · Imagen · Texto</span>
       <button class="badge history-btn" onclick="toggleHistory()" id="historyBtn">📚 Historial <span id="historyBadge" style="display:none;background:var(--accent);color:#fff;border-radius:100px;padding:1px 7px;font-size:10px;margin-left:4px;">0</span></button>
     </div>
+
+```
+<!-- LOGIN FIREBASE -->
+<div id="authBar" style="margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+  <div id="authLoggedOut" style="display:none;">
+    <button onclick="fbLogin()" style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;font-family:Syne,sans-serif;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:all 0.2s;">
+      Iniciar sesion con Google para sincronizar
+    </button>
+  </div>
+  <div id="authLoggedIn" style="display:none;align-items:center;gap:10px;">
+    <img id="authAvatar" src="" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--accent);" />
+    <span id="authName" style="font-size:13px;color:var(--muted2);"></span>
+    <span style="font-size:11px;background:rgba(13,171,139,0.12);color:var(--accent3);border:1px solid rgba(13,171,139,0.3);padding:2px 10px;border-radius:20px;font-weight:700;">Sincronizado</span>
+    <button onclick="fbLogout()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;">Salir</button>
+  </div>
+  <div id="authLoading" style="font-size:12px;color:var(--muted);">Conectando...</div>
+</div>
+```
+
   </header>
 
-  <!-- BANNER ALERTAS SEMANALES -->
-  <div id="weeklyAlertsBanner" style="display:none;margin:16px auto 0;max-width:720px;padding:0 16px;">
-    <div style="background:rgba(255,107,107,0.07);border:1px solid rgba(255,107,107,0.25);border-radius:16px;padding:14px 18px;position:relative;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);">⚡ TAREAS DE ESTA SEMANA</div>
-        <button onclick="document.getElementById('weeklyAlertsBanner').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;">✕</button>
-      </div>
-      <div id="weeklyAlertsList"></div>
-    </div>
-  </div>
-
-    <!-- TAB NAVIGATION -->
-    <div class="tab-nav" id="tabNav">
-      <button class="tab-btn active" id="tab-btn-plania" onclick="switchTab('plania')">
-        <span>⚡</span> Planificador
-      </button>
-      <button class="tab-btn" id="tab-btn-apa" onclick="switchTab('apa')">
-        <span>📐</span> APA 7
-      </button>
-      <button class="tab-btn" id="tab-btn-plagio" onclick="switchTab('plagio')">
-        <span>🔍</span> Plagio
-      </button>
-    </div>
+```
+<!-- TAB NAVIGATION -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" id="tab-btn-plania" onclick="switchTab('plania')">
+    <span>⚡</span> Planificador
+  </button>
+  <button class="tab-btn" id="tab-btn-apa" onclick="switchTab('apa')">
+    <span>📐</span> APA 7
+  </button>
+  <button class="tab-btn" id="tab-btn-plagio" onclick="switchTab('plagio')">
+    <span>🔍</span> Plagio
+  </button>
+</div>
+```
 
 <div id="tab-plania">
 
   <!-- API KEY -->
+
   <div class="apikey-section">
     <div class="apikey-card" id="apikeyCard">
       <div class="apikey-top">
@@ -1303,11 +1297,12 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- UPLOAD -->
+
   <div class="upload-section">
     <div class="drop-zone" id="dropZone">
       <span class="drop-icon">📄</span>
-      <div class="drop-title">Arrastra tus documentos aquí</div>
-      <div class="drop-sub">o haz clic para seleccionar • puedes subir varios a la vez</div>
+      <div class="drop-title">Arrastra tu documento aquí</div>
+      <div class="drop-sub">o haz clic para seleccionar</div>
       <div class="formats">
         <span class="fmt-tag">PDF</span>
         <span class="fmt-tag">DOCX</span>
@@ -1317,16 +1312,32 @@ h1 em { color: var(--accent3); font-style: italic; }
       </div>
       <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" multiple>
     </div>
-    <!-- Lista dinámica de archivos -->
-    <div id="fileListContainer" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
-    <div style="margin-top:10px;text-align:center;">
-      <button onclick="document.getElementById('fileInput').click()" id="addMoreBtn" style="display:none;background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:8px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--muted2)'">
-        ➕ Agregar más documentos
+    <div style="margin-top:14px;text-align:center;">
+      <button onclick="document.getElementById('fileInput2').click()" style="background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:10px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+        ➕ Agregar segundo documento (misma materia)
       </button>
+      <input type="file" id="fileInput2" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" style="display:none">
+    </div>
+    <div class="file-preview" id="filePreview2" style="margin-top:10px;">
+      <div class="file-icon-box">📄</div>
+      <div class="file-info">
+        <div class="file-name" id="fileName2">—</div>
+        <div class="file-size" id="fileSize2">—</div>
+      </div>
+      <button class="remove-btn" onclick="removeFile2()">✕</button>
+    </div>
+    <div class="file-preview" id="filePreview">
+      <div class="file-icon-box" id="fileTypeIcon">📄</div>
+      <div class="file-info">
+        <div class="file-name" id="fileName">—</div>
+        <div class="file-size" id="fileSize">—</div>
+      </div>
+      <button class="remove-btn" id="removeFile">✕</button>
     </div>
   </div>
 
   <!-- CONTEXT -->
+
   <div class="context-section">
     <label class="context-label" for="contextInput">Contexto adicional (opcional)</label>
     <textarea class="context-textarea" id="contextInput"
@@ -1334,6 +1345,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- BUTTON -->
+
   <div class="analyze-section">
     <button class="analyze-btn" id="analyzeBtn" disabled>
       <div class="btn-inner">
@@ -1344,6 +1356,7 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- LOADING -->
+
   <div class="loading-section" id="loadingSection">
     <div class="loading-card">
       <div style="font-size: 36px; margin-bottom: 12px;">🧠</div>
@@ -1359,9 +1372,11 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- ERROR -->
+
   <div class="error-box" id="errorBox"></div>
 
   <!-- RESULT -->
+
   <div id="result">
     <div class="result-header">
       <div class="result-tag">✦ Plan generado</div>
@@ -1374,15 +1389,15 @@ h1 em { color: var(--accent3); font-style: italic; }
       <button class="action-btn" onclick="resetApp()">↩ Nuevo documento</button>
       <button class="action-btn" onclick="copyPlan()">📋 Copiar plan</button>
       <button class="action-btn primary" onclick="exportPDF()">⬇️ Descargar PDF</button>
-      <button class="action-btn" style="border-color:rgba(126,236,212,0.4);color:var(--accent3);background:rgba(126,236,212,0.07)" onclick="exportDOCX()">📝 Descargar DOCX</button>
+      <button class="action-btn" style="border-color:rgba(99,255,218,0.4);color:var(--accent3);background:rgba(99,255,218,0.07)" onclick="exportDOCX()">📝 Descargar DOCX</button>
     </div>
   </div>
 </div>
 
 </div><!-- end tab-plania -->
 
-
 <!-- ═══════════════ TAB: APA 7 ═══════════════ -->
+
 <div id="tab-apa" class="tab-content" style="display:none">
   <div class="apa-layout">
     <aside class="apa-side">
@@ -1428,182 +1443,187 @@ h1 em { color: var(--accent3); font-style: italic; }
 </div>
 
 <!-- ═══════════════ TAB: PLAGIO ═══════════════ -->
+
 <div id="tab-plagio" class="tab-content" style="display:none">
   <div style="max-width:780px;margin:0 auto;padding:0 24px 60px">
 
-    <!-- Upload zone -->
-    <div class="plag-card">
-      <div class="plag-section-title">📄 Documento principal</div>
-      <div class="plag-dropzone" id="plagDz1">
-        <input type="file" id="plagFile1" accept=".docx">
-        <div style="font-size:2rem;margin-bottom:10px">📝</div>
-        <div class="plag-dz-title">Sube el documento a analizar</div>
-        <div class="plag-dz-sub">Solo .docx · Haz clic o arrastra</div>
-      </div>
-      <div class="plag-file-preview" id="plagPreview1" style="display:none">
-        <span>📄</span>
-        <span id="plagFileName1" style="flex:1;font-size:13px"></span>
-        <button onclick="clearPlagFile(1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
-      </div>
-    </div>
+```
+<!-- Upload zone -->
+<div class="plag-card">
+  <div class="plag-section-title">📄 Documento principal</div>
+  <div class="plag-dropzone" id="plagDz1">
+    <input type="file" id="plagFile1" accept=".docx">
+    <div style="font-size:2rem;margin-bottom:10px">📝</div>
+    <div class="plag-dz-title">Sube el documento a analizar</div>
+    <div class="plag-dz-sub">Solo .docx · Haz clic o arrastra</div>
+  </div>
+  <div class="plag-file-preview" id="plagPreview1" style="display:none">
+    <span>📄</span>
+    <span id="plagFileName1" style="flex:1;font-size:13px"></span>
+    <button onclick="clearPlagFile(1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
+  </div>
+</div>
 
-    <div class="plag-card" id="plagCard2">
-      <div class="plag-section-title">📄 Segundo documento <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional — para comparar entre sí)</span></div>
-      <div class="plag-dropzone" id="plagDz2">
-        <input type="file" id="plagFile2" accept=".docx">
-        <div style="font-size:2rem;margin-bottom:10px">📝</div>
-        <div class="plag-dz-title">Sube un segundo documento</div>
-        <div class="plag-dz-sub">Para detectar similitud entre ambos</div>
-      </div>
-      <div class="plag-file-preview" id="plagPreview2" style="display:none">
-        <span>📄</span>
-        <span id="plagFileName2" style="flex:1;font-size:13px"></span>
-        <button onclick="clearPlagFile(2)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
-      </div>
-    </div>
+<div class="plag-card" id="plagCard2">
+  <div class="plag-section-title">📄 Segundo documento <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional — para comparar entre sí)</span></div>
+  <div class="plag-dropzone" id="plagDz2">
+    <input type="file" id="plagFile2" accept=".docx">
+    <div style="font-size:2rem;margin-bottom:10px">📝</div>
+    <div class="plag-dz-title">Sube un segundo documento</div>
+    <div class="plag-dz-sub">Para detectar similitud entre ambos</div>
+  </div>
+  <div class="plag-file-preview" id="plagPreview2" style="display:none">
+    <span>📄</span>
+    <span id="plagFileName2" style="flex:1;font-size:13px"></span>
+    <button onclick="clearPlagFile(2)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
+  </div>
+</div>
 
-    <!-- Analysis options -->
-    <div class="plag-card">
-      <div class="plag-section-title">⚙️ Tipo de análisis</div>
-      <div class="plag-options">
-        <div class="plag-option active" id="plag-opt-ia" onclick="togglePlagOption('ia')">
-          <input type="checkbox" id="checkIA" checked style="display:none">
-          <div class="plag-opt-check" id="check-icon-ia">✓</div>
-          <div class="plag-opt-icon">🤖</div>
-          <div>
-            <div class="plag-opt-title">Detección de escritura IA</div>
-            <div class="plag-opt-desc">Identifica señales de texto generado por IA: frases genéricas, estructura artificial, falta de voz propia</div>
-          </div>
-        </div>
-        <div class="plag-option active" id="plag-opt-citas" onclick="togglePlagOption('citas')">
-          <input type="checkbox" id="checkCitas" checked style="display:none">
-          <div class="plag-opt-check" id="check-icon-citas">✓</div>
-          <div class="plag-opt-icon">💬</div>
-          <div>
-            <div class="plag-opt-title">Fragmentos sin citar</div>
-            <div class="plag-opt-desc">Detecta párrafos que parecen tomados de fuentes externas sin comillas ni referencia APA</div>
-          </div>
-        </div>
-        <div class="plag-option" id="plag-opt-comp" onclick="togglePlagOption('comp')">
-          <input type="checkbox" id="checkComp" style="display:none">
-          <div class="plag-opt-check" id="check-icon-comp" style="opacity:0">✓</div>
-          <div class="plag-opt-icon">🔄</div>
-          <div>
-            <div class="plag-opt-title">Comparar documentos</div>
-            <div class="plag-opt-desc">Calcula similitud entre el doc 1 y el doc 2. Requiere subir ambos archivos</div>
-          </div>
-        </div>
+<!-- Analysis options -->
+<div class="plag-card">
+  <div class="plag-section-title">⚙️ Tipo de análisis</div>
+  <div class="plag-options">
+    <div class="plag-option active" id="plag-opt-ia" onclick="togglePlagOption('ia')">
+      <input type="checkbox" id="checkIA" checked style="display:none">
+      <div class="plag-opt-check" id="check-icon-ia">✓</div>
+      <div class="plag-opt-icon">🤖</div>
+      <div>
+        <div class="plag-opt-title">Detección de escritura IA</div>
+        <div class="plag-opt-desc">Identifica señales de texto generado por IA: frases genéricas, estructura artificial, falta de voz propia</div>
       </div>
     </div>
-
-    <!-- GUÍA DE ESCRITURA AUTÉNTICA -->
-    <div class="plag-card" style="margin-bottom:16px">
-      <div class="plag-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleGuide()">
-        <span>✍️ Guía: cómo escribir con voz propia</span>
-        <span id="guideArrow" style="font-size:18px;color:var(--muted);transition:transform 0.3s">▾</span>
-      </div>
-      <div id="guideContent" style="display:none">
-        <p style="font-size:13px;color:var(--muted2);margin-bottom:20px;line-height:1.7">
-          Estas son las características que diferencian un texto con voz humana auténtica de uno generado por IA. Úsalas como checklist antes de entregar.
-        </p>
-
-        <div class="guide-grid">
-
-          <div class="guide-item danger-item">
-            <div class="guide-item-header">
-              <span class="guide-emoji">🚩</span>
-              <span class="guide-item-title">Señales que delatan escritura IA</span>
-            </div>
-            <ul class="guide-list">
-              <li><strong>"Es importante destacar que..."</strong> — frase de relleno, elimínala</li>
-              <li><strong>"En el mundo actual..."</strong> — apertura genérica sin contexto real</li>
-              <li><strong>"Cabe resaltar que..."</strong> / <strong>"En este sentido..."</strong> — conectores vacíos</li>
-              <li><strong>Párrafos perfectamente equilibrados</strong> — todos igual de largos y ordenados</li>
-              <li><strong>Sin ningún error</strong> — la escritura humana tiene leves imperfecciones naturales</li>
-              <li><strong>Vocabulario demasiado variado</strong> — sinónimos rebuscados donde nadie los usaría</li>
-              <li><strong>Conclusiones que repiten todo</strong> — "En conclusión, como se ha demostrado a lo largo..."</li>
-            </ul>
-          </div>
-
-          <div class="guide-item ok-item">
-            <div class="guide-item-header">
-              <span class="guide-emoji">✅</span>
-              <span class="guide-item-title">Características de escritura humana auténtica</span>
-            </div>
-            <ul class="guide-list">
-              <li><strong>Voz personal</strong> — usa "considero", "observé", "en mi experiencia"</li>
-              <li><strong>Ejemplos concretos y propios</strong> — casos reales que viviste o investigaste tú</li>
-              <li><strong>Preguntas retóricas</strong> — "¿Pero qué pasa cuando esto falla en la práctica?"</li>
-              <li><strong>Variación de longitud</strong> — mezcla oraciones cortas con párrafos más largos</li>
-              <li><strong>Dudas o matices</strong> — "aunque esto no siempre aplica a...", "sin embargo"</li>
-              <li><strong>Referencias a contexto local</strong> — Colombia, tu ciudad, tu facultad, tu caso</li>
-              <li><strong>Citas integradas naturalmente</strong> — no solo al final, sino dentro del argumento</li>
-            </ul>
-          </div>
-
-          <div class="guide-item info-item">
-            <div class="guide-item-header">
-              <span class="guide-emoji">🛠️</span>
-              <span class="guide-item-title">Técnicas para humanizar tu escritura</span>
-            </div>
-            <ul class="guide-list">
-              <li><strong>Empieza con el problema</strong>, no con una definición genérica</li>
-              <li><strong>Escribe primero en bruto</strong> sin preocuparte de la forma, luego edita</li>
-              <li><strong>Lee en voz alta</strong> — si suena raro al hablar, reescríbelo</li>
-              <li><strong>Conecta con lo que sabes</strong> — relaciona el tema con algo que hayas visto</li>
-              <li><strong>Varía los comienzos</strong> — no empieces tres párrafos seguidos con "La..."</li>
-              <li><strong>Usa la primera persona cuando aplique</strong> — en análisis y reflexiones</li>
-              <li><strong>Incluye tensiones o contradicciones</strong> — la realidad no es perfecta</li>
-            </ul>
-          </div>
-
-          <div class="guide-item warn-item">
-            <div class="guide-item-header">
-              <span class="guide-emoji">⚠️</span>
-              <span class="guide-item-title">Palabras y frases a evitar</span>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
-              <span class="avoid-tag">es importante destacar</span>
-              <span class="avoid-tag">en el mundo actual</span>
-              <span class="avoid-tag">cabe resaltar</span>
-              <span class="avoid-tag">en este sentido</span>
-              <span class="avoid-tag">a lo largo de la historia</span>
-              <span class="avoid-tag">como se mencionó anteriormente</span>
-              <span class="avoid-tag">en conclusión</span>
-              <span class="avoid-tag">es fundamental</span>
-              <span class="avoid-tag">en la actualidad</span>
-              <span class="avoid-tag">sin lugar a dudas</span>
-              <span class="avoid-tag">es por ello que</span>
-              <span class="avoid-tag">se puede observar</span>
-              <span class="avoid-tag">es necesario mencionar</span>
-              <span class="avoid-tag">a través de los años</span>
-              <span class="avoid-tag">en definitiva</span>
-              <span class="avoid-tag">juega un papel fundamental</span>
-            </div>
-          </div>
-
-        </div>
-
-        <div style="margin-top:20px;padding:16px 20px;background:rgba(126,236,212,0.06);border:1px solid rgba(126,236,212,0.2);border-radius:14px">
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:10px">💡 Regla de oro</div>
-          <p style="font-size:13px;color:var(--muted2);line-height:1.75">
-            Si puedes reemplazar un párrafo tuyo por uno generado por IA y nadie nota la diferencia, es señal de que ese párrafo no tiene suficiente voz propia. <strong style="color:var(--text)">Pregúntate: ¿qué sé yo de esto que nadie más sabe exactamente igual?</strong> Eso es lo que debe aparecer en tu texto.
-          </p>
-        </div>
+    <div class="plag-option active" id="plag-opt-citas" onclick="togglePlagOption('citas')">
+      <input type="checkbox" id="checkCitas" checked style="display:none">
+      <div class="plag-opt-check" id="check-icon-citas">✓</div>
+      <div class="plag-opt-icon">💬</div>
+      <div>
+        <div class="plag-opt-title">Fragmentos sin citar</div>
+        <div class="plag-opt-desc">Detecta párrafos que parecen tomados de fuentes externas sin comillas ni referencia APA</div>
       </div>
     </div>
+    <div class="plag-option" id="plag-opt-comp" onclick="togglePlagOption('comp')">
+      <input type="checkbox" id="checkComp" style="display:none">
+      <div class="plag-opt-check" id="check-icon-comp" style="opacity:0">✓</div>
+      <div class="plag-opt-icon">🔄</div>
+      <div>
+        <div class="plag-opt-title">Comparar documentos</div>
+        <div class="plag-opt-desc">Calcula similitud entre el doc 1 y el doc 2. Requiere subir ambos archivos</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <button class="plag-analyze-btn" id="plagAnalyzeBtn" onclick="runPlagAnalysis()" disabled>
-      <span id="plagBtnText">🔍 Analizar documento</span>
-      <span id="plagSpinner" style="display:none" class="apa-spinner"></span>
-    </button>
+<!-- GUÍA DE ESCRITURA AUTÉNTICA -->
+<div class="plag-card" style="margin-bottom:16px">
+  <div class="plag-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleGuide()">
+    <span>✍️ Guía: cómo escribir con voz propia</span>
+    <span id="guideArrow" style="font-size:18px;color:var(--muted);transition:transform 0.3s">▾</span>
+  </div>
+  <div id="guideContent" style="display:none">
+    <p style="font-size:13px;color:var(--muted2);margin-bottom:20px;line-height:1.7">
+      Estas son las características que diferencian un texto con voz humana auténtica de uno generado por IA. Úsalas como checklist antes de entregar.
+    </p>
 
-    <!-- Results -->
-    <div id="plagResults" style="display:none"></div>
+    <div class="guide-grid">
+
+      <div class="guide-item danger-item">
+        <div class="guide-item-header">
+          <span class="guide-emoji">🚩</span>
+          <span class="guide-item-title">Señales que delatan escritura IA</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>"Es importante destacar que..."</strong> — frase de relleno, elimínala</li>
+          <li><strong>"En el mundo actual..."</strong> — apertura genérica sin contexto real</li>
+          <li><strong>"Cabe resaltar que..."</strong> / <strong>"En este sentido..."</strong> — conectores vacíos</li>
+          <li><strong>Párrafos perfectamente equilibrados</strong> — todos igual de largos y ordenados</li>
+          <li><strong>Sin ningún error</strong> — la escritura humana tiene leves imperfecciones naturales</li>
+          <li><strong>Vocabulario demasiado variado</strong> — sinónimos rebuscados donde nadie los usaría</li>
+          <li><strong>Conclusiones que repiten todo</strong> — "En conclusión, como se ha demostrado a lo largo..."</li>
+        </ul>
+      </div>
+
+      <div class="guide-item ok-item">
+        <div class="guide-item-header">
+          <span class="guide-emoji">✅</span>
+          <span class="guide-item-title">Características de escritura humana auténtica</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>Voz personal</strong> — usa "considero", "observé", "en mi experiencia"</li>
+          <li><strong>Ejemplos concretos y propios</strong> — casos reales que viviste o investigaste tú</li>
+          <li><strong>Preguntas retóricas</strong> — "¿Pero qué pasa cuando esto falla en la práctica?"</li>
+          <li><strong>Variación de longitud</strong> — mezcla oraciones cortas con párrafos más largos</li>
+          <li><strong>Dudas o matices</strong> — "aunque esto no siempre aplica a...", "sin embargo"</li>
+          <li><strong>Referencias a contexto local</strong> — Colombia, tu ciudad, tu facultad, tu caso</li>
+          <li><strong>Citas integradas naturalmente</strong> — no solo al final, sino dentro del argumento</li>
+        </ul>
+      </div>
+
+      <div class="guide-item info-item">
+        <div class="guide-item-header">
+          <span class="guide-emoji">🛠️</span>
+          <span class="guide-item-title">Técnicas para humanizar tu escritura</span>
+        </div>
+        <ul class="guide-list">
+          <li><strong>Empieza con el problema</strong>, no con una definición genérica</li>
+          <li><strong>Escribe primero en bruto</strong> sin preocuparte de la forma, luego edita</li>
+          <li><strong>Lee en voz alta</strong> — si suena raro al hablar, reescríbelo</li>
+          <li><strong>Conecta con lo que sabes</strong> — relaciona el tema con algo que hayas visto</li>
+          <li><strong>Varía los comienzos</strong> — no empieces tres párrafos seguidos con "La..."</li>
+          <li><strong>Usa la primera persona cuando aplique</strong> — en análisis y reflexiones</li>
+          <li><strong>Incluye tensiones o contradicciones</strong> — la realidad no es perfecta</li>
+        </ul>
+      </div>
+
+      <div class="guide-item warn-item">
+        <div class="guide-item-header">
+          <span class="guide-emoji">⚠️</span>
+          <span class="guide-item-title">Palabras y frases a evitar</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+          <span class="avoid-tag">es importante destacar</span>
+          <span class="avoid-tag">en el mundo actual</span>
+          <span class="avoid-tag">cabe resaltar</span>
+          <span class="avoid-tag">en este sentido</span>
+          <span class="avoid-tag">a lo largo de la historia</span>
+          <span class="avoid-tag">como se mencionó anteriormente</span>
+          <span class="avoid-tag">en conclusión</span>
+          <span class="avoid-tag">es fundamental</span>
+          <span class="avoid-tag">en la actualidad</span>
+          <span class="avoid-tag">sin lugar a dudas</span>
+          <span class="avoid-tag">es por ello que</span>
+          <span class="avoid-tag">se puede observar</span>
+          <span class="avoid-tag">es necesario mencionar</span>
+          <span class="avoid-tag">a través de los años</span>
+          <span class="avoid-tag">en definitiva</span>
+          <span class="avoid-tag">juega un papel fundamental</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:20px;padding:16px 20px;background:rgba(99,255,218,0.06);border:1px solid rgba(99,255,218,0.2);border-radius:14px">
+      <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:10px">💡 Regla de oro</div>
+      <p style="font-size:13px;color:var(--muted2);line-height:1.75">
+        Si puedes reemplazar un párrafo tuyo por uno generado por IA y nadie nota la diferencia, es señal de que ese párrafo no tiene suficiente voz propia. <strong style="color:var(--text)">Pregúntate: ¿qué sé yo de esto que nadie más sabe exactamente igual?</strong> Eso es lo que debe aparecer en tu texto.
+      </p>
+    </div>
+  </div>
+</div>
+
+<button class="plag-analyze-btn" id="plagAnalyzeBtn" onclick="runPlagAnalysis()" disabled>
+  <span id="plagBtnText">🔍 Analizar documento</span>
+  <span id="plagSpinner" style="display:none" class="apa-spinner"></span>
+</button>
+
+<!-- Results -->
+<div id="plagResults" style="display:none"></div>
+```
+
   </div>
 </div>
 
 <!-- HISTORY PANEL -->
+
 <div class="history-panel" id="historyPanel">
   <div class="history-header">
     <div class="history-title">
@@ -1616,8 +1636,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   <div class="history-list" id="historyList"></div>
 </div>
 <div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
-
-
 
 <script>
 
@@ -1787,9 +1805,9 @@ ${text}
 
   // Modelos en orden de preferencia — si uno falla por demanda, prueba el siguiente
   const MODELS = [
+    'gemini-2.5-flash-preview-05-20',
     'gemini-2.5-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash'
+    'gemini-1.5-pro-latest'
   ];
 
   const body = JSON.stringify({
@@ -2018,8 +2036,6 @@ function addToHistory(plan) {
   const entry = {
     id,
     titulo: plan.titulo || 'Plan sin título',
-    materia: plan.materia || null,
-    actividad: plan.actividad || null,
     fecha: new Date().toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' }),
     resumen: plan.resumen?.slice(0, 100) + '...',
     entrega: plan.fechas?.entrega || null,
@@ -2029,7 +2045,7 @@ function addToHistory(plan) {
     createdAt: Date.now()
   };
   hist.unshift(entry);
-  if (hist.length > 30) hist.pop();
+  if (hist.length > 30) hist.pop(); // max 30 plans
   saveHistory(hist);
   return id;
 }
@@ -2076,50 +2092,7 @@ function updateHistoryBadge() {
   if (countEl) countEl.textContent = hist.length;
 }
 
-function renderWeeklyAlerts() {
-  const banner = document.getElementById('weeklyAlertsBanner');
-  const listEl = document.getElementById('weeklyAlertsList');
-  if (!banner || !listEl) return;
-
-  const hist = getHistory();
-  const alerts = [];
-  hist.forEach(entry => {
-    const done = (entry.checklistDone || []).length;
-    const total = entry.checklistTotal || 0;
-    const isCompleted = total > 0 && done === total;
-    if (isCompleted) return;
-    (entry.plan?.alertas_semana || []).forEach(a => {
-      alerts.push({ ...a, materia: entry.materia || null, actividad: entry.actividad || entry.titulo });
-    });
-  });
-
-  if (!alerts.length) { banner.style.display = 'none'; return; }
-
-  const urgOrder = { alta: 0, media: 1, baja: 2 };
-  alerts.sort((a, b) => (urgOrder[a.urgencia] ?? 1) - (urgOrder[b.urgencia] ?? 1));
-
-  const urgColors = { alta:'rgba(255,107,107,0.9)', media:'rgba(255,209,102,0.9)', baja:'rgba(126,236,212,0.8)' };
-  const urgBg =    { alta:'rgba(255,107,107,0.06)', media:'rgba(255,209,102,0.05)', baja:'rgba(126,236,212,0.04)' };
-  const urgBorder ={ alta:'rgba(255,107,107,0.22)', media:'rgba(255,209,102,0.18)', baja:'rgba(126,236,212,0.15)' };
-
-  listEl.innerHTML = alerts.map(a => `
-    <div style="background:${urgBg[a.urgencia]||urgBg.media};border:1px solid ${urgBorder[a.urgencia]||urgBorder.media};border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;">
-      <span style="font-size:18px;flex-shrink:0;">${a.emoji||'📌'}</span>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-          <span style="font-size:13px;font-weight:600;">${a.dia}</span>
-          <span style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${urgColors[a.urgencia]||urgColors.media};">${a.urgencia}</span>
-        </div>
-        <div style="font-size:13px;color:var(--muted2);margin-bottom:2px;">${a.tarea}</div>
-        ${a.materia ? `<div style="font-size:10px;color:var(--muted);">${a.materia} · ${a.actividad}</div>` : ''}
-      </div>
-    </div>`).join('');
-
-  banner.style.display = 'block';
-}
-
 function renderHistoryList() {
-  renderWeeklyAlerts();
   const hist = getHistory();
   const list = document.getElementById('historyList');
   const countEl = document.getElementById('historyCount');
@@ -2135,22 +2108,19 @@ function renderHistoryList() {
     const total = entry.checklistTotal || 0;
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
     const completed = total > 0 && done === total;
-    const barColor = pct === 100 ? 'var(--accent3)' : pct >= 50 ? 'var(--accent)' : 'var(--warn)';
 
     return `<div class="history-item ${completed ? 'completed' : ''}" onclick="loadFromHistory('${entry.id}')">
       <div class="hi-actions">
         <button class="hi-btn load" onclick="loadFromHistory('${entry.id}');event.stopPropagation()">📂 Ver</button>
         <button class="hi-btn" onclick="deleteFromHistory('${entry.id}',event)">🗑️</button>
       </div>
-      ${entry.materia ? `<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:2px;">${entry.materia}</div>` : ''}
-      <div class="hi-title">${completed ? '✅ ' : ''}${entry.actividad || entry.titulo}</div>
-      ${entry.materia && entry.actividad ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;margin-bottom:4px;">📄 ${entry.titulo}</div>` : ''}
+      <div class="hi-title">${completed ? '✅ ' : ''}${entry.titulo}</div>
       <div class="hi-meta">
         <span>🗓️ ${entry.fecha}</span>
-        ${entry.entrega ? `<span>⏰ ${entry.entrega}</span>` : ''}
-        ${total > 0 ? `<span style="color:${completed ? 'var(--accent3)' : 'var(--muted2'}">☑️ ${done}/${total}</span>` : ''}
+        ${entry.entrega ? `<span>⏰ Entrega: ${entry.entrega}</span>` : ''}
+        ${total > 0 ? `<span style="color:${completed ? 'var(--accent3)' : 'var(--muted2)'}">☑️ ${done}/${total} ítems</span>` : ''}
       </div>
-      ${total > 0 ? `<div class="hi-progress"><div class="hi-progress-bar" style="width:${pct}%;background:${barColor};"></div></div>` : ''}
+      ${total > 0 ? `<div class="hi-progress"><div class="hi-progress-bar" style="width:${pct}%"></div></div>` : ''}
     </div>`;
   }).join('');
 }
@@ -2214,10 +2184,10 @@ function getApiKey() {
 
 loadApiKey();
 updateHistoryBadge();
-renderWeeklyAlerts();
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const btnText = document.getElementById('btnText');
 const btnSpinner = document.getElementById('btnSpinner');
@@ -2225,7 +2195,8 @@ const loadingSection = document.getElementById('loadingSection');
 const result = document.getElementById('result');
 const errorBox = document.getElementById('errorBox');
 
-let uploadedFiles = []; // array of File objects — replaces currentFile/currentFile2
+let currentFile = null;
+let currentFile2 = null;
 let rawPlanText = '';
 let currentPlan = null;
 
@@ -2239,65 +2210,56 @@ function formatSize(bytes) {
   return (bytes/1024/1024).toFixed(1) + ' MB';
 }
 
-// ===== MULTI-FILE SYSTEM =====
-
-function renderFileList() {
-  const container = document.getElementById('fileListContainer');
-  const addBtn = document.getElementById('addMoreBtn');
-  if (!container) return;
-  if (!uploadedFiles.length) {
-    container.innerHTML = '';
-    if (addBtn) addBtn.style.display = 'none';
-    analyzeBtn.disabled = true;
-    btnText.textContent = '⚡ Sube un documento para analizar';
-    return;
-  }
-  if (addBtn) addBtn.style.display = 'inline-block';
-  analyzeBtn.disabled = false;
-  btnText.textContent = `⚡ Generar plan (${uploadedFiles.length} documento${uploadedFiles.length>1?'s':''})`;
-
-  container.innerHTML = uploadedFiles.map((f, i) => {
-    const ext = getExt(f.name);
-    const icon = fileIcons[ext] || '📄';
-    return `<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;">
-      <span style="font-size:20px;flex-shrink:0;">${icon}</span>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:1px;">${formatSize(f.size)}</div>
-      </div>
-      <button onclick="removeUploadedFile(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color 0.2s;" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--muted)'">✕</button>
-    </div>`;
-  }).join('');
-}
-
-function removeUploadedFile(index) {
-  uploadedFiles.splice(index, 1);
-  renderFileList();
-}
-
-function addFiles(fileList) {
-  const allowed = ['.pdf','.doc','.docx','.txt','.png','.jpg','.jpeg','.webp'];
-  Array.from(fileList).forEach(f => {
-    const ext = '.' + getExt(f.name);
-    if (allowed.includes(ext) && !uploadedFiles.find(u => u.name===f.name && u.size===f.size)) {
-      uploadedFiles.push(f);
-    }
-  });
-  renderFileList();
-}
-
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
 });
-fileInput.addEventListener('change', () => { if (fileInput.files.length) { addFiles(fileInput.files); fileInput.value=''; } });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
+
+// SECOND FILE
+const fileInput2 = document.getElementById('fileInput2');
+const filePreview2 = document.getElementById('filePreview2');
+fileInput2.addEventListener('change', () => { if (fileInput2.files.length) setFile2(fileInput2.files[0]); });
+
+function setFile2(file) {
+  currentFile2 = file;
+  const ext = file.name.split('.').pop().toLowerCase();
+  document.getElementById('fileName2').textContent = file.name;
+  document.getElementById('fileSize2').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  filePreview2.classList.add('show');
+}
+
+function removeFile2() {
+  currentFile2 = null;
+  fileInput2.value = '';
+  filePreview2.classList.remove('show');
+}
+
+document.getElementById('removeFile').addEventListener('click', () => {
+  currentFile = null;
+  filePreview.classList.remove('show');
+  fileInput.value = '';
+  analyzeBtn.disabled = true;
+  btnText.textContent = '⚡ Sube un documento para analizar';
+});
+
+function setFile(file) {
+  currentFile = file;
+  const ext = getExt(file.name);
+  document.getElementById('fileTypeIcon').textContent = fileIcons[ext] || '📄';
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatSize(file.size);
+  filePreview.classList.add('show');
+  analyzeBtn.disabled = false;
+  btnText.textContent = '⚡ Generar mi plan personalizado';
+}
 
 analyzeBtn.addEventListener('click', async () => {
-  if (!uploadedFiles.length) return;
+  if (!currentFile) return;
   await analyzeDocument();
 });
 
@@ -2353,10 +2315,13 @@ async function analyzeDocument() {
   errorBox.classList.remove('show');
   animateSteps();
 
+  const ext = getExt(currentFile.name);
   const context = document.getElementById('contextInput').value.trim();
   const today = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   try {
+    const isImage = ['png','jpg','jpeg','webp'].includes(ext);
+    const isPdf = ext === 'pdf';
 
     const systemPrompt = `Eres un planificador académico para estudiantes con TDAH y TOC. HOY: ${today}.
 
@@ -2365,26 +2330,19 @@ Responde ÚNICAMENTE con JSON puro. Sin markdown. Sin texto antes o después. So
 IMPORTANTE: Si el documento no tiene fechas específicas, usa fechas realistas partiendo de hoy. SIEMPRE genera tareas concretas y útiles. NUNCA pongas alerta de "plan genérico" — siempre extrae o infiere tareas accionables del contenido.
 
 Estructura requerida:
-{"titulo":"string","materia":"string (nombre de la materia o curso, ej: Psicología Social)","actividad":"string (tipo de actividad, ej: Informe de visita de campo, Ensayo, Quiz, Taller, etc.)","resumen":"string 2 oraciones","alerta":"string o null","fechas":{"inicio":"string","entrega":"string","diasRestantes":0,"horasEstudio":0},"puntaje_total":"string (ej: 80 puntos)","puntaje_items":[{"criterio":"string (ej: RAE)","valor":"string (ej: 20 pts)"}],"entregables":[{"numero":1,"descripcion":"string","nota":"string o null"}],"bloques":[{"nombre":"string","emoji":"string","fechas":"string","urgencia":"alta|media|baja","tareas":[{"emoji":"string","titulo":"string","descripcion":"string","nota":"string o null","tipo":"focus|action|warn|normal"}]}],"checklist":["string"],"consejos":{"tdah":["string"],"toc":["string"]},"alertas_semana":[{"dia":"string (ej: Lunes, Martes, o Esta semana)","tarea":"string (qué debe hacer ese día)","urgencia":"alta|media|baja","emoji":"string"}],"lecturas_requeridas":[{"numero":1,"titulo":"string (título exacto del texto, artículo o capítulo)","autor":"string o null","tipo":"string (ej: artículo, capítulo, libro, guía, norma, etc.)","paginas":"string o null (ej: pp. 12-35 o null)","obligatorio":true,"nota":"string o null (para qué sirve esta lectura en el trabajo)","palabras_clave":["string (término exacto a buscar/subrayar en el texto, máx 6)"],"ideas_clave":["string (frase corta con la idea más importante que debes encontrar en esa lectura, máx 4)"],"como_resumir":"string (instrucción concreta de 1-2 oraciones: qué estructura usar para resumir ESA lectura específica)"],"lectura":{"estrategia":"string (1 párrafo con el método de lectura recomendado para este tipo de documento y tema)","sesiones":[{"numero":1,"titulo":"string","duracion":"string (ej: 25 min)","objetivo":"string (qué debe lograr en esta sesión)","tecnica":"string (ej: lectura skimming, subrayado activo, mapa mental, método Cornell, etc.)","paginas":"string o null"}],"ambiente":["string (tip concreto de ambiente para leer con TDAH/TOC)"],"herramientas":["string (app, técnica o recurso concreto para esta lectura)"]}}
+{"titulo":"string","resumen":"string 2 oraciones","alerta":"string o null","fechas":{"inicio":"string","entrega":"string","diasRestantes":0,"horasEstudio":0},"puntaje":"string","entregables":[{"numero":1,"descripcion":"string","nota":"string o null"}],"bloques":[{"nombre":"string","emoji":"string","fechas":"string","urgencia":"alta|media|baja","tareas":[{"emoji":"string","titulo":"string","descripcion":"string","nota":"string o null","tipo":"focus|action|warn|normal"}]}],"checklist":["string"],"consejos":{"tdah":["string"],"toc":["string"]}}
 
 Reglas:
 - 3 a 5 bloques concretos y accionables
 - Checklist de 5-6 ítems
 - 2 consejos TDAH y 2 consejos TOC
-- materia: extrae el nombre exacto de la materia o curso del documento. Si no aparece, infiere por el tema.
-- actividad: identifica qué tipo de trabajo es (informe, ensayo, taller, quiz, proyecto, etc.)
-- puntaje_total: el puntaje total del trabajo (ej: "80 puntos"). puntaje_items: desglosa CADA criterio de calificación en un ítem separado (ej: RAE: 20 pts, Aplicación: 30 pts). NUNCA mezcles todos los criterios en un solo string.
-- alertas_semana: genera 3-5 alertas concretas de lo que debe hacer esta semana, distribuidas por día o agrupadas. Cada alerta tiene un día específico, la tarea concreta, urgencia y emoji. Prioriza las tareas más urgentes o que tienen fecha próxima.
-- lecturas_requeridas: extrae TODAS las lecturas obligatorias mencionadas en el documento. Mínimo 1, máximo 10. Para CADA lectura genera: 4-6 palabras_clave, 3-4 ideas_clave, instrucción como_resumir, y dificultad_rae: "facil", "media" o "dificil" con razon_dificultad_rae (1 oración sobre por qué esa lectura es fácil o difícil para hacer la RAE).
-- 2 a 4 sesiones de lectura cortas y concretas, adaptadas al documento y pensadas para TDAH y TOC
-- 2 tips de ambiente de lectura y 2 herramientas
 - Si es imagen o PDF, extrae toda la info visible`;
 
     // Auto-detect best available model
     const CANDIDATE_MODELS = [
+      'gemini-2.5-flash-preview-05-20',
       'gemini-2.5-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-1.5-flash'
+      'gemini-1.5-pro-latest'
     ];
 
     let GEMINI_MODEL = null;
@@ -2400,7 +2358,7 @@ Reglas:
       }
       if (!GEMINI_MODEL && available.length > 0) GEMINI_MODEL = available[0];
     } catch(e) { console.warn('No se pudo listar modelos, usando fallback'); }
-    if (!GEMINI_MODEL) GEMINI_MODEL = 'gemini-2.5-flash';
+    if (!GEMINI_MODEL) GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
     console.log('Usando modelo:', GEMINI_MODEL);
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
@@ -2424,18 +2382,15 @@ Reglas:
       }
     }
 
-    let allParts = [];
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      if (i > 0) allParts.push({ text: `\n\n--- DOCUMENTO ${i+1}: ${uploadedFiles[i].name} ---\n` });
-      else allParts.push({ text: `--- DOCUMENTO 1: ${uploadedFiles[0].name} ---\n` });
-      const parts_i = await buildPartsForFile(uploadedFiles[i]);
-      allParts = [...allParts, ...parts_i];
+    const parts1 = await buildPartsForFile(currentFile);
+    let allParts = [...parts1];
+
+    if (currentFile2) {
+      const parts2 = await buildPartsForFile(currentFile2);
+      allParts = [...allParts, { text: '\n\n--- SEGUNDO DOCUMENTO DE LA MISMA MATERIA ---\n' }, ...parts2];
     }
 
-    const multiMsg = uploadedFiles.length > 1
-      ? `\nAnaliza TODOS los ${uploadedFiles.length} documentos anteriores juntos y genera UN SOLO plan JSON integrado.`
-      : `\nAnaliza el documento anterior y genera el plan JSON.`;
-    allParts.push({ text: `${multiMsg}${context ? '\nContexto adicional: ' + context : ''}` });
+    allParts.push({ text: `\nAnaliza TODOS los documentos anteriores juntos y genera UN SOLO plan JSON integrado.${context ? '\nContexto adicional: ' + context : ''}` });
     parts = allParts;
 
     const requestBody = {
@@ -2444,23 +2399,11 @@ Reglas:
       generationConfig: { temperature: 0.3, maxOutputTokens: 65536, responseMimeType: 'application/json' }
     };
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
-
-    let response;
-    try {
-      response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
-    } catch(fetchErr) {
-      if (fetchErr.name === 'AbortError') throw new Error('El análisis tardó demasiado. Intenta con documentos más pequeños o uno a la vez.');
-      throw fetchErr;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
 
     const data = await response.json();
     console.log('=== RESPUESTA COMPLETA DE GEMINI ===');
@@ -2574,27 +2517,6 @@ function renderPlan(plan, checklistDone) {
   html += `<p style="font-size:15px;color:var(--muted2);margin-bottom:28px;padding:18px;background:var(--card);border-radius:12px;border:1px solid var(--border2)">${plan.resumen}</p>`;
 
   // FECHAS
-  // ALERTAS SEMANALES
-  if (plan.alertas_semana?.length) {
-    const urgColors = { alta:'rgba(255,107,107,0.8)', media:'rgba(255,209,102,0.8)', baja:'rgba(126,236,212,0.7)' };
-    const urgBg = { alta:'rgba(255,107,107,0.06)', media:'rgba(255,209,102,0.05)', baja:'rgba(126,236,212,0.04)' };
-    const urgBorder = { alta:'rgba(255,107,107,0.25)', media:'rgba(255,209,102,0.2)', baja:'rgba(126,236,212,0.15)' };
-    html += `<h2>⚡ Lo que debes hacer esta semana</h2><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">`;
-    plan.alertas_semana.forEach(a => {
-      html += `<div style="background:${urgBg[a.urgencia]||urgBg.media};border:1px solid ${urgBorder[a.urgencia]||urgBorder.media};border-radius:12px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start;">
-        <span style="font-size:20px;flex-shrink:0">${a.emoji||'📌'}</span>
-        <div style="flex:1;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-            <span style="font-size:13px;font-weight:600;">${a.dia}</span>
-            <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${urgColors[a.urgencia]||urgColors.media};border:1px solid ${urgBorder[a.urgencia]||urgBorder.media};padding:1px 8px;border-radius:20px;">${a.urgencia}</span>
-          </div>
-          <div style="font-size:13px;color:var(--muted2);">${a.tarea}</div>
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
   html += `<h2>📅 Fechas clave</h2><div class="info-grid">`;
   html += `<div class="info-card"><div class="ic-label">Inicio</div><div class="ic-value">${plan.fechas?.inicio || '—'}</div></div>`;
   html += `<div class="info-card warn"><div class="ic-label">⏰ Entrega</div><div class="ic-value">${plan.fechas?.entrega || '—'}</div></div>`;
@@ -2602,15 +2524,7 @@ function renderPlan(plan, checklistDone) {
     const urgColor = plan.fechas.diasRestantes <= 7 ? 'var(--accent2)' : plan.fechas.diasRestantes <= 14 ? 'var(--warn)' : 'var(--accent3)';
     html += `<div class="info-card"><div class="ic-label">Días restantes</div><div class="ic-value" style="color:${urgColor}">${plan.fechas.diasRestantes} días</div></div>`;
   }
-  if (plan.puntaje_total || plan.puntaje_items?.length) {
-    html += `<div class="info-card accent" style="grid-column:1/-1;">
-      <div class="ic-label">🏆 Puntaje total</div>
-      <div class="ic-value" style="margin-bottom:${plan.puntaje_items?.length ? '10px' : '0'}">${plan.puntaje_total || plan.puntaje || '—'}</div>
-      ${plan.puntaje_items?.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${plan.puntaje_items.map(p => `<span style="background:rgba(26,154,212,0.12);border:1px solid rgba(26,154,212,0.3);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--accent);">${p.criterio}: ${p.valor}</span>`).join('')}
-      </div>` : ''}
-    </div>`;
-  }
+  if (plan.puntaje) html += `<div class="info-card accent"><div class="ic-label">Puntaje</div><div class="ic-value">${plan.puntaje}</div></div>`;
   html += `</div>`;
 
   // ENTREGABLES
@@ -2630,8 +2544,8 @@ function renderPlan(plan, checklistDone) {
   // BLOQUES / PLAN
   html += `<h2>🗓️ Tu plan de acción</h2>`;
   (plan.bloques || []).forEach(bloque => {
-    const urgColors = { alta: 'rgba(255,107,107,0.3)', media: 'rgba(255,209,102,0.25)', baja: 'rgba(126,236,212,0.2)' };
-    const urgBg = { alta: 'rgba(224,90,122,0.07)', media: 'rgba(212,146,10,0.07)', baja: 'rgba(13,171,139,0.07)' };
+    const urgColors = { alta: 'rgba(255,107,107,0.3)', media: 'rgba(255,209,102,0.25)', baja: 'rgba(99,255,218,0.2)' };
+    const urgBg = { alta: 'rgba(255,107,107,0.07)', media: 'rgba(255,209,102,0.05)', baja: 'rgba(99,255,218,0.04)' };
     const borderColor = urgColors[bloque.urgencia] || 'var(--border2)';
     const bgColor = urgBg[bloque.urgencia] || 'var(--card)';
 
@@ -2642,8 +2556,8 @@ function renderPlan(plan, checklistDone) {
       </div>`;
 
     (bloque.tareas || []).forEach(t => {
-      const tipoBorder = { focus: 'rgba(26,154,212,0.35)', action: 'rgba(126,236,212,0.25)', warn: 'rgba(255,209,102,0.3)', normal: 'var(--border2)' };
-      const tipoBg = { focus: 'rgba(26,154,212,0.07)', action: 'rgba(126,236,212,0.05)', warn: 'rgba(255,209,102,0.05)', normal: 'var(--surface)' };
+      const tipoBorder = { focus: 'rgba(108,99,255,0.35)', action: 'rgba(99,255,218,0.25)', warn: 'rgba(255,209,102,0.3)', normal: 'var(--border2)' };
+      const tipoBg = { focus: 'rgba(108,99,255,0.07)', action: 'rgba(99,255,218,0.05)', warn: 'rgba(255,209,102,0.05)', normal: 'var(--surface)' };
       html += `<div style="background:${tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;">
         <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
           <span style="font-size:18px;flex-shrink:0">${t.emoji}</span>
@@ -2658,26 +2572,9 @@ function renderPlan(plan, checklistDone) {
 
   // CHECKLIST INTERACTIVO
   if (plan.checklist && plan.checklist.length) {
-    const total = plan.checklist.length;
-    const done = checklistDone.length;
-    const pct = Math.round((done / total) * 100);
-    const barColor = pct === 100 ? 'var(--accent3)' : pct >= 50 ? 'var(--accent)' : 'var(--warn)';
-
     html += `<h2>✅ Lista de verificación final</h2>
     <div class="checklist" id="checklistContainer">
-      <div class="checklist-title">Marca cada ítem cuando esté listo — cuando todos estén marcados, el trabajo está completo</div>
-
-      <!-- BARRA DE PROGRESO -->
-      <div style="margin:14px 0 18px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <span style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">PROGRESO</span>
-          <span id="progressLabel" style="font-size:13px;font-weight:700;color:${barColor};">${done}/${total} — ${pct}%</span>
-        </div>
-        <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:20px;overflow:hidden;">
-          <div id="progressBar" style="height:100%;width:${pct}%;background:${barColor};border-radius:20px;transition:width 0.4s ease, background 0.4s ease;"></div>
-        </div>
-      </div>`;
-
+      <div class="checklist-title">Marca cada ítem cuando esté listo — cuando todos estén marcados, el trabajo está completo</div>`;
     plan.checklist.forEach((item, i) => {
       const isDone = checklistDone.includes(i);
       html += `<div class="check-item ${isDone ? 'checked' : ''}" id="ci-${i}" onclick="toggleCheck(${i})">
@@ -2704,312 +2601,14 @@ function renderPlan(plan, checklistDone) {
     html += `</div>`;
   }
 
-  // LISTA DE LECTURAS REQUERIDAS
-  if (plan.lecturas_requeridas?.length) {
-    const totalLec = plan.lecturas_requeridas.length;
-    html += `<h2>📚 Lecturas que debes hacer</h2>
-    <div style="margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">LECTURAS COMPLETADAS</span>
-        <span id="lecProgressLabel" style="font-size:13px;font-weight:700;color:var(--warn);">0/${totalLec} — 0%</span>
-      </div>
-      <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:20px;overflow:hidden;">
-        <div id="lecProgressBar" style="height:100%;width:0%;background:var(--warn);border-radius:20px;transition:width 0.4s ease,background 0.4s ease;"></div>
-      </div>
-    </div>`;
-
-    plan.lecturas_requeridas.forEach((lec, li) => {
-      const obligColor = lec.obligatorio ? 'rgba(255,107,107,0.7)' : 'rgba(126,236,212,0.7)';
-      const obligLabel = lec.obligatorio ? 'Obligatoria' : 'Recomendada';
-      const lecId = `lec-${li}`;
-      html += `<div id="${lecId}" style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:0;margin-bottom:16px;overflow:hidden;transition:border-color 0.3s,opacity 0.3s;">
-
-        <!-- Cabecera con checkbox -->
-        <div style="padding:14px 18px 12px;border-bottom:1px solid var(--border);">
-          <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
-            <!-- Checkbox lectura -->
-            <div onclick="toggleLectura(${li})" id="lec-cb-${li}" style="width:22px;height:22px;min-width:22px;border:2px solid rgba(26,154,212,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-top:1px;"></div>
-            <div style="width:24px;height:24px;min-width:24px;background:rgba(26,154,212,0.2);border:1px solid rgba(26,154,212,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);">${lec.numero}</div>
-            <div style="font-weight:600;font-size:14px;flex:1;min-width:0;">${lec.titulo}</div>
-            <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${obligColor};border:1px solid ${obligColor};padding:2px 8px;border-radius:20px;white-space:nowrap;">${obligLabel}</span>
-            ${lec.dificultad_rae ? (() => {
-              const dc = {facil:'rgba(13,171,139,0.9)',media:'rgba(212,146,10,0.9)',dificil:'rgba(224,90,122,0.9)'};
-              const dl = {facil:'RAE fácil ✓',media:'RAE media',dificil:'RAE difícil'};
-              return `<span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${dc[lec.dificultad_rae]};border:1px solid ${dc[lec.dificultad_rae]};padding:2px 8px;border-radius:20px;white-space:nowrap;">${dl[lec.dificultad_rae]}</span>`;
-            })() : ''}
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);padding-left:56px;">
-            ${lec.autor ? `<span>✍️ ${lec.autor}</span>` : ''}
-            ${lec.tipo ? `<span>📄 ${lec.tipo}</span>` : ''}
-            ${lec.paginas ? `<span>🔖 ${lec.paginas}</span>` : ''}
-          </div>
-          ${lec.nota ? `<div style="font-size:12px;color:var(--muted2);font-style:italic;margin-top:6px;padding-left:56px;">💡 ${lec.nota}</div>` : ''}
-        </div>
-
-        <!-- Palabras clave -->
-        ${lec.palabras_clave?.length ? `
-        <div style="padding:12px 18px;border-bottom:1px solid var(--border);">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;">🔍 PALABRAS CLAVE A BUSCAR Y SUBRAYAR</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${lec.palabras_clave.map(p => `<span style="background:rgba(26,154,212,0.10);border:1px solid rgba(26,154,212,0.25);color:var(--accent);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:500;">${p}</span>`).join('')}
-          </div>
-        </div>` : ''}
-
-        <!-- Ideas clave -->
-        ${lec.ideas_clave?.length ? `
-        <div style="padding:12px 18px;border-bottom:1px solid var(--border);">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;">💡 LO MÁS IMPORTANTE QUE DEBES ENCONTRAR</div>
-          ${lec.ideas_clave.map(idea => `
-            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
-              <span style="color:var(--accent3);font-size:14px;flex-shrink:0;margin-top:1px;">▸</span>
-              <span style="font-size:13px;color:var(--muted2);">${idea}</span>
-            </div>`).join('')}
-        </div>` : ''}
-
-        <!-- Cómo resumir -->
-        ${lec.como_resumir ? `
-        <div style="padding:12px 18px;border-bottom:1px solid var(--border);">
-          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:6px;">✍️ CÓMO HACER EL RESUMEN</div>
-          <div style="font-size:13px;color:var(--muted2);line-height:1.6;">${lec.como_resumir}</div>
-        </div>` : ''}
-
-
-
-      </div>`;
-    });
-
-    // RANKING RAE por lectura
-    const lecsConDif = (plan.lecturas_requeridas || []).filter(l => l.dificultad_rae);
-    if (lecsConDif.length >= 1) {
-      const order = {facil:0, media:1, dificil:2};
-      const sorted = [...lecsConDif].sort((a,b) => (order[a.dificultad_rae]??1)-(order[b.dificultad_rae]??1));
-      const opcionLabel = ['1ra mejor opción','2da mejor opción','3ra mejor opción','4ta mejor opción','5ta mejor opción','6ta mejor opción','7ta mejor opción','8va mejor opción','9na mejor opción','10ma mejor opción'];
-      const bgCard = ['rgba(13,171,139,0.08)','rgba(26,154,212,0.07)','rgba(212,146,10,0.07)','rgba(224,90,122,0.06)'];
-      const borderCard = ['rgba(13,171,139,0.3)','rgba(26,154,212,0.25)','rgba(212,146,10,0.25)','rgba(224,90,122,0.2)'];
-      const labelColor = ['#0dab8b','#1a9ad4','#d4920a','#e05a7a'];
-      const difLabel = {facil:'Fácil ✓', media:'Moderada', dificil:'Difícil'};
-      const difColor = {facil:'#0dab8b', media:'#d4920a', dificil:'#e05a7a'};
-
-      html += `<div style="margin-top:6px;margin-bottom:8px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;padding:0 2px;">📋 ¿POR CUÁL LECTURA HACER LA RAE PRIMERO?</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;padding:0 2px;">Ordenadas de más práctica a más difícil</div>`;
-
-      sorted.forEach((lec, ri) => {
-        const ci = Math.min(ri, bgCard.length-1);
-        html += `<div style="background:${bgCard[ci]};border:1.5px solid ${borderCard[ci]};border-radius:14px;padding:14px 16px;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:${labelColor[ci]};">${opcionLabel[ri] || (ri+1)+'a opción'}</span>
-            <span style="font-size:10px;font-weight:700;color:${difColor[lec.dificultad_rae]||'var(--muted)'};background:rgba(255,255,255,0.6);padding:2px 10px;border-radius:20px;">${difLabel[lec.dificultad_rae]||lec.dificultad_rae}</span>
-          </div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">${lec.titulo}</div>
-          ${lec.autor ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">✍️ ${lec.autor}</div>` : ''}
-          ${lec.razon_dificultad_rae ? `<div style="font-size:12px;color:var(--muted2);line-height:1.5;margin-top:4px;">💡 ${lec.razon_dificultad_rae}</div>` : ''}
-        </div>`;
-      });
-      html += `</div>`;
-    }
-  }
-
-  // SUGERENCIAS DE LECTURA
-  if (plan.lectura) {
-    const L = plan.lectura;
-    html += `<h2>📖 Cómo leer este documento</h2>`;
-
-    // Estrategia general
-    if (L.estrategia) {
-      html += `<div style="background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;">ESTRATEGIA RECOMENDADA</div>
-        <div style="font-size:14px;color:var(--muted2);line-height:1.7;">${L.estrategia}</div>
-      </div>`;
-    }
-
-    // Sesiones de lectura
-    if (L.sesiones?.length) {
-      html += `<div style="margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">SESIONES DE LECTURA</div>`;
-      L.sesiones.forEach(s => {
-        html += `<div style="background:rgba(26,154,212,0.06);border:1px solid rgba(26,154,212,0.2);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;">
-          <div style="width:32px;height:32px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;">${s.numero}</div>
-          <div style="flex:1;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <div style="font-weight:600;font-size:14px;">${s.titulo}</div>
-              <div style="font-size:11px;background:rgba(26,154,212,0.12);color:var(--accent);padding:2px 10px;border-radius:20px;white-space:nowrap;">⏱ ${s.duracion}</div>
-            </div>
-            <div style="font-size:13px;color:var(--muted2);margin-bottom:4px;">🎯 ${s.objetivo}</div>
-            <div style="font-size:12px;color:var(--muted);">🛠 ${s.tecnica}${s.paginas ? ` &nbsp;·&nbsp; 📄 ${s.paginas}` : ''}</div>
-          </div>
-        </div>`;
-      });
-      html += `</div>`;
-    }
-
-    // Ambiente y herramientas
-    if (L.ambiente?.length || L.herramientas?.length) {
-      html += `<div class="tip-grid">`;
-      if (L.ambiente?.length) {
-        html += `<div class="tip-box">
-          <div class="tip-label tdah">🌿 Ambiente ideal</div>`;
-        L.ambiente.forEach(a => { html += `<div class="tip-text" style="margin-bottom:8px;">• ${a}</div>`; });
-        html += `</div>`;
-      }
-      if (L.herramientas?.length) {
-        html += `<div class="tip-box">
-          <div class="tip-label toc">🧰 Herramientas</div>`;
-        L.herramientas.forEach(h => { html += `<div class="tip-text" style="margin-bottom:8px;">• ${h}</div>`; });
-        html += `</div>`;
-      }
-      html += `</div>`;
-    }
-  }
-
   document.getElementById('plan-content').innerHTML = html;
-
-  // Inject preguntas + notas sections after checklist
-  const planContent = document.getElementById('plan-content');
-
-  // --- PREGUNTAS PENDIENTES ---
-  const pqSection = document.createElement('div');
-  pqSection.className = 'pq-section';
-  pqSection.innerHTML = `
-    <div class="pq-header">
-      <div class="pq-title" style="color:var(--accent);">❓ Preguntas pendientes</div>
-      <button class="pq-add-btn" onclick="pqAddItem('pq-list','pq')">+ Agregar</button>
-    </div>
-    <div id="pq-list"></div>
-    <div class="pq-empty" id="pq-empty">Aún no tienes preguntas — toca "+ Agregar" para escribir una</div>
-  `;
-  planContent.appendChild(pqSection);
-
-  // --- NOTAS ---
-  const notasSection = document.createElement('div');
-  notasSection.className = 'pq-section';
-  notasSection.innerHTML = `
-    <div class="pq-header">
-      <div class="pq-title" style="color:var(--accent3);">📝 Mis notas</div>
-      <span style="font-size:10px;color:var(--muted);">Se guarda automáticamente</span>
-    </div>
-    <textarea class="notes-area" id="notas-area" placeholder="Escribe aquí tus apuntes, ideas sueltas, recordatorios..."></textarea>
-  `;
-  planContent.appendChild(notasSection);
-
-  // Load saved data for this plan
-  if (currentHistoryId) {
-    pqLoadData(currentHistoryId);
-    notasLoadData(currentHistoryId);
-  }
-
   result.classList.add('show');
   result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ===== PREGUNTAS PENDIENTES & NOTAS =====
-
-function pqSave(planId) {
-  if (!planId) return;
-  const items = [];
-  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => {
-    if (el.value.trim()) items.push(el.value.trim());
-  });
-  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
-}
-
-function pqLoadData(planId) {
-  if (!planId) return;
-  let items = [];
-  try { items = JSON.parse(localStorage.getItem('planIA_pq_' + planId) || '[]'); } catch(e){}
-  const list = document.getElementById('pq-list');
-  const empty = document.getElementById('pq-empty');
-  if (!list) return;
-  list.innerHTML = '';
-  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
-  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
-}
-
-function pqCreateItem(listId, prefix, value) {
-  const list = document.getElementById(listId);
-  const empty = document.getElementById(prefix + '-empty');
-  if (!list) return;
-  const id = prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-  const div = document.createElement('div');
-  div.className = 'pq-item';
-  div.id = id;
-  div.innerHTML = `
-    <span style="color:var(--accent);font-size:14px;flex-shrink:0;margin-top:2px;">•</span>
-    <textarea class="pq-item-text" rows="1" placeholder="Escribe tu pregunta..."
-      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';pqSave(currentHistoryId)"
-      onblur="pqSave(currentHistoryId)">${value || ''}</textarea>
-    <button class="pq-del-btn" onclick="document.getElementById('${id}').remove();pqSave(currentHistoryId);pqCheckEmpty('${listId}','${prefix}')">✕</button>
-  `;
-  list.appendChild(div);
-  if (empty) empty.style.display = 'none';
-  // Auto-resize
-  const ta = div.querySelector('textarea');
-  setTimeout(() => { ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; ta.focus(); }, 50);
-}
-
-function pqAddItem(listId, prefix) {
-  pqCreateItem(listId, prefix, '');
-}
-
-function pqCheckEmpty(listId, prefix) {
-  const list = document.getElementById(listId);
-  const empty = document.getElementById(prefix + '-empty');
-  if (list && empty) empty.style.display = list.children.length ? 'none' : 'block';
-}
-
-function notasSave(planId) {
-  if (!planId) return;
-  const val = document.getElementById('notas-area')?.value || '';
-  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
-}
-
-function notasLoadData(planId) {
-  if (!planId) return;
-  let val = '';
-  try { val = localStorage.getItem('planIA_notas_' + planId) || ''; } catch(e){}
-  const ta = document.getElementById('notas-area');
-  if (ta) {
-    ta.value = val;
-    ta.oninput = () => notasSave(currentHistoryId);
-    ta.style.height = 'auto';
-    ta.style.height = Math.max(80, ta.scrollHeight) + 'px';
-  }
 }
 
 // ===== EXPORT FUNCTIONS =====
 
 
-
-function toggleLectura(i) {
-  const card = document.getElementById(`lec-${i}`);
-  const cb = document.getElementById(`lec-cb-${i}`);
-  if (!card || !cb) return;
-  const done = cb.dataset.done === '1';
-  if (done) {
-    cb.dataset.done = '0';
-    cb.innerHTML = '';
-    cb.style.background = 'transparent';
-    cb.style.borderColor = 'rgba(26,154,212,0.4)';
-    card.style.opacity = '1';
-    card.style.borderColor = 'var(--border2)';
-  } else {
-    cb.dataset.done = '1';
-    cb.innerHTML = '✓';
-    cb.style.cssText += ';background:var(--accent3);border-color:var(--accent3);color:#000;font-weight:700;font-size:13px;';
-    card.style.opacity = '0.6';
-    card.style.borderColor = 'rgba(126,236,212,0.4)';
-  }
-  // Update progress bar
-  const allCbs = document.querySelectorAll('[id^="lec-cb-"]');
-  const total = allCbs.length;
-  const doneCount = Array.from(allCbs).filter(el => el.dataset.done === '1').length;
-  const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-  const barColor = pct === 100 ? 'var(--accent3)' : pct >= 50 ? 'var(--accent)' : 'var(--warn)';
-  const bar = document.getElementById('lecProgressBar');
-  const label = document.getElementById('lecProgressLabel');
-  if (bar) { bar.style.width = pct + '%'; bar.style.background = barColor; }
-  if (label) { label.textContent = `${doneCount}/${total} — ${pct}%`; label.style.color = barColor; }
-}
 
 function toggleCheck(i) {
   const item = document.getElementById('ci-' + i);
@@ -3018,26 +2617,16 @@ function toggleCheck(i) {
   item.classList.toggle('checked');
   box.textContent = isChecked ? '' : '✓';
 
-  // Update progress bar
-  const allItems = document.querySelectorAll('.check-item');
-  const doneItems = Array.from(allItems).filter(el => el.classList.contains('checked'));
-  const total = allItems.length;
-  const done = doneItems.length;
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-  const barColor = pct === 100 ? 'var(--accent3)' : pct >= 50 ? 'var(--accent)' : 'var(--warn)';
-  const bar = document.getElementById('progressBar');
-  const label = document.getElementById('progressLabel');
-  if (bar) { bar.style.width = pct + '%'; bar.style.background = barColor; }
-  if (label) { label.textContent = `${done}/${total} — ${pct}%`; label.style.color = barColor; }
-
   // Save checklist state to history
   if (currentHistoryId) {
+    const allItems = document.querySelectorAll('.check-item');
     const doneIndexes = [];
     allItems.forEach((el, idx) => { if (el.classList.contains('checked')) doneIndexes.push(idx); });
     saveChecklist(currentHistoryId, doneIndexes);
   }
 
   // Check if all done → celebrate
+  const allItems = document.querySelectorAll('.check-item');
   const allDone = Array.from(allItems).every(el => el.classList.contains('checked'));
   if (allDone && allItems.length > 0) {
     const container = document.getElementById('checklistContainer');
@@ -3045,14 +2634,9 @@ function toggleCheck(i) {
       const msg = document.createElement('div');
       msg.className = 'all-done-msg';
       msg.innerHTML = '🎉 ¡Todo listo! El trabajo está completo. ¡Excelente!';
-      msg.style.cssText = 'margin-top:16px;padding:14px 18px;background:rgba(13,171,139,0.10);border:1px solid rgba(13,171,139,0.35);border-radius:12px;text-align:center;font-family:Syne,sans-serif;font-weight:700;color:var(--accent3);font-size:14px;animation:fadeIn 0.4s ease';
+      msg.style.cssText = 'margin-top:16px;padding:14px 18px;background:rgba(99,255,218,0.12);border:1px solid rgba(99,255,218,0.4);border-radius:12px;text-align:center;font-family:Syne,sans-serif;font-weight:700;color:var(--accent3);font-size:14px;animation:fadeIn 0.4s ease';
       container.appendChild(msg);
     }
-  } else {
-    // Remove celebration if unchecked
-    const container = document.getElementById('checklistContainer');
-    const msg = container?.querySelector('.all-done-msg');
-    if (msg) msg.remove();
   }
 }
 
@@ -3092,13 +2676,13 @@ function exportPDF() {
   style.textContent = `
     * { color: #1a1a2e !important; background: transparent !important; border-color: #c0c0d0 !important; }
     h1,h2 { color: #3730a3 !important; border-bottom: 2px solid #3730a3 !important; padding-bottom: 6px; }
-    .result-tag { color: #1a9ad4 !important; }
+    .result-tag { color: #6c63ff !important; }
     .result-title { color: #1a1a2e !important; font-size: 22px !important; }
     .ic-label { color: #6b7280 !important; font-size: 11px !important; }
     .ic-value { color: #1a1a2e !important; font-weight: 700 !important; }
     .check-item.checked { background: #f0fdf4 !important; }
     .check-item.checked span { text-decoration: line-through; color: #6b7280 !important; }
-    .check-box { border: 2px solid #5bc8f5 !important; color: #1a9ad4 !important; }
+    .check-box { border: 2px solid #6c63ff !important; color: #6c63ff !important; }
     .tip-label { background: #ede9fe !important; color: #4c1d95 !important; }
     .result-actions { display: none !important; }
   `;
@@ -3215,30 +2799,36 @@ function savePlanManual() {
   const btn = document.getElementById('savePlanBtn');
   if (!currentPlan) return;
 
-  // Save if not already saved
-  if (!currentHistoryId) {
-    currentHistoryId = addToHistory(currentPlan);
-    updateHistoryBadge();
-    renderWeeklyAlerts();
+  // If already saved (has currentHistoryId), just confirm
+  if (currentHistoryId) {
+    btn.textContent = '✅ ¡Ya guardado!';
+    btn.classList.add('saved');
+    setTimeout(() => {
+      btn.textContent = '💾 Guardar plan';
+      btn.classList.remove('saved');
+    }, 2000);
+    return;
   }
 
-  // Show confirmation then reset
-  btn.textContent = '✅ Guardado — preparando nuevo plan...';
+  // Save fresh
+  currentHistoryId = addToHistory(currentPlan);
+  updateHistoryBadge();
+  btn.textContent = '✅ Guardado en historial';
   btn.classList.add('saved');
-  btn.disabled = true;
-
   setTimeout(() => {
-    resetApp();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 1500);
+    btn.textContent = '💾 Guardar plan';
+    btn.classList.remove('saved');
+  }, 2500);
 }
 
 function resetApp() {
   currentHistoryId = null;
-  uploadedFiles = [];
-  renderFileList();
+  currentFile = null;
+  filePreview.classList.remove('show');
   fileInput.value = '';
   document.getElementById('contextInput').value = '';
+  analyzeBtn.disabled = true;
+  btnText.textContent = '⚡ Sube un documento para analizar';
   result.classList.remove('show');
   errorBox.classList.remove('show');
   // Reset steps
@@ -3425,9 +3015,9 @@ async function runPlagAnalysis() {
 async function callGeminiPlag(apiKey, prompt) {
   // Auto-detect available models (same candidates as main planner)
   const CANDIDATES = [
+    'gemini-2.5-flash-preview-05-20',
     'gemini-2.5-flash',
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash'
+    'gemini-1.5-pro-latest'
   ];
   let MODELS = CANDIDATES;
   try {
@@ -3584,7 +3174,7 @@ function renderAnnotatedDoc(text, annotations, filename) {
   const colorMap = {
     'warn-ia':    { bg: 'rgba(255,209,102,0.25)', border: 'rgba(255,209,102,0.6)', label: 'rgba(255,209,102,1)' },
     'danger-ia':  { bg: 'rgba(255,107,107,0.22)', border: 'rgba(255,107,107,0.6)', label: 'rgba(255,107,107,1)' },
-    'warn-citas': { bg: 'rgba(26,154,212,0.20)',  border: 'rgba(26,154,212,0.6)',  label: 'rgba(26,154,212,1)' },
+    'warn-citas': { bg: 'rgba(108,99,255,0.20)',  border: 'rgba(108,99,255,0.6)',  label: 'rgba(108,99,255,1)' },
     'danger-citas':{ bg: 'rgba(255,107,107,0.22)', border: 'rgba(255,107,107,0.6)', label: 'rgba(255,107,107,1)' },
   };
   const iconMap = { ia: '🤖', citas: '💬' };
@@ -3615,16 +3205,16 @@ function renderAnnotatedDoc(text, annotations, filename) {
 
     placeholders.push({
       key,
-      html: `<span class="ann-mark" style="background:${colors.bg};border-bottom:2px solid ${colors.border};border-radius:3px;padding:1px 2px;position:relative;cursor:pointer" title="${ann.razon || lbl}" onclick="this.querySelector('.ann-tooltip').style.display=this.querySelector('.ann-tooltip').style.display==='none'?'block':'none'"><span class="ann-inner">${escHtml(ann.fragmento)}</span><span class="ann-badge" style="background:${colors.label};color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;vertical-align:super;margin-left:2px;font-family:Syne,sans-serif;letter-spacing:0.5px">${icon} ${lbl}</span><span class="ann-tooltip" style="display:none;position:absolute;left:0;top:100%;margin-top:6px;z-index:50;background:#ffffff;border:1px solid #a8d8ee;border-radius:12px;padding:12px 14px;font-size:12px;color:#3a6d87;white-space:normal;min-width:220px;max-width:320px;line-height:1.6;box-shadow:0 12px 32px rgba(0,0,0,0.6)">
+      html: `<span class="ann-mark" style="background:${colors.bg};border-bottom:2px solid ${colors.border};border-radius:3px;padding:1px 2px;position:relative;cursor:pointer" title="${ann.razon || lbl}" onclick="this.querySelector('.ann-tooltip').style.display=this.querySelector('.ann-tooltip').style.display==='none'?'block':'none'"><span class="ann-inner">${escHtml(ann.fragmento)}</span><span class="ann-badge" style="background:${colors.label};color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;vertical-align:super;margin-left:2px;font-family:Syne,sans-serif;letter-spacing:0.5px">${icon} ${lbl}</span><span class="ann-tooltip" style="display:none;position:absolute;left:0;top:100%;margin-top:6px;z-index:50;background:#14141f;border:1px solid #2a2a40;border-radius:12px;padding:12px 14px;font-size:12px;color:#9b98b0;white-space:normal;min-width:220px;max-width:320px;line-height:1.6;box-shadow:0 12px 32px rgba(0,0,0,0.6)">
   <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${colors.label};margin-bottom:6px;font-family:Syne,sans-serif">${icon} ${lbl}</div>
   <div style="margin-bottom:${ann.sugerencia ? '10px' : '0'}">${ann.razon || lbl}</div>
   ${ann.sugerencia ? `<div style="border-top:1px solid #2a2a40;padding-top:8px;margin-top:2px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7eecd4;margin-bottom:5px;font-family:Syne,sans-serif">✏️ Sugerencia</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#63ffda;margin-bottom:5px;font-family:Syne,sans-serif">✏️ Sugerencia</div>
     <div style="color:#ece9ff;font-style:italic;line-height:1.65">${ann.sugerencia}</div>
   </div>` : ''}
   ${ann.ejemplo ? `<div style="border-top:1px solid #2a2a40;padding-top:8px;margin-top:8px">
-    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1a9ad4;margin-bottom:5px;font-family:Syne,sans-serif">💡 Ejemplo</div>
-    <div style="color:#3a6d87;font-style:italic;line-height:1.65">${ann.ejemplo}</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#6c63ff;margin-bottom:5px;font-family:Syne,sans-serif">💡 Ejemplo</div>
+    <div style="color:#9b98b0;font-style:italic;line-height:1.65">${ann.ejemplo}</div>
   </div>` : ''}
 </span></span>`
     });
@@ -3649,8 +3239,8 @@ function renderAnnotatedDoc(text, annotations, filename) {
   const warnCount = annotations.filter(a => a.tipo === 'warn').length;
 
   return `
-  <div class="plag-result-section" style="border-color:rgba(26,154,212,0.35)">
-    <div class="plag-result-header" style="background:rgba(26,154,212,0.08)">
+  <div class="plag-result-section" style="border-color:rgba(108,99,255,0.35)">
+    <div class="plag-result-header" style="background:rgba(108,99,255,0.08)">
       <span class="plag-result-icon">📝</span>
       <span class="plag-result-title">Documento anotado — ${filename}</span>
       <div style="display:flex;gap:8px">
@@ -3663,7 +3253,7 @@ function renderAnnotatedDoc(text, annotations, filename) {
         <span>🖱️ Haz clic en cada subrayado para ver la explicación, sugerencia y ejemplo de corrección</span>
         <span style="display:flex;align-items:center;gap:5px"><span style="background:rgba(255,107,107,0.22);border-bottom:2px solid rgba(255,107,107,0.6);padding:1px 6px;border-radius:3px;font-size:11px">texto</span> Alta prioridad</span>
         <span style="display:flex;align-items:center;gap:5px"><span style="background:rgba(255,209,102,0.25);border-bottom:2px solid rgba(255,209,102,0.6);padding:1px 6px;border-radius:3px;font-size:11px">texto</span> Revisar</span>
-        <span style="display:flex;align-items:center;gap:5px"><span style="background:rgba(26,154,212,0.20);border-bottom:2px solid rgba(26,154,212,0.6);padding:1px 6px;border-radius:3px;font-size:11px">texto</span> Falta cita</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="background:rgba(108,99,255,0.20);border-bottom:2px solid rgba(108,99,255,0.6);padding:1px 6px;border-radius:3px;font-size:11px">texto</span> Falta cita</span>
       </div>
       <div style="font-family:'Instrument Serif',Georgia,serif;font-size:15px;max-height:60vh;overflow-y:auto;padding-right:8px;border:1px solid var(--border2);border-radius:12px;padding:20px;background:var(--surface)">
         ${bodyHtml || '<p style="color:var(--muted)">No se encontraron fragmentos anotables en el texto.</p>'}
@@ -3708,7 +3298,7 @@ function renderPlagSection(type, data) {
       </div>
       <div class="plag-result-summary">${data.resumen || ''}</div>
       ${hallazgosHTML}
-      ${data.recomendacion ? `<div style="margin-top:16px;padding:14px 16px;background:rgba(26,154,212,0.08);border:1px solid rgba(26,154,212,0.25);border-radius:12px;font-size:13px;color:var(--muted2)"><strong style="color:var(--accent);font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px">💡 Recomendación</strong>${data.recomendacion}</div>` : ''}
+      ${data.recomendacion ? `<div style="margin-top:16px;padding:14px 16px;background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.25);border-radius:12px;font-size:13px;color:var(--muted2)"><strong style="color:var(--accent);font-family:'Syne',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px">💡 Recomendación</strong>${data.recomendacion}</div>` : ''}
     </div>
   </div>`;
 }
@@ -3722,5 +3312,205 @@ if (document.readyState === 'loading') {
 
 
 </script>
+
 </body>
 </html>
+
+<script>
+// ══ FIREBASE AUTH & FIRESTORE SYNC ══
+
+// Wait for Firebase module to initialize
+window._onAuthReady = function(user) {
+  const loading = document.getElementById('authLoading');
+  const loggedOut = document.getElementById('authLoggedOut');
+  const loggedIn = document.getElementById('authLoggedIn');
+  if (loading) loading.style.display = 'none';
+
+  if (user) {
+    if (loggedOut) loggedOut.style.display = 'none';
+    if (loggedIn) { loggedIn.style.display = 'flex'; }
+    const avatar = document.getElementById('authAvatar');
+    const nameEl = document.getElementById('authName');
+    if (avatar && user.photoURL) avatar.src = user.photoURL;
+    if (nameEl) nameEl.textContent = user.displayName || user.email;
+    // Load history from Firestore
+    fbLoadHistory();
+  } else {
+    if (loggedOut) loggedOut.style.display = 'block';
+    if (loggedIn) loggedIn.style.display = 'none';
+    // Fall back to localStorage
+    updateHistoryBadge();
+    renderWeeklyAlerts();
+  }
+};
+
+// If Firebase hasn't initialized yet after 3s, show login button anyway
+setTimeout(() => {
+  if (window._fbUser === undefined) {
+    const loading = document.getElementById('authLoading');
+    const loggedOut = document.getElementById('authLoggedOut');
+    if (loading) loading.style.display = 'none';
+    if (loggedOut) loggedOut.style.display = 'block';
+  }
+}, 3000);
+
+async function fbLogin() {
+  if (!window._fbAuth || !window._fbFns) { alert('Firebase no está listo todavía. Espera un momento.'); return; }
+  try {
+    const provider = new window._fbFns.GoogleAuthProvider();
+    await window._fbFns.signInWithPopup(window._fbAuth, provider);
+  } catch(e) {
+    alert('Error al iniciar sesión: ' + e.message);
+  }
+}
+
+async function fbLogout() {
+  if (!window._fbAuth || !window._fbFns) return;
+  await window._fbFns.signOut(window._fbAuth);
+}
+
+// ── FIRESTORE HELPERS ──────────────────────────────────────────────────────
+
+function fbUserPath() {
+  return window._fbUser ? window._fbUser.uid : null;
+}
+
+async function fbSaveHistory(hist) {
+  const uid = fbUserPath();
+  if (!uid || !window._fbDb) { saveHistory(hist); return; }
+  try {
+    const { doc, setDoc } = window._fbFns;
+    await setDoc(doc(window._fbDb, 'users', uid, 'data', 'history'), { items: hist, updatedAt: Date.now() });
+  } catch(e) {
+    console.error('Firebase save error:', e);
+    saveHistory(hist); // fallback
+  }
+}
+
+async function fbLoadHistory() {
+  const uid = fbUserPath();
+  if (!uid || !window._fbDb) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
+  try {
+    const { doc, getDoc } = window._fbFns;
+    const snap = await getDoc(doc(window._fbDb, 'users', uid, 'data', 'history'));
+    if (snap.exists()) {
+      const data = snap.data();
+      // Merge with localStorage (keep most recent)
+      const local = getHistory();
+      const remote = data.items || [];
+      // Combine, deduplicate by id, sort by createdAt
+      const all = [...remote];
+      local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
+      all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+      const merged = all.slice(0, 30);
+      saveHistory(merged); // also keep in localStorage as cache
+    }
+    updateHistoryBadge();
+    renderWeeklyAlerts();
+  } catch(e) {
+    console.error('Firebase load error:', e);
+    updateHistoryBadge();
+    renderWeeklyAlerts();
+  }
+}
+
+async function fbSaveNote(planId, key, value) {
+  const uid = fbUserPath();
+  if (!uid || !window._fbDb) { try { localStorage.setItem(key + '_' + planId, value); } catch(e){} return; }
+  try {
+    const { doc, setDoc } = window._fbFns;
+    await setDoc(doc(window._fbDb, 'users', uid, 'notes', planId + '_' + key), { value, updatedAt: Date.now() });
+  } catch(e) {
+    try { localStorage.setItem(key + '_' + planId, value); } catch(e2){}
+  }
+}
+
+async function fbLoadNote(planId, key) {
+  const uid = fbUserPath();
+  if (!uid || !window._fbDb) {
+    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
+  }
+  try {
+    const { doc, getDoc } = window._fbFns;
+    const snap = await getDoc(doc(window._fbDb, 'users', uid, 'notes', planId + '_' + key));
+    if (snap.exists()) return snap.data().value || '';
+    // fallback to localStorage
+    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
+  } catch(e) {
+    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e2) { return ''; }
+  }
+}
+
+// ── OVERRIDE HISTORY FUNCTIONS TO USE FIREBASE ────────────────────────────
+
+// Patch addToHistory to also sync to Firebase
+const _origAddToHistory = addToHistory;
+window.addToHistory = function(plan) {
+  const id = _origAddToHistory(plan);
+  const hist = getHistory();
+  fbSaveHistory(hist); // async, fire and forget
+  return id;
+};
+
+// Patch saveChecklist to also sync to Firebase
+const _origSaveChecklist = saveChecklist;
+window.saveChecklist = function(planId, doneIndexes) {
+  _origSaveChecklist(planId, doneIndexes);
+  const hist = getHistory();
+  fbSaveHistory(hist);
+};
+
+// Patch deleteFromHistory to also sync
+const _origDeleteFromHistory = deleteFromHistory;
+window.deleteFromHistory = function(id, e) {
+  _origDeleteFromHistory(id, e);
+  const hist = getHistory();
+  fbSaveHistory(hist);
+};
+
+// Patch notasSave to use Firebase
+window.notasSave = function(planId) {
+  if (!planId) return;
+  const val = document.getElementById('notas-area')?.value || '';
+  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
+  fbSaveNote(planId, 'planIA_notas', val);
+};
+
+// Patch notasLoadData to use Firebase
+window.notasLoadData = async function(planId) {
+  if (!planId) return;
+  const val = await fbLoadNote(planId, 'planIA_notas');
+  const ta = document.getElementById('notas-area');
+  if (ta) {
+    ta.value = val;
+    ta.oninput = () => notasSave(currentHistoryId);
+    ta.style.height = 'auto';
+    ta.style.height = Math.max(80, ta.scrollHeight) + 'px';
+  }
+};
+
+// Patch pqSave to use Firebase
+window.pqSave = function(planId) {
+  if (!planId) return;
+  const items = [];
+  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => {
+    if (el.value.trim()) items.push(el.value.trim());
+  });
+  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
+  fbSaveNote(planId, 'planIA_pq', JSON.stringify(items));
+};
+
+// Patch pqLoadData to use Firebase
+window.pqLoadData = async function(planId) {
+  if (!planId) return;
+  const raw = await fbLoadNote(planId, 'planIA_pq');
+  let items = [];
+  try { items = JSON.parse(raw || '[]'); } catch(e){}
+  const list = document.getElementById('pq-list');
+  const empty = document.getElementById('pq-empty');
+  if (!list) return;
+  list.innerHTML = '';
+  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
+  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
+};
+</script>
