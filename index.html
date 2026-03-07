@@ -3878,7 +3878,94 @@ function renderAgenda() {
   const urgBg     = { alta: 'rgba(224,90,122,0.07)', media: 'rgba(212,146,10,0.06)', baja: 'rgba(13,171,139,0.06)' };
   const urgBorder = { alta: 'rgba(224,90,122,0.25)', media: 'rgba(212,146,10,0.2)', baja: 'rgba(13,171,139,0.18)' };
 
+  // ── SECCIÓN "ESTA SEMANA SÍ O SÍ" ─────────────────────────────────────────
+  const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + 7);
+  const estaSemanaTareas = allTasks.filter(t => {
+    if (t.urgencia === 'alta') return true;
+    if (t.deliveryDate && t.deliveryDate <= endOfWeek) return true;
+    if (t.diasRestantes !== null && t.diasRestantes <= 7) return true;
+    return false;
+  });
+
+  // Group esta semana tasks by materia
+  const materiasEsta = {};
+  estaSemanaTareas.forEach(t => {
+    const key = t.materia;
+    if (!materiasEsta[key]) materiasEsta[key] = { materia: key, entrega: t.entrega, diasRestantes: t.diasRestantes, tareas: [] };
+    materiasEsta[key].tareas.push(t);
+  });
+
   let html = '';
+
+  if (Object.keys(materiasEsta).length > 0) {
+    html += `<div style="background:rgba(224,90,122,0.07);border:2px solid rgba(224,90,122,0.3);border-radius:20px;padding:20px;margin-bottom:28px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <div style="font-size:22px;">🚨</div>
+        <div>
+          <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#e05a7a;">ESTA SEMANA SÍ O SÍ</div>
+          <div style="font-size:12px;color:var(--muted2);margin-top:2px;">Esto debes completar antes del domingo para no atrasarte</div>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(224,90,122,0.2);margin:14px 0;"></div>`;
+
+    Object.values(materiasEsta).forEach(grupo => {
+      const diasColor = grupo.diasRestantes !== null
+        ? (grupo.diasRestantes <= 3 ? '#e05a7a' : grupo.diasRestantes <= 5 ? '#d4920a' : '#0dab8b')
+        : '#d4920a';
+      const diasLabel = grupo.diasRestantes !== null ? `⏰ ${grupo.diasRestantes} días` : '';
+      const entregaLabel = grupo.entrega ? `Entrega: ${grupo.entrega}` : '';
+
+      html += `<div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);">📚 ${grupo.materia}</div>
+          <div style="display:flex;gap:6px;">
+            ${entregaLabel ? `<span style="font-size:10px;color:${diasColor};font-weight:700;background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:20px;">${entregaLabel}</span>` : ''}
+            ${diasLabel ? `<span style="font-size:10px;color:${diasColor};font-weight:800;background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:20px;">${diasLabel}</span>` : ''}
+          </div>
+        </div>`;
+
+      grupo.tareas.slice(0, 4).forEach((t, i) => {
+        html += `<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:rgba(255,255,255,0.5);border-radius:10px;margin-bottom:5px;">
+          <div style="font-size:14px;flex-shrink:0;">${t.emoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:var(--text);">${t.titulo}</div>
+            <div style="font-size:12px;color:var(--muted2);margin-top:2px;line-height:1.4;">${t.descripcion}</div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:#e05a7a;flex-shrink:0;">#${i+1}</div>
+        </div>`;
+      });
+
+      // Sugerencia personalizada
+      const numTareas = grupo.tareas.length;
+      const diasR = grupo.diasRestantes;
+      let sugerencia = '';
+      if (diasR !== null && diasR <= 2) {
+        sugerencia = `⚡ Tienes menos de 3 días. Haz solo las tareas #1 y #2 hoy mismo, el resto mañana temprano.`;
+      } else if (diasR !== null && diasR <= 5) {
+        sugerencia = `🎯 Divide las ${numTareas} tareas en bloques de 25 min. Haz 1 tarea por sesión, descansa 5 min entre cada una.`;
+      } else {
+        sugerencia = `📅 Tienes tiempo, pero empieza hoy con la tarea #1. Dejar todo para el final activa el TDAH en modo crisis.`;
+      }
+
+      html += `<div style="background:rgba(26,154,212,0.08);border:1px solid rgba(26,154,212,0.2);border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;gap:8px;align-items:flex-start;">
+        <div style="font-size:14px;flex-shrink:0;">💡</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.5;">${sugerencia}</div>
+      </div>`;
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+  } else {
+    html += `<div style="background:rgba(13,171,139,0.07);border:1px solid rgba(13,171,139,0.2);border-radius:16px;padding:16px 20px;margin-bottom:24px;display:flex;gap:12px;align-items:center;">
+      <div style="font-size:28px;">✅</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent3);">¡Esta semana estás al día!</div>
+        <div style="font-size:12px;color:var(--muted2);margin-top:3px;">No tienes entregas urgentes esta semana. Aprovecha para adelantar trabajo.</div>
+      </div>
+    </div>`;
+  }
+
   let lastUrgencia = null;
   let groupCount = 0;
 
