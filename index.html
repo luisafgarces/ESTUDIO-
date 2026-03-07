@@ -4217,14 +4217,22 @@ window._fbUser  = { uid: s.localId, email: s.email };
 })();
 
 // Una vez cargado el DOM, mostrar estado de sesión
-window.addEventListener(‘DOMContentLoaded’, function() {
+// Safari fix: si DOMContentLoaded ya se disparó, ejecutar de inmediato
+function _initAuthUI() {
 if (window._fbUser) {
 _showLoggedIn(window._fbUser);
 fbLoadHistory();
 } else {
 _showLoggedOut();
 }
-});
+}
+
+if (document.readyState === ‘loading’) {
+window.addEventListener(‘DOMContentLoaded’, _initAuthUI);
+} else {
+// DOM ya está listo (Safari)
+setTimeout(_initAuthUI, 0);
+}
 
 function _showLoggedIn(user) {
 const el = document.getElementById(‘authLoading’);
