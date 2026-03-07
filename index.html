@@ -2661,24 +2661,86 @@ function renderPlan(plan, checklistDone, lecturasDone) {
   });
   html += `</div>`;
 
+
+
+  // PRIORIDAD GLOBAL DE TAREAS
+  const todasLasTareas = [];
+  (plan.bloques || []).forEach((bloque, bi) => {
+    (bloque.tareas || []).forEach((t, ti) => {
+      todasLasTareas.push({ ...t, bloque: bloque.nombre, bloqueEmoji: bloque.emoji || '', urgenciaBloque: bloque.urgencia, taskId: `tarea-${bi}-${ti}` });
+    });
+  });
+
+  if (todasLasTareas.length > 0) {
+    const urgOrder  = { alta: 0, media: 1, baja: 2 };
+    const tipoOrder = { warn: 0, focus: 1, action: 2, normal: 3 };
+    const sorted = [...todasLasTareas].sort((a, b) => {
+      const uA = urgOrder[a.urgenciaBloque] ?? 1;
+      const uB = urgOrder[b.urgenciaBloque] ?? 1;
+      if (uA !== uB) return uA - uB;
+      return (tipoOrder[a.tipo] ?? 3) - (tipoOrder[b.tipo] ?? 3);
+    });
+
+    const urgLabel = { alta: '🔴 URGENTE — empieza aquí', media: '🟡 IMPORTANTE — sigue con estas', baja: '🟢 CUANDO PUEDAS — para después' };
+    const urgBg    = { alta: 'rgba(224,90,122,0.07)', media: 'rgba(212,146,10,0.06)', baja: 'rgba(13,171,139,0.06)' };
+    const urgBorder= { alta: 'rgba(224,90,122,0.25)', media: 'rgba(212,146,10,0.2)',  baja: 'rgba(13,171,139,0.18)' };
+    const urgColor = { alta: '#e05a7a', media: '#d4920a', baja: '#0dab8b' };
+
+    html += `<h2>🎯 ¿Por dónde empiezo?</h2>
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:18px 20px;margin-bottom:28px;">
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:18px;line-height:1.6;">Todas tus subtareas ordenadas de más a menos urgente. Toca cualquiera para ir directamente a ella en el plan.</div>`;
+
+    let lastUrgencia = null;
+    sorted.forEach((t, idx) => {
+      const u = t.urgenciaBloque || 'media';
+      if (u !== lastUrgencia) {
+        if (lastUrgencia !== null) html += `</div><div style="height:12px;"></div>`;
+        html += `<div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:2px;color:${urgColor[u]};text-transform:uppercase;margin-bottom:10px;${lastUrgencia ? 'padding-top:4px;' : ''}">${urgLabel[u]}</div>`;
+        lastUrgencia = u;
+      }
+      html += `
+      <div onclick="irATarea('${t.taskId}')"
+           style="display:flex;gap:10px;align-items:flex-start;background:${urgBg[u]};border:1px solid ${urgBorder[u]};border-radius:12px;padding:12px 14px;margin-bottom:7px;cursor:pointer;transition:all 0.2s;"
+           onmouseover="this.style.borderColor='${urgColor[u]}';this.style.transform='translateX(3px)'"
+           onmouseout="this.style.borderColor='${urgBorder[u]}';this.style.transform='translateX(0)'">
+        <div style="font-size:18px;flex-shrink:0;margin-top:1px;">${t.emoji || '📌'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;">${t.titulo}</div>
+          <div style="font-size:12px;color:var(--muted2);line-height:1.5;">${t.descripcion}</div>
+          ${t.nota ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;">💡 ${t.nota}</div>` : ''}
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;">${t.bloqueEmoji} ${t.bloque}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+          <div style="font-size:10px;font-weight:800;color:${urgColor[u]};background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:20px;white-space:nowrap;">#${idx + 1}</div>
+          <div style="font-size:10px;color:var(--muted);white-space:nowrap;">→ Ver</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+
   // BLOQUES / PLAN
   html += `<h2>🗓️ Tu plan de acción</h2>`;
-  (plan.bloques || []).forEach(bloque => {
+  let _globalTaskIdx = 0;
+  (plan.bloques || []).forEach((bloque, bi) => {
     const urgColors = { alta: 'rgba(255,107,107,0.3)', media: 'rgba(255,209,102,0.25)', baja: 'rgba(126,236,212,0.2)' };
     const urgBg = { alta: 'rgba(224,90,122,0.07)', media: 'rgba(212,146,10,0.07)', baja: 'rgba(13,171,139,0.07)' };
     const borderColor = urgColors[bloque.urgencia] || 'var(--border2)';
     const bgColor = urgBg[bloque.urgencia] || 'var(--card)';
 
-    html += `<div class="week-block" style="border-color:${borderColor};background:${bgColor};">
+    html += `<div class="week-block" id="bloque-${bi}" style="border-color:${borderColor};background:${bgColor};">
       <div class="week-label">
         <div class="week-name">${bloque.emoji || ''} ${bloque.nombre}</div>
         <div class="week-dates-tag">${bloque.fechas}</div>
       </div>`;
 
-    (bloque.tareas || []).forEach(t => {
+    (bloque.tareas || []).forEach((t, ti) => {
+      const taskId = `tarea-${bi}-${ti}`;
       const tipoBorder = { focus: 'rgba(26,154,212,0.35)', action: 'rgba(126,236,212,0.25)', warn: 'rgba(255,209,102,0.3)', normal: 'var(--border2)' };
       const tipoBg = { focus: 'rgba(26,154,212,0.07)', action: 'rgba(126,236,212,0.05)', warn: 'rgba(255,209,102,0.05)', normal: 'var(--surface)' };
-      html += `<div style="background:${tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;">
+      html += `<div id="${taskId}" style="background:${tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;transition:box-shadow 0.3s,border-color 0.3s;">
         <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
           <span style="font-size:18px;flex-shrink:0">${t.emoji}</span>
           <div style="font-weight:500;font-size:14px;">${t.titulo}</div>
@@ -2686,6 +2748,7 @@ function renderPlan(plan, checklistDone, lecturasDone) {
         <div style="font-size:13px;color:var(--muted2);padding-left:28px;">${t.descripcion}</div>
         ${t.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px;font-style:italic;">💡 ${t.nota}</div>` : ''}
       </div>`;
+      _globalTaskIdx++;
     });
     html += `</div>`;
   });
@@ -3016,6 +3079,19 @@ function notasLoadData(planId) {
 // ===== EXPORT FUNCTIONS =====
 
 
+
+function irATarea(taskId) {
+  const el = document.getElementById(taskId);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Flash highlight
+  el.style.boxShadow = '0 0 0 3px var(--accent)';
+  el.style.borderColor = 'var(--accent)';
+  setTimeout(() => {
+    el.style.boxShadow = '';
+    el.style.borderColor = '';
+  }, 2000);
+}
 
 function toggleLectura(i) {
   const card = document.getElementById(`lec-${i}`);
