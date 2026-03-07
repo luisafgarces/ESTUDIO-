@@ -2688,6 +2688,10 @@ function renderPlan(plan, checklistDone, lecturasDone) {
         </div>
         <div style="font-size:13px;color:var(--muted2);padding-left:28px;">${t.descripcion}</div>
         ${t.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px;font-style:italic;">💡 ${t.nota}</div>` : ''}
+        <div style="padding-left:28px;margin-top:10px;">
+          <button onclick="generarIdeasForo('${taskId}', this)" style="background:rgba(26,154,212,0.1);border:1px solid rgba(26,154,212,0.3);color:var(--accent);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(26,154,212,0.2)'" onmouseout="this.style.background='rgba(26,154,212,0.1)'">💬 Ideas para el foro</button>
+          <div id="foro-${taskId}" style="display:none;margin-top:10px;"></div>
+        </div>
       </div>`;
       _globalTaskIdx++;
     });
@@ -3021,6 +3025,89 @@ function notasLoadData(planId) {
 
 
 
+async function generarIdeasForo(taskId, btn) {
+  const container = document.getElementById('foro-' + taskId);
+  if (!container) return;
+
+  // Toggle off if already showing
+  if (container.style.display !== 'none') {
+    container.style.display = 'none';
+    btn.textContent = '💬 Ideas para el foro';
+    return;
+  }
+
+  const apiKey = getApiKey();
+  if (!apiKey) { alert('Primero configura tu API Key.'); return; }
+
+  // Get task context from DOM
+  const taskEl = document.getElementById(taskId);
+  const titulo = taskEl ? taskEl.querySelector('div[style*="font-weight:500"]')?.textContent?.trim() : '';
+  const descripcion = taskEl ? taskEl.querySelectorAll('div')[2]?.textContent?.trim() : '';
+  const materia = currentPlan?.titulo || '';
+
+  btn.textContent = '⏳ Generando ideas...';
+  btn.disabled = true;
+  container.style.display = 'block';
+  container.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;">Pensando ideas para tu foro...</div>`;
+
+  try {
+    const prompt = `Eres un tutor universitario de la UNAD. El estudiante tiene TDAH y TOC.
+
+Materia: ${materia}
+Tarea: ${titulo}
+Descripción: ${descripcion}
+
+Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada tipo, da 1-2 ideas específicas sobre este tema. Responde SOLO en JSON:
+{
+  "respuesta_docente": "idea concreta de cómo responder la pregunta del docente sobre este tema",
+  "comentar_compañero": "idea concreta de cómo comentar el aporte de un compañero sobre este tema",
+  "aporte_propio": "idea concreta de un aporte original que puedas hacer sobre este tema",
+  "publicar": "idea de qué publicar relacionado con este tema para enriquecer el foro"
+}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+    });
+
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    let ideas = {};
+    try {
+      const clean = text.replace(/```json|```/g, '').trim();
+      ideas = JSON.parse(clean);
+    } catch(e) { ideas = null; }
+
+    if (!ideas) {
+      container.innerHTML = `<div style="font-size:12px;color:var(--muted2);">${text}</div>`;
+    } else {
+      const tipos = [
+        { key: 'respuesta_docente', label: '❓ Responder al docente', color: 'rgba(26,154,212,0.08)', border: 'rgba(26,154,212,0.25)' },
+        { key: 'comentar_compañero', label: '🗣️ Comentar a un compañero', color: 'rgba(13,171,139,0.08)', border: 'rgba(13,171,139,0.25)' },
+        { key: 'aporte_propio', label: '✍️ Tu aporte propio', color: 'rgba(212,146,10,0.08)', border: 'rgba(212,146,10,0.25)' },
+        { key: 'publicar', label: '📢 Qué publicar', color: 'rgba(224,90,122,0.08)', border: 'rgba(224,90,122,0.25)' }
+      ];
+      let html = `<div style="display:flex;flex-direction:column;gap:8px;">`;
+      tipos.forEach(tipo => {
+        if (ideas[tipo.key]) {
+          html += `<div style="background:${tipo.color};border:1px solid ${tipo.border};border-radius:10px;padding:10px 12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:4px;letter-spacing:0.5px;">${tipo.label}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.5;">${ideas[tipo.key]}</div>
+          </div>`;
+        }
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+  } catch(e) {
+    container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Error al generar ideas. Intenta de nuevo.</div>`;
+  }
+
+  btn.textContent = '💬 Ideas para el foro';
+  btn.disabled = false;
+}
+
 function irATarea(taskId) {
   const el = document.getElementById(taskId);
   if (!el) return;
@@ -3098,6 +3185,10 @@ function toggleCheck(i) {
     allItems.forEach((el, idx) => { if (el.classList.contains('checked')) doneIndexes.push(idx); });
     saveChecklist(currentHistoryId, doneIndexes);
   }
+
+  // Refresh agenda if open
+  const agendaTab = document.getElementById('tab-agenda');
+  if (agendaTab && agendaTab.style.display !== 'none') renderAgenda();
 
   // Check if all done → celebrate
   const allDone = Array.from(allItems).every(el => el.classList.contains('checked'));
