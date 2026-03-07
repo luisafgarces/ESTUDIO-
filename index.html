@@ -9,40 +9,283 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Firebase via REST API (no SDK needed) -->
+<script>
+// ══ FIREBASE REST API ══
+// No SDK, no CDN — usa la API REST directamente. Funciona en cualquier navegador.
 
-const firebaseConfig = {
-apiKey: “AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o”,
-authDomain: “plania-f7102.firebaseapp.com”,
-projectId: “plania-f7102”,
-storageBucket: “plania-f7102.firebasestorage.app”,
-messagingSenderId: “23905844105”,
-appId: “1:23905844105:web:496a619d394688847dff58”,
-measurementId: “G-EYJQ501KGS”
+const FB_API_KEY = “AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o”;
+const FB_PROJECT = “plania-f7102”;
+const FB_AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts`;
+const FB_DB_URL   = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
+
+window._fbReady = true;
+window._fbUser  = null;
+window._fbToken = null;
+
+// Restaurar sesión guardada
+try {
+const saved = localStorage.getItem(’_fb_session’);
+if (saved) {
+const s = JSON.parse(saved);
+if (s && s.idToken && s.localId) {
+window._fbToken = s.idToken;
+window._fbUser  = { uid: s.localId, email: s.email };
+}
+}
+} catch(e) {}
+
+// Notificar al resto de la app cuando haya sesión restaurada
+window.addEventListener(‘DOMContentLoaded’, () => {
+if (window._fbUser && typeof window._onAuthReady === ‘function’) {
+window._onAuthReady(window._fbUser);
+} else if (typeof window._onAuthReady === ‘function’) {
+window._onAuthReady(null);
+}
+});
+
+async function fbApiAuth(action, body) {
+const res = await fetch(`${FB_AUTH_URL}:${action}?key=${FB_API_KEY}`, {
+method: ‘POST’,
+headers: { ‘Content-Type’: ‘application/json’ },
+body: JSON.stringify({ …body, returnSecureToken: true })
+});
+const data = await res.json();
+if (!res.ok) throw { code: data.error?.message, message: data.error?.message };
+return data;
+}
+
+async function fbRegister() {
+const email = document.getElementById(‘authEmail’)?.value.trim();
+const pass  = document.getElementById(‘authPassword’)?.value;
+if (!email || !pass) { fbShowError(‘Ingresa tu correo y contraseña.’); return; }
+if (pass.length < 6) { fbShowError(‘La contraseña debe tener mínimo 6 caracteres.’); return; }
+try {
+const data = await fbApiAuth(‘signUp’, { email, password: pass });
+fbSetSession(data);
+} catch(e) {
+const msgs = {
+‘EMAIL_EXISTS’: ‘Ese correo ya tiene cuenta. Usa “Iniciar sesión”.’,
+‘INVALID_EMAIL’: ‘El correo no es válido.’,
+‘WEAK_PASSWORD : Password should be at least 6 characters’: ‘La contraseña debe tener mínimo 6 caracteres.’
+};
+fbShowError(msgs[e.code] || ‘Error al crear cuenta. Intenta de nuevo.’);
+}
+}
+
+async function fbLogin() {
+const email = document.getElementById(‘authEmail’)?.value.trim();
+const pass  = document.getElementById(‘authPassword’)?.value;
+if (!email || !pass) { fbShowError(‘Ingresa tu correo y contraseña.’); return; }
+try {
+const data = await fbApiAuth(‘signInWithPassword’, { email, password: pass });
+fbSetSession(data);
+} catch(e) {
+const msgs = {
+‘EMAIL_NOT_FOUND’: ‘No existe cuenta con ese correo. Usa “Crear cuenta”.’,
+‘INVALID_PASSWORD’: ‘Contraseña incorrecta.’,
+‘INVALID_LOGIN_CREDENTIALS’: ‘Correo o contraseña incorrectos.’,
+‘INVALID_EMAIL’: ‘El correo no es válido.’
+};
+fbShowError(msgs[e.code] || ‘Error al iniciar sesión. Intenta de nuevo.’);
+}
+}
+
+function fbSetSession(data) {
+window._fbToken = data.idToken;
+window._fbUser  = { uid: data.localId, email: data.email };
+try { localStorage.setItem(’_fb_session’, JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
+if (typeof window._onAuthReady === ‘function’) window._onAuthReady(window._fbUser);
+}
+
+function fbLogout() {
+window._fbToken = null;
+window._fbUser  = null;
+try { localStorage.removeItem(’_fb_session’); } catch(e) {}
+const loggedIn  = document.getElementById(‘authLoggedIn’);
+const loggedOut = document.getElementById(‘authLoggedOut’);
+if (loggedIn)  loggedIn.style.display  = ‘none’;
+if (loggedOut) loggedOut.style.display = ‘block’;
+}
+
+function fbShowError(msg) {
+const el = document.getElementById(‘authError’);
+if (el) { el.textContent = msg; el.style.display = ‘block’; }
+}
+
+function fbUserPath() { return window._fbUser ? window._fbUser.uid : null; }
+
+// ── FIRESTORE REST ─────────────────────────────────────────────────────────
+
+function fbDocUrl(path) { return `${FB_DB_URL}/${path}`; }
+
+function fbToFirestore(obj) {
+function convert(val) {
+if (val === null || val === undefined) return { nullValue: null };
+if (typeof val === ‘boolean’) return { booleanValue: val };
+if (typeof val === ‘number’) return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+if (typeof val === ‘string’) return { stringValue: val };
+if (Array.isArray(val)) return { arrayValue: { values: val.map(convert) } };
+if (typeof val === ‘object’) return { mapValue: { fields: Object.fromEntries(Object.entries(val).map(([k,v]) => [k, convert(v)])) } };
+return { stringValue: String(val) };
+}
+return { fields: Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, convert(v)])) };
+}
+
+function fbFromFirestore(fields) {
+function parse(val) {
+if (‘nullValue’ in val) return null;
+if (‘booleanValue’ in val) return val.booleanValue;
+if (‘integerValue’ in val) return parseInt(val.integerValue);
+if (‘doubleValue’ in val) return val.doubleValue;
+if (‘stringValue’ in val) return val.stringValue;
+if (‘arrayValue’ in val) return (val.arrayValue.values || []).map(parse);
+if (‘mapValue’ in val) return fbFromFirestore(val.mapValue.fields || {});
+return null;
+}
+return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, parse(v)]));
+}
+
+async function fbSetDoc(path, data) {
+if (!window._fbToken) return;
+const url = fbDocUrl(path) + ‘?currentDocument.exists=false’;
+// Use PATCH which creates or updates
+const res = await fetch(fbDocUrl(path), {
+method: ‘PATCH’,
+headers: { ‘Content-Type’: ‘application/json’, ‘Authorization’: `Bearer ${window._fbToken}` },
+body: JSON.stringify(fbToFirestore(data))
+});
+return res.ok;
+}
+
+async function fbGetDoc(path) {
+if (!window._fbToken) return null;
+const res = await fetch(fbDocUrl(path), {
+headers: { ‘Authorization’: `Bearer ${window._fbToken}` }
+});
+if (!res.ok) return null;
+const data = await res.json();
+return data.fields ? fbFromFirestore(data.fields) : null;
+}
+
+async function fbSaveHistory(hist) {
+const uid = fbUserPath();
+if (!uid) { saveHistory(hist); return; }
+saveHistory(hist); // always keep local cache
+try { await fbSetDoc(`users/${uid}/data/history`, { items: hist, updatedAt: Date.now() }); } catch(e) {}
+}
+
+async function fbLoadHistory() {
+const uid = fbUserPath();
+if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
+try {
+const data = await fbGetDoc(`users/${uid}/data/history`);
+if (data && data.items) {
+const local = getHistory();
+const remote = data.items;
+const all = […remote];
+local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
+all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+saveHistory(all.slice(0, 30));
+}
+} catch(e) {}
+updateHistoryBadge();
+renderWeeklyAlerts();
+}
+
+async function fbSaveNote(planId, key, value) {
+try { localStorage.setItem(key + ‘_’ + planId, value); } catch(e) {}
+const uid = fbUserPath();
+if (!uid) return;
+try { await fbSetDoc(`users/${uid}/notes/${planId}_${key}`, { value, updatedAt: Date.now() }); } catch(e) {}
+}
+
+async function fbLoadNote(planId, key) {
+const uid = fbUserPath();
+if (uid) {
+try {
+const data = await fbGetDoc(`users/${uid}/notes/${planId}_${key}`);
+if (data && data.value !== undefined) return data.value;
+} catch(e) {}
+}
+try { return localStorage.getItem(key + ‘_’ + planId) || ‘’; } catch(e) { return ‘’; }
+}
+
+// ── AUTH READY HANDLER ─────────────────────────────────────────────────────
+
+window._onAuthReady = function(user) {
+const loading   = document.getElementById(‘authLoading’);
+const loggedOut = document.getElementById(‘authLoggedOut’);
+const loggedIn  = document.getElementById(‘authLoggedIn’);
+if (loading)   loading.style.display   = ‘none’;
+if (user) {
+if (loggedOut) loggedOut.style.display = ‘none’;
+if (loggedIn)  loggedIn.style.display  = ‘flex’;
+const nameEl = document.getElementById(‘authName’);
+if (nameEl) nameEl.textContent = user.email;
+fbLoadHistory();
+} else {
+if (loggedOut) loggedOut.style.display = ‘block’;
+if (loggedIn)  loggedIn.style.display  = ‘none’;
+updateHistoryBadge();
+renderWeeklyAlerts();
+}
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// ── PATCH HISTORY & NOTES TO SYNC ─────────────────────────────────────────
 
-// Expose globally
-window._fbAuth = auth;
-window._fbDb = db;
-window._fbReady = true;
+const _origAddToHistory = addToHistory;
+window.addToHistory = function(plan) {
+const id = _origAddToHistory(plan);
+fbSaveHistory(getHistory());
+return id;
+};
 
-// Resolve any pending login calls
-if (window._fbPendingLogin) { window._fbPendingLogin(); window._fbPendingLogin = null; }
-window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged };
+const _origSaveChecklist = saveChecklist;
+window.saveChecklist = function(planId, doneIndexes) {
+_origSaveChecklist(planId, doneIndexes);
+fbSaveHistory(getHistory());
+};
 
-// Listen for auth state changes
-onAuthStateChanged(auth, (user) => {
-window._fbUser = user || null;
-if (typeof window._onAuthReady === ‘function’) window._onAuthReady(user);
-});
+const _origDeleteFromHistory = deleteFromHistory;
+window.deleteFromHistory = function(id, e) {
+_origDeleteFromHistory(id, e);
+fbSaveHistory(getHistory());
+};
+
+window.notasSave = function(planId) {
+if (!planId) return;
+const val = document.getElementById(‘notas-area’)?.value || ‘’;
+try { localStorage.setItem(‘planIA_notas_’ + planId, val); } catch(e){}
+fbSaveNote(planId, ‘planIA_notas’, val);
+};
+
+window.notasLoadData = async function(planId) {
+if (!planId) return;
+const val = await fbLoadNote(planId, ‘planIA_notas’);
+const ta = document.getElementById(‘notas-area’);
+if (ta) { ta.value = val; ta.oninput = () => notasSave(currentHistoryId); ta.style.height = ‘auto’; ta.style.height = Math.max(80, ta.scrollHeight) + ‘px’; }
+};
+
+window.pqSave = function(planId) {
+if (!planId) return;
+const items = [];
+document.querySelectorAll(’#pq-list .pq-item-text’).forEach(el => { if (el.value.trim()) items.push(el.value.trim()); });
+try { localStorage.setItem(‘planIA_pq_’ + planId, JSON.stringify(items)); } catch(e){}
+fbSaveNote(planId, ‘planIA_pq’, JSON.stringify(items));
+};
+
+window.pqLoadData = async function(planId) {
+if (!planId) return;
+const raw = await fbLoadNote(planId, ‘planIA_pq’);
+let items = []; try { items = JSON.parse(raw || ‘[]’); } catch(e){}
+const list = document.getElementById(‘pq-list’);
+const empty = document.getElementById(‘pq-empty’);
+if (!list) return;
+list.innerHTML = ‘’;
+items.forEach(text => pqCreateItem(‘pq-list’, ‘pq’, text));
+if (empty) empty.style.display = list.children.length ? ‘none’ : ‘block’;
+};
 </script>
 
 <style>
@@ -3330,250 +3573,3 @@ if (document.readyState === 'loading') {
 
 </body>
 </html>
-
-<script>
-// ══ FIREBASE AUTH & FIRESTORE SYNC ══
-
-// Wait for Firebase module to initialize
-window._onAuthReady = function(user) {
-  const loading = document.getElementById('authLoading');
-  const loggedOut = document.getElementById('authLoggedOut');
-  const loggedIn = document.getElementById('authLoggedIn');
-  if (loading) loading.style.display = 'none';
-
-  if (user) {
-    if (loggedOut) loggedOut.style.display = 'none';
-    if (loggedIn) { loggedIn.style.display = 'flex'; }
-    const nameEl = document.getElementById('authName');
-    if (nameEl) nameEl.textContent = user.email;
-    // Load history from Firestore
-    fbLoadHistory();
-  } else {
-    if (loggedOut) loggedOut.style.display = 'block';
-    if (loggedIn) loggedIn.style.display = 'none';
-    // Fall back to localStorage
-    updateHistoryBadge();
-    renderWeeklyAlerts();
-  }
-};
-
-// If Firebase hasn't initialized yet after 10s, show login button anyway
-setTimeout(() => {
-  if (!window._fbReady) {
-    const loading = document.getElementById('authLoading');
-    const loggedOut = document.getElementById('authLoggedOut');
-    if (loading) loading.style.display = 'none';
-    if (loggedOut) loggedOut.style.display = 'block';
-  }
-}, 10000);
-
-function fbShowError(msg) {
-  const el = document.getElementById('authError');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-
-function fbGetCredentials() {
-  const email = document.getElementById('authEmail')?.value.trim();
-  const pass = document.getElementById('authPassword')?.value;
-  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return null; }
-  if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return null; }
-  return { email, pass };
-}
-
-// Wait up to 12 seconds for Firebase to be ready
-function waitForFirebase() {
-  return new Promise((resolve, reject) => {
-    if (window._fbReady && window._fbAuth && window._fbFns) { resolve(); return; }
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (window._fbReady && window._fbAuth && window._fbFns) {
-        clearInterval(interval); resolve();
-      } else if (attempts > 24) { // 24 * 500ms = 12 seconds
-        clearInterval(interval); reject(new Error('No se pudo conectar con Firebase. Verifica tu internet e intenta de nuevo.'));
-      }
-    }, 500);
-  });
-}
-
-async function fbRegister() {
-  const creds = fbGetCredentials(); if (!creds) return;
-  try {
-    await waitForFirebase();
-    await window._fbFns.createUserWithEmailAndPassword(window._fbAuth, creds.email, creds.pass);
-  } catch(e) {
-    const msgs = {
-      'auth/email-already-in-use': 'Ese correo ya tiene cuenta. Usa "Iniciar sesión".',
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/weak-password': 'La contraseña es muy débil.'
-    };
-    fbShowError(msgs[e.code] || e.message);
-  }
-}
-
-async function fbLogin() {
-  const creds = fbGetCredentials(); if (!creds) return;
-  try {
-    await waitForFirebase();
-    await window._fbFns.signInWithEmailAndPassword(window._fbAuth, creds.email, creds.pass);
-  } catch(e) {
-    const msgs = {
-      'auth/user-not-found': 'No existe cuenta con ese correo. Usa "Crear cuenta".',
-      'auth/wrong-password': 'Contraseña incorrecta.',
-      'auth/invalid-email': 'El correo no es válido.',
-      'auth/invalid-credential': 'Correo o contraseña incorrectos.'
-    };
-    fbShowError(msgs[e.code] || e.message);
-  }
-}
-
-async function fbLogout() {
-  if (!window._fbAuth || !window._fbFns) return;
-  await window._fbFns.signOut(window._fbAuth);
-}
-
-// ── FIRESTORE HELPERS ──────────────────────────────────────────────────────
-
-function fbUserPath() {
-  return window._fbUser ? window._fbUser.uid : null;
-}
-
-async function fbSaveHistory(hist) {
-  const uid = fbUserPath();
-  if (!uid || !window._fbDb) { saveHistory(hist); return; }
-  try {
-    const { doc, setDoc } = window._fbFns;
-    await setDoc(doc(window._fbDb, 'users', uid, 'data', 'history'), { items: hist, updatedAt: Date.now() });
-  } catch(e) {
-    console.error('Firebase save error:', e);
-    saveHistory(hist); // fallback
-  }
-}
-
-async function fbLoadHistory() {
-  const uid = fbUserPath();
-  if (!uid || !window._fbDb) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
-  try {
-    const { doc, getDoc } = window._fbFns;
-    const snap = await getDoc(doc(window._fbDb, 'users', uid, 'data', 'history'));
-    if (snap.exists()) {
-      const data = snap.data();
-      // Merge with localStorage (keep most recent)
-      const local = getHistory();
-      const remote = data.items || [];
-      // Combine, deduplicate by id, sort by createdAt
-      const all = [...remote];
-      local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
-      all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-      const merged = all.slice(0, 30);
-      saveHistory(merged); // also keep in localStorage as cache
-    }
-    updateHistoryBadge();
-    renderWeeklyAlerts();
-  } catch(e) {
-    console.error('Firebase load error:', e);
-    updateHistoryBadge();
-    renderWeeklyAlerts();
-  }
-}
-
-async function fbSaveNote(planId, key, value) {
-  const uid = fbUserPath();
-  if (!uid || !window._fbDb) { try { localStorage.setItem(key + '_' + planId, value); } catch(e){} return; }
-  try {
-    const { doc, setDoc } = window._fbFns;
-    await setDoc(doc(window._fbDb, 'users', uid, 'notes', planId + '_' + key), { value, updatedAt: Date.now() });
-  } catch(e) {
-    try { localStorage.setItem(key + '_' + planId, value); } catch(e2){}
-  }
-}
-
-async function fbLoadNote(planId, key) {
-  const uid = fbUserPath();
-  if (!uid || !window._fbDb) {
-    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
-  }
-  try {
-    const { doc, getDoc } = window._fbFns;
-    const snap = await getDoc(doc(window._fbDb, 'users', uid, 'notes', planId + '_' + key));
-    if (snap.exists()) return snap.data().value || '';
-    // fallback to localStorage
-    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
-  } catch(e) {
-    try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e2) { return ''; }
-  }
-}
-
-// ── OVERRIDE HISTORY FUNCTIONS TO USE FIREBASE ────────────────────────────
-
-// Patch addToHistory to also sync to Firebase
-const _origAddToHistory = addToHistory;
-window.addToHistory = function(plan) {
-  const id = _origAddToHistory(plan);
-  const hist = getHistory();
-  fbSaveHistory(hist); // async, fire and forget
-  return id;
-};
-
-// Patch saveChecklist to also sync to Firebase
-const _origSaveChecklist = saveChecklist;
-window.saveChecklist = function(planId, doneIndexes) {
-  _origSaveChecklist(planId, doneIndexes);
-  const hist = getHistory();
-  fbSaveHistory(hist);
-};
-
-// Patch deleteFromHistory to also sync
-const _origDeleteFromHistory = deleteFromHistory;
-window.deleteFromHistory = function(id, e) {
-  _origDeleteFromHistory(id, e);
-  const hist = getHistory();
-  fbSaveHistory(hist);
-};
-
-// Patch notasSave to use Firebase
-window.notasSave = function(planId) {
-  if (!planId) return;
-  const val = document.getElementById('notas-area')?.value || '';
-  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
-  fbSaveNote(planId, 'planIA_notas', val);
-};
-
-// Patch notasLoadData to use Firebase
-window.notasLoadData = async function(planId) {
-  if (!planId) return;
-  const val = await fbLoadNote(planId, 'planIA_notas');
-  const ta = document.getElementById('notas-area');
-  if (ta) {
-    ta.value = val;
-    ta.oninput = () => notasSave(currentHistoryId);
-    ta.style.height = 'auto';
-    ta.style.height = Math.max(80, ta.scrollHeight) + 'px';
-  }
-};
-
-// Patch pqSave to use Firebase
-window.pqSave = function(planId) {
-  if (!planId) return;
-  const items = [];
-  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => {
-    if (el.value.trim()) items.push(el.value.trim());
-  });
-  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
-  fbSaveNote(planId, 'planIA_pq', JSON.stringify(items));
-};
-
-// Patch pqLoadData to use Firebase
-window.pqLoadData = async function(planId) {
-  if (!planId) return;
-  const raw = await fbLoadNote(planId, 'planIA_pq');
-  let items = [];
-  try { items = JSON.parse(raw || '[]'); } catch(e){}
-  const list = document.getElementById('pq-list');
-  const empty = document.getElementById('pq-empty');
-  if (!list) return;
-  list.innerHTML = '';
-  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
-  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
-};
-</script>
