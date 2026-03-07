@@ -8,286 +8,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
 <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js" defer></script>
-<!-- Firebase via REST API (no SDK needed) -->
-<script>
-// ══ FIREBASE REST API ══
-// No SDK, no CDN — usa la API REST directamente. Funciona en cualquier navegador.
-
-const FB_API_KEY = "AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o";
-const FB_PROJECT = "plania-f7102";
-const FB_AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts`;
-const FB_DB_URL   = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
-
-window._fbReady = true;
-window._fbUser  = null;
-window._fbToken = null;
-
-// Restaurar sesión guardada
-try {
-  const saved = localStorage.getItem('_fb_session');
-  if (saved) {
-    const s = JSON.parse(saved);
-    if (s && s.idToken && s.localId) {
-      window._fbToken = s.idToken;
-      window._fbUser  = { uid: s.localId, email: s.email };
-    }
-  }
-} catch(e) {}
-
-// Notificar al resto de la app cuando haya sesión restaurada
-window.addEventListener('DOMContentLoaded', () => {
-  if (window._fbUser && typeof window._onAuthReady === 'function') {
-    window._onAuthReady(window._fbUser);
-  } else if (typeof window._onAuthReady === 'function') {
-    window._onAuthReady(null);
-  }
-});
-
-async function fbApiAuth(action, body) {
-  const res = await fetch(`${FB_AUTH_URL}:${action}?key=${FB_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...body, returnSecureToken: true })
-  });
-  const data = await res.json();
-  if (!res.ok) throw { code: data.error?.message, message: data.error?.message };
-  return data;
-}
-
-async function fbRegister() {
-  const email = document.getElementById('authEmail')?.value.trim();
-  const pass  = document.getElementById('authPassword')?.value;
-  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
-  if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return; }
-  fbShowError('Creando cuenta...');
-  try {
-    const data = await fbApiAuth('signUp', { email, password: pass });
-    fbSetSession(data);
-  } catch(e) {
-    const msgs = {
-      'EMAIL_EXISTS': 'Ese correo ya tiene cuenta. Usa "Iniciar sesión".',
-      'INVALID_EMAIL': 'El correo no es válido.',
-      'WEAK_PASSWORD : Password should be at least 6 characters': 'La contraseña debe tener mínimo 6 caracteres.'
-    };
-    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
-  }
-}
-
-async function fbLogin() {
-  const email = document.getElementById('authEmail')?.value.trim();
-  const pass  = document.getElementById('authPassword')?.value;
-  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
-  fbShowError('Iniciando sesión...');
-  try {
-    const data = await fbApiAuth('signInWithPassword', { email, password: pass });
-    fbSetSession(data);
-  } catch(e) {
-    const msgs = {
-      'EMAIL_NOT_FOUND': 'No existe cuenta con ese correo. Usa "Crear cuenta".',
-      'INVALID_PASSWORD': 'Contraseña incorrecta.',
-      'INVALID_LOGIN_CREDENTIALS': 'Correo o contraseña incorrectos.',
-      'INVALID_EMAIL': 'El correo no es válido.'
-    };
-    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
-  }
-}
-
-function fbSetSession(data) {
-  window._fbToken = data.idToken;
-  window._fbUser  = { uid: data.localId, email: data.email };
-  try { localStorage.setItem('_fb_session', JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
-  if (typeof window._onAuthReady === 'function') window._onAuthReady(window._fbUser);
-}
-
-function fbLogout() {
-  window._fbToken = null;
-  window._fbUser  = null;
-  try { localStorage.removeItem('_fb_session'); } catch(e) {}
-  const loggedIn  = document.getElementById('authLoggedIn');
-  const loggedOut = document.getElementById('authLoggedOut');
-  if (loggedIn)  loggedIn.style.display  = 'none';
-  if (loggedOut) loggedOut.style.display = 'block';
-}
-
-function fbShowError(msg) {
-  const el = document.getElementById('authError');
-  if (el) el.textContent = msg;
-}
-
-function fbUserPath() { return window._fbUser ? window._fbUser.uid : null; }
-
-// ── FIRESTORE REST ─────────────────────────────────────────────────────────
-
-function fbDocUrl(path) { return `${FB_DB_URL}/${path}`; }
-
-function fbToFirestore(obj) {
-  function convert(val) {
-    if (val === null || val === undefined) return { nullValue: null };
-    if (typeof val === 'boolean') return { booleanValue: val };
-    if (typeof val === 'number') return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
-    if (typeof val === 'string') return { stringValue: val };
-    if (Array.isArray(val)) return { arrayValue: { values: val.map(convert) } };
-    if (typeof val === 'object') return { mapValue: { fields: Object.fromEntries(Object.entries(val).map(([k,v]) => [k, convert(v)])) } };
-    return { stringValue: String(val) };
-  }
-  return { fields: Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, convert(v)])) };
-}
-
-function fbFromFirestore(fields) {
-  function parse(val) {
-    if ('nullValue' in val) return null;
-    if ('booleanValue' in val) return val.booleanValue;
-    if ('integerValue' in val) return parseInt(val.integerValue);
-    if ('doubleValue' in val) return val.doubleValue;
-    if ('stringValue' in val) return val.stringValue;
-    if ('arrayValue' in val) return (val.arrayValue.values || []).map(parse);
-    if ('mapValue' in val) return fbFromFirestore(val.mapValue.fields || {});
-    return null;
-  }
-  return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, parse(v)]));
-}
-
-async function fbSetDoc(path, data) {
-  if (!window._fbToken) return;
-  const url = fbDocUrl(path) + '?currentDocument.exists=false';
-  // Use PATCH which creates or updates
-  const res = await fetch(fbDocUrl(path), {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window._fbToken}` },
-    body: JSON.stringify(fbToFirestore(data))
-  });
-  return res.ok;
-}
-
-async function fbGetDoc(path) {
-  if (!window._fbToken) return null;
-  const res = await fetch(fbDocUrl(path), {
-    headers: { 'Authorization': `Bearer ${window._fbToken}` }
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.fields ? fbFromFirestore(data.fields) : null;
-}
-
-async function fbSaveHistory(hist) {
-  const uid = fbUserPath();
-  if (!uid) { saveHistory(hist); return; }
-  saveHistory(hist); // always keep local cache
-  try { await fbSetDoc(`users/${uid}/data/history`, { items: hist, updatedAt: Date.now() }); } catch(e) {}
-}
-
-async function fbLoadHistory() {
-  const uid = fbUserPath();
-  if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
-  try {
-    const data = await fbGetDoc(`users/${uid}/data/history`);
-    if (data && data.items) {
-      const local = getHistory();
-      const remote = data.items;
-      const all = [...remote];
-      local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
-      all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-      saveHistory(all.slice(0, 30));
-    }
-  } catch(e) {}
-  updateHistoryBadge();
-  renderWeeklyAlerts();
-}
-
-async function fbSaveNote(planId, key, value) {
-  try { localStorage.setItem(key + '_' + planId, value); } catch(e) {}
-  const uid = fbUserPath();
-  if (!uid) return;
-  try { await fbSetDoc(`users/${uid}/notes/${planId}_${key}`, { value, updatedAt: Date.now() }); } catch(e) {}
-}
-
-async function fbLoadNote(planId, key) {
-  const uid = fbUserPath();
-  if (uid) {
-    try {
-      const data = await fbGetDoc(`users/${uid}/notes/${planId}_${key}`);
-      if (data && data.value !== undefined) return data.value;
-    } catch(e) {}
-  }
-  try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
-}
-
-// ── AUTH READY HANDLER ─────────────────────────────────────────────────────
-
-window._onAuthReady = function(user) {
-  const loading   = document.getElementById('authLoading');
-  const loggedOut = document.getElementById('authLoggedOut');
-  const loggedIn  = document.getElementById('authLoggedIn');
-  if (loading)   loading.style.display   = 'none';
-  if (user) {
-    if (loggedOut) loggedOut.style.display = 'none';
-    if (loggedIn)  loggedIn.style.display  = 'flex';
-    const nameEl = document.getElementById('authName');
-    if (nameEl) nameEl.textContent = user.email;
-    fbLoadHistory();
-  } else {
-    if (loggedOut) loggedOut.style.display = 'block';
-    if (loggedIn)  loggedIn.style.display  = 'none';
-    updateHistoryBadge();
-    renderWeeklyAlerts();
-  }
-};
-
-// ── PATCH HISTORY & NOTES TO SYNC ─────────────────────────────────────────
-
-const _origAddToHistory = addToHistory;
-window.addToHistory = function(plan) {
-  const id = _origAddToHistory(plan);
-  fbSaveHistory(getHistory());
-  return id;
-};
-
-const _origSaveChecklist = saveChecklist;
-window.saveChecklist = function(planId, doneIndexes) {
-  _origSaveChecklist(planId, doneIndexes);
-  fbSaveHistory(getHistory());
-};
-
-const _origDeleteFromHistory = deleteFromHistory;
-window.deleteFromHistory = function(id, e) {
-  _origDeleteFromHistory(id, e);
-  fbSaveHistory(getHistory());
-};
-
-window.notasSave = function(planId) {
-  if (!planId) return;
-  const val = document.getElementById('notas-area')?.value || '';
-  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
-  fbSaveNote(planId, 'planIA_notas', val);
-};
-
-window.notasLoadData = async function(planId) {
-  if (!planId) return;
-  const val = await fbLoadNote(planId, 'planIA_notas');
-  const ta = document.getElementById('notas-area');
-  if (ta) { ta.value = val; ta.oninput = () => notasSave(currentHistoryId); ta.style.height = 'auto'; ta.style.height = Math.max(80, ta.scrollHeight) + 'px'; }
-};
-
-window.pqSave = function(planId) {
-  if (!planId) return;
-  const items = [];
-  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => { if (el.value.trim()) items.push(el.value.trim()); });
-  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
-  fbSaveNote(planId, 'planIA_pq', JSON.stringify(items));
-};
-
-window.pqLoadData = async function(planId) {
-  if (!planId) return;
-  const raw = await fbLoadNote(planId, 'planIA_pq');
-  let items = []; try { items = JSON.parse(raw || '[]'); } catch(e){}
-  const list = document.getElementById('pq-list');
-  const empty = document.getElementById('pq-empty');
-  if (!list) return;
-  list.innerHTML = '';
-  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
-  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
-};
-</script>
 <style>
 
 :root {
@@ -1551,8 +1271,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   <div class="upload-section">
     <div class="drop-zone" id="dropZone">
       <span class="drop-icon">📄</span>
-      <div class="drop-title">Arrastra tu documento aquí</div>
-      <div class="drop-sub">o haz clic para seleccionar</div>
+      <div class="drop-title">Arrastra tus documentos aquí</div>
+      <div class="drop-sub">o haz clic para seleccionar · puedes subir varios a la vez</div>
       <div class="formats">
         <span class="fmt-tag">PDF</span>
         <span class="fmt-tag">DOCX</span>
@@ -1562,27 +1282,11 @@ h1 em { color: var(--accent3); font-style: italic; }
       </div>
       <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" multiple>
     </div>
-    <div style="margin-top:14px;text-align:center;">
-      <button onclick="document.getElementById('fileInput2').click()" style="background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:10px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
-        ➕ Agregar segundo documento (misma materia)
+    <div id="fileListContainer" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="margin-top:10px;text-align:center;">
+      <button onclick="document.getElementById('fileInput').click()" style="background:var(--card);border:1px dashed var(--border2);color:var(--muted2);padding:10px 20px;border-radius:12px;cursor:pointer;font-size:13px;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+        ➕ Agregar más documentos
       </button>
-      <input type="file" id="fileInput2" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.webp" style="display:none">
-    </div>
-    <div class="file-preview" id="filePreview2" style="margin-top:10px;">
-      <div class="file-icon-box">📄</div>
-      <div class="file-info">
-        <div class="file-name" id="fileName2">—</div>
-        <div class="file-size" id="fileSize2">—</div>
-      </div>
-      <button class="remove-btn" onclick="removeFile2()">✕</button>
-    </div>
-    <div class="file-preview" id="filePreview">
-      <div class="file-icon-box" id="fileTypeIcon">📄</div>
-      <div class="file-info">
-        <div class="file-name" id="fileName">—</div>
-        <div class="file-size" id="fileSize">—</div>
-      </div>
-      <button class="remove-btn" id="removeFile">✕</button>
     </div>
   </div>
 
@@ -2429,7 +2133,6 @@ updateHistoryBadge();
 
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-const filePreview = document.getElementById('filePreview');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const btnText = document.getElementById('btnText');
 const btnSpinner = document.getElementById('btnSpinner');
@@ -2452,56 +2155,63 @@ function formatSize(bytes) {
   return (bytes/1024/1024).toFixed(1) + ' MB';
 }
 
+// ── MULTI-FILE SYSTEM ─────────────────────────────────────────────────────
+let planFiles = []; // array of File objects
+
+function addPlanFiles(files) {
+  for (const f of files) {
+    if (!planFiles.find(x => x.name === f.name && x.size === f.size)) {
+      planFiles.push(f);
+    }
+  }
+  renderPlanFiles();
+}
+
+function removePlanFile(idx) {
+  planFiles.splice(idx, 1);
+  renderPlanFiles();
+}
+
+function renderPlanFiles() {
+  const container = document.getElementById('fileListContainer');
+  container.innerHTML = '';
+  planFiles.forEach((f, i) => {
+    const ext = getExt(f.name);
+    const icon = fileIcons[ext] || '📄';
+    const div = document.createElement('div');
+    div.className = 'file-preview show';
+    div.style.cssText = 'display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;';
+    div.innerHTML = `
+      <div class="file-icon-box">${icon}</div>
+      <div class="file-info" style="flex:1;min-width:0;">
+        <div class="file-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div>
+        <div class="file-size">${formatSize(f.size)}</div>
+      </div>
+      <button class="remove-btn" onclick="removePlanFile(${i})">✕</button>`;
+    container.appendChild(div);
+  });
+  analyzeBtn.disabled = planFiles.length === 0;
+  btnText.textContent = planFiles.length === 0
+    ? '⚡ Sube un documento para analizar'
+    : planFiles.length === 1
+      ? '⚡ Generar mi plan personalizado'
+      : `⚡ Generar plan con ${planFiles.length} documentos`;
+}
+
 dropZone.addEventListener('click', () => fileInput.click());
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => {
   e.preventDefault();
   dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+  if (e.dataTransfer.files.length) addPlanFiles([...e.dataTransfer.files]);
 });
-fileInput.addEventListener('change', () => { if (fileInput.files.length) setFile(fileInput.files[0]); });
-
-// SECOND FILE
-const fileInput2 = document.getElementById('fileInput2');
-const filePreview2 = document.getElementById('filePreview2');
-fileInput2.addEventListener('change', () => { if (fileInput2.files.length) setFile2(fileInput2.files[0]); });
-
-function setFile2(file) {
-  currentFile2 = file;
-  const ext = file.name.split('.').pop().toLowerCase();
-  document.getElementById('fileName2').textContent = file.name;
-  document.getElementById('fileSize2').textContent = (file.size / 1024).toFixed(1) + ' KB';
-  filePreview2.classList.add('show');
-}
-
-function removeFile2() {
-  currentFile2 = null;
-  fileInput2.value = '';
-  filePreview2.classList.remove('show');
-}
-
-document.getElementById('removeFile').addEventListener('click', () => {
-  currentFile = null;
-  filePreview.classList.remove('show');
-  fileInput.value = '';
-  analyzeBtn.disabled = true;
-  btnText.textContent = '⚡ Sube un documento para analizar';
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) { addPlanFiles([...fileInput.files]); fileInput.value = ''; }
 });
-
-function setFile(file) {
-  currentFile = file;
-  const ext = getExt(file.name);
-  document.getElementById('fileTypeIcon').textContent = fileIcons[ext] || '📄';
-  document.getElementById('fileName').textContent = file.name;
-  document.getElementById('fileSize').textContent = formatSize(file.size);
-  filePreview.classList.add('show');
-  analyzeBtn.disabled = false;
-  btnText.textContent = '⚡ Generar mi plan personalizado';
-}
 
 analyzeBtn.addEventListener('click', async () => {
-  if (!currentFile) return;
+  if (planFiles.length === 0) return;
   await analyzeDocument();
 });
 
@@ -2557,13 +2267,10 @@ async function analyzeDocument() {
   errorBox.classList.remove('show');
   animateSteps();
 
-  const ext = getExt(currentFile.name);
   const context = document.getElementById('contextInput').value.trim();
   const today = new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   try {
-    const isImage = ['png','jpg','jpeg','webp'].includes(ext);
-    const isPdf = ext === 'pdf';
 
     const systemPrompt = `Eres un planificador académico para estudiantes con TDAH y TOC. HOY: ${today}.
 
@@ -2624,12 +2331,11 @@ Reglas:
       }
     }
 
-    const parts1 = await buildPartsForFile(currentFile);
-    let allParts = [...parts1];
-
-    if (currentFile2) {
-      const parts2 = await buildPartsForFile(currentFile2);
-      allParts = [...allParts, { text: '\n\n--- SEGUNDO DOCUMENTO DE LA MISMA MATERIA ---\n' }, ...parts2];
+    let allParts = [];
+    for (let fi = 0; fi < planFiles.length; fi++) {
+      const fileParts = await buildPartsForFile(planFiles[fi]);
+      if (fi > 0) allParts.push({ text: `\n\n--- DOCUMENTO ${fi + 1}: ${planFiles[fi].name} ---\n` });
+      allParts = [...allParts, ...fileParts];
     }
 
     allParts.push({ text: `\nAnaliza TODOS los documentos anteriores juntos y genera UN SOLO plan JSON integrado.${context ? '\nContexto adicional: ' + context : ''}` });
@@ -3065,12 +2771,10 @@ function savePlanManual() {
 
 function resetApp() {
   currentHistoryId = null;
-  currentFile = null;
-  filePreview.classList.remove('show');
+  planFiles = [];
+  renderPlanFiles();
   fileInput.value = '';
   document.getElementById('contextInput').value = '';
-  analyzeBtn.disabled = true;
-  btnText.textContent = '⚡ Sube un documento para analizar';
   result.classList.remove('show');
   errorBox.classList.remove('show');
   // Reset steps
@@ -3552,6 +3256,285 @@ if (document.readyState === 'loading') {
   initPlagDropzones();
 }
 
+
+
+
+// ── FIREBASE INIT (moved to end so all functions are defined) ──
+// ══ FIREBASE REST API ══
+// No SDK, no CDN — usa la API REST directamente. Funciona en cualquier navegador.
+
+const FB_API_KEY = "AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o";
+const FB_PROJECT = "plania-f7102";
+const FB_AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts`;
+const FB_DB_URL   = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
+
+window._fbReady = true;
+window._fbUser  = null;
+window._fbToken = null;
+
+// Restaurar sesión guardada
+try {
+  const saved = localStorage.getItem('_fb_session');
+  if (saved) {
+    const s = JSON.parse(saved);
+    if (s && s.idToken && s.localId) {
+      window._fbToken = s.idToken;
+      window._fbUser  = { uid: s.localId, email: s.email };
+    }
+  }
+} catch(e) {}
+
+// Notificar al resto de la app cuando haya sesión restaurada
+window.addEventListener('DOMContentLoaded', () => {
+  if (window._fbUser && typeof window._onAuthReady === 'function') {
+    window._onAuthReady(window._fbUser);
+  } else if (typeof window._onAuthReady === 'function') {
+    window._onAuthReady(null);
+  }
+});
+
+async function fbApiAuth(action, body) {
+  const res = await fetch(`${FB_AUTH_URL}:${action}?key=${FB_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, returnSecureToken: true })
+  });
+  const data = await res.json();
+  if (!res.ok) throw { code: data.error?.message, message: data.error?.message };
+  return data;
+}
+
+async function fbRegister() {
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass  = document.getElementById('authPassword')?.value;
+  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
+  if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return; }
+  fbShowError('Creando cuenta...');
+  try {
+    const data = await fbApiAuth('signUp', { email, password: pass });
+    fbSetSession(data);
+  } catch(e) {
+    const msgs = {
+      'EMAIL_EXISTS': 'Ese correo ya tiene cuenta. Usa "Iniciar sesión".',
+      'INVALID_EMAIL': 'El correo no es válido.',
+      'WEAK_PASSWORD : Password should be at least 6 characters': 'La contraseña debe tener mínimo 6 caracteres.'
+    };
+    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
+  }
+}
+
+async function fbLogin() {
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass  = document.getElementById('authPassword')?.value;
+  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
+  fbShowError('Iniciando sesión...');
+  try {
+    const data = await fbApiAuth('signInWithPassword', { email, password: pass });
+    fbSetSession(data);
+  } catch(e) {
+    const msgs = {
+      'EMAIL_NOT_FOUND': 'No existe cuenta con ese correo. Usa "Crear cuenta".',
+      'INVALID_PASSWORD': 'Contraseña incorrecta.',
+      'INVALID_LOGIN_CREDENTIALS': 'Correo o contraseña incorrectos.',
+      'INVALID_EMAIL': 'El correo no es válido.'
+    };
+    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
+  }
+}
+
+function fbSetSession(data) {
+  window._fbToken = data.idToken;
+  window._fbUser  = { uid: data.localId, email: data.email };
+  try { localStorage.setItem('_fb_session', JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
+  if (typeof window._onAuthReady === 'function') window._onAuthReady(window._fbUser);
+}
+
+function fbLogout() {
+  window._fbToken = null;
+  window._fbUser  = null;
+  try { localStorage.removeItem('_fb_session'); } catch(e) {}
+  const loggedIn  = document.getElementById('authLoggedIn');
+  const loggedOut = document.getElementById('authLoggedOut');
+  if (loggedIn)  loggedIn.style.display  = 'none';
+  if (loggedOut) loggedOut.style.display = 'block';
+}
+
+function fbShowError(msg) {
+  const el = document.getElementById('authError');
+  if (el) el.textContent = msg;
+}
+
+function fbUserPath() { return window._fbUser ? window._fbUser.uid : null; }
+
+// ── FIRESTORE REST ─────────────────────────────────────────────────────────
+
+function fbDocUrl(path) { return `${FB_DB_URL}/${path}`; }
+
+function fbToFirestore(obj) {
+  function convert(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(convert) } };
+    if (typeof val === 'object') return { mapValue: { fields: Object.fromEntries(Object.entries(val).map(([k,v]) => [k, convert(v)])) } };
+    return { stringValue: String(val) };
+  }
+  return { fields: Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, convert(v)])) };
+}
+
+function fbFromFirestore(fields) {
+  function parse(val) {
+    if ('nullValue' in val) return null;
+    if ('booleanValue' in val) return val.booleanValue;
+    if ('integerValue' in val) return parseInt(val.integerValue);
+    if ('doubleValue' in val) return val.doubleValue;
+    if ('stringValue' in val) return val.stringValue;
+    if ('arrayValue' in val) return (val.arrayValue.values || []).map(parse);
+    if ('mapValue' in val) return fbFromFirestore(val.mapValue.fields || {});
+    return null;
+  }
+  return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, parse(v)]));
+}
+
+async function fbSetDoc(path, data) {
+  if (!window._fbToken) return;
+  const url = fbDocUrl(path) + '?currentDocument.exists=false';
+  // Use PATCH which creates or updates
+  const res = await fetch(fbDocUrl(path), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window._fbToken}` },
+    body: JSON.stringify(fbToFirestore(data))
+  });
+  return res.ok;
+}
+
+async function fbGetDoc(path) {
+  if (!window._fbToken) return null;
+  const res = await fetch(fbDocUrl(path), {
+    headers: { 'Authorization': `Bearer ${window._fbToken}` }
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.fields ? fbFromFirestore(data.fields) : null;
+}
+
+async function fbSaveHistory(hist) {
+  const uid = fbUserPath();
+  if (!uid) { saveHistory(hist); return; }
+  saveHistory(hist); // always keep local cache
+  try { await fbSetDoc(`users/${uid}/data/history`, { items: hist, updatedAt: Date.now() }); } catch(e) {}
+}
+
+async function fbLoadHistory() {
+  const uid = fbUserPath();
+  if (!uid) { updateHistoryBadge(); return; }
+  try {
+    const data = await fbGetDoc(`users/${uid}/data/history`);
+    if (data && data.items) {
+      const local = getHistory();
+      const remote = data.items;
+      const all = [...remote];
+      local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
+      all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+      saveHistory(all.slice(0, 30));
+    }
+  } catch(e) {}
+  updateHistoryBadge();
+}
+
+async function fbSaveNote(planId, key, value) {
+  try { localStorage.setItem(key + '_' + planId, value); } catch(e) {}
+  const uid = fbUserPath();
+  if (!uid) return;
+  try { await fbSetDoc(`users/${uid}/notes/${planId}_${key}`, { value, updatedAt: Date.now() }); } catch(e) {}
+}
+
+async function fbLoadNote(planId, key) {
+  const uid = fbUserPath();
+  if (uid) {
+    try {
+      const data = await fbGetDoc(`users/${uid}/notes/${planId}_${key}`);
+      if (data && data.value !== undefined) return data.value;
+    } catch(e) {}
+  }
+  try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
+}
+
+// ── AUTH READY HANDLER ─────────────────────────────────────────────────────
+
+window._onAuthReady = function(user) {
+  const loading   = document.getElementById('authLoading');
+  const loggedOut = document.getElementById('authLoggedOut');
+  const loggedIn  = document.getElementById('authLoggedIn');
+  if (loading)   loading.style.display   = 'none';
+  if (user) {
+    if (loggedOut) loggedOut.style.display = 'none';
+    if (loggedIn)  loggedIn.style.display  = 'flex';
+    const nameEl = document.getElementById('authName');
+    if (nameEl) nameEl.textContent = user.email;
+    fbLoadHistory();
+  } else {
+    if (loggedOut) loggedOut.style.display = 'block';
+    if (loggedIn)  loggedIn.style.display  = 'none';
+    updateHistoryBadge();
+    }
+};
+
+// ── PATCH HISTORY & NOTES TO SYNC ─────────────────────────────────────────
+
+const _origAddToHistory = addToHistory;
+window.addToHistory = function(plan) {
+  const id = _origAddToHistory(plan);
+  fbSaveHistory(getHistory());
+  return id;
+};
+
+const _origSaveChecklist = saveChecklist;
+window.saveChecklist = function(planId, doneIndexes) {
+  _origSaveChecklist(planId, doneIndexes);
+  fbSaveHistory(getHistory());
+};
+
+const _origDeleteFromHistory = deleteFromHistory;
+window.deleteFromHistory = function(id, e) {
+  _origDeleteFromHistory(id, e);
+  fbSaveHistory(getHistory());
+};
+
+window.notasSave = function(planId) {
+  if (!planId) return;
+  const val = document.getElementById('notas-area')?.value || '';
+  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
+  fbSaveNote(planId, 'planIA_notas', val);
+};
+
+window.notasLoadData = async function(planId) {
+  if (!planId) return;
+  const val = await fbLoadNote(planId, 'planIA_notas');
+  const ta = document.getElementById('notas-area');
+  if (ta) { ta.value = val; ta.oninput = () => notasSave(currentHistoryId); ta.style.height = 'auto'; ta.style.height = Math.max(80, ta.scrollHeight) + 'px'; }
+};
+
+window.pqSave = function(planId) {
+  if (!planId) return;
+  const items = [];
+  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => { if (el.value.trim()) items.push(el.value.trim()); });
+  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
+  fbSaveNote(planId, 'planIA_pq', JSON.stringify(items));
+};
+
+window.pqLoadData = async function(planId) {
+  if (!planId) return;
+  const raw = await fbLoadNote(planId, 'planIA_pq');
+  let items = []; try { items = JSON.parse(raw || '[]'); } catch(e){}
+  const list = document.getElementById('pq-list');
+  const empty = document.getElementById('pq-empty');
+  if (!list) return;
+  list.innerHTML = '';
+  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
+  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
+};
 
 </script>
 </body>
