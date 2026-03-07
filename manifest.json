@@ -1,0 +1,17 @@
+{
+  "name": "PlanIA — Planificador TDAH + TOC",
+  "short_name": "PlanIA",
+  "description": "Tu asistente académico inteligente para TDAH y TOC",
+  "start_url": "/ESTUDIO-/",
+  "scope": "/ESTUDIO-/",
+  "display": "standalone",
+  "background_color": "#e8f5fb",
+  "theme_color": "#1a9ad4",
+  "icons": [
+    {
+      "src": "https://api.iconify.design/twemoji/books.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
