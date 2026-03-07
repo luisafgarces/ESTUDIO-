@@ -1,21 +1,20 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PlanIA — Planificador TDAH + TOC · APA 7</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" defer></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js" defer></script>
 <!-- Firebase via REST API (no SDK needed) -->
 <script>
 // ══ FIREBASE REST API ══
 // No SDK, no CDN — usa la API REST directamente. Funciona en cualquier navegador.
 
-const FB_API_KEY = “AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o”;
-const FB_PROJECT = “plania-f7102”;
+const FB_API_KEY = "AIzaSyB0qZu-L9mA5zzt7s98d9jD3kgamuejD9o";
+const FB_PROJECT = "plania-f7102";
 const FB_AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts`;
 const FB_DB_URL   = `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents`;
 
@@ -25,92 +24,94 @@ window._fbToken = null;
 
 // Restaurar sesión guardada
 try {
-const saved = localStorage.getItem(’_fb_session’);
-if (saved) {
-const s = JSON.parse(saved);
-if (s && s.idToken && s.localId) {
-window._fbToken = s.idToken;
-window._fbUser  = { uid: s.localId, email: s.email };
-}
-}
+  const saved = localStorage.getItem('_fb_session');
+  if (saved) {
+    const s = JSON.parse(saved);
+    if (s && s.idToken && s.localId) {
+      window._fbToken = s.idToken;
+      window._fbUser  = { uid: s.localId, email: s.email };
+    }
+  }
 } catch(e) {}
 
 // Notificar al resto de la app cuando haya sesión restaurada
-window.addEventListener(‘DOMContentLoaded’, () => {
-if (window._fbUser && typeof window._onAuthReady === ‘function’) {
-window._onAuthReady(window._fbUser);
-} else if (typeof window._onAuthReady === ‘function’) {
-window._onAuthReady(null);
-}
+window.addEventListener('DOMContentLoaded', () => {
+  if (window._fbUser && typeof window._onAuthReady === 'function') {
+    window._onAuthReady(window._fbUser);
+  } else if (typeof window._onAuthReady === 'function') {
+    window._onAuthReady(null);
+  }
 });
 
 async function fbApiAuth(action, body) {
-const res = await fetch(`${FB_AUTH_URL}:${action}?key=${FB_API_KEY}`, {
-method: ‘POST’,
-headers: { ‘Content-Type’: ‘application/json’ },
-body: JSON.stringify({ …body, returnSecureToken: true })
-});
-const data = await res.json();
-if (!res.ok) throw { code: data.error?.message, message: data.error?.message };
-return data;
+  const res = await fetch(`${FB_AUTH_URL}:${action}?key=${FB_API_KEY}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, returnSecureToken: true })
+  });
+  const data = await res.json();
+  if (!res.ok) throw { code: data.error?.message, message: data.error?.message };
+  return data;
 }
 
 async function fbRegister() {
-const email = document.getElementById(‘authEmail’)?.value.trim();
-const pass  = document.getElementById(‘authPassword’)?.value;
-if (!email || !pass) { fbShowError(‘Ingresa tu correo y contraseña.’); return; }
-if (pass.length < 6) { fbShowError(‘La contraseña debe tener mínimo 6 caracteres.’); return; }
-try {
-const data = await fbApiAuth(‘signUp’, { email, password: pass });
-fbSetSession(data);
-} catch(e) {
-const msgs = {
-‘EMAIL_EXISTS’: ‘Ese correo ya tiene cuenta. Usa “Iniciar sesión”.’,
-‘INVALID_EMAIL’: ‘El correo no es válido.’,
-‘WEAK_PASSWORD : Password should be at least 6 characters’: ‘La contraseña debe tener mínimo 6 caracteres.’
-};
-fbShowError(msgs[e.code] || ‘Error al crear cuenta. Intenta de nuevo.’);
-}
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass  = document.getElementById('authPassword')?.value;
+  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
+  if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return; }
+  fbShowError('Creando cuenta...');
+  try {
+    const data = await fbApiAuth('signUp', { email, password: pass });
+    fbSetSession(data);
+  } catch(e) {
+    const msgs = {
+      'EMAIL_EXISTS': 'Ese correo ya tiene cuenta. Usa "Iniciar sesión".',
+      'INVALID_EMAIL': 'El correo no es válido.',
+      'WEAK_PASSWORD : Password should be at least 6 characters': 'La contraseña debe tener mínimo 6 caracteres.'
+    };
+    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
+  }
 }
 
 async function fbLogin() {
-const email = document.getElementById(‘authEmail’)?.value.trim();
-const pass  = document.getElementById(‘authPassword’)?.value;
-if (!email || !pass) { fbShowError(‘Ingresa tu correo y contraseña.’); return; }
-try {
-const data = await fbApiAuth(‘signInWithPassword’, { email, password: pass });
-fbSetSession(data);
-} catch(e) {
-const msgs = {
-‘EMAIL_NOT_FOUND’: ‘No existe cuenta con ese correo. Usa “Crear cuenta”.’,
-‘INVALID_PASSWORD’: ‘Contraseña incorrecta.’,
-‘INVALID_LOGIN_CREDENTIALS’: ‘Correo o contraseña incorrectos.’,
-‘INVALID_EMAIL’: ‘El correo no es válido.’
-};
-fbShowError(msgs[e.code] || ‘Error al iniciar sesión. Intenta de nuevo.’);
-}
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass  = document.getElementById('authPassword')?.value;
+  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
+  fbShowError('Iniciando sesión...');
+  try {
+    const data = await fbApiAuth('signInWithPassword', { email, password: pass });
+    fbSetSession(data);
+  } catch(e) {
+    const msgs = {
+      'EMAIL_NOT_FOUND': 'No existe cuenta con ese correo. Usa "Crear cuenta".',
+      'INVALID_PASSWORD': 'Contraseña incorrecta.',
+      'INVALID_LOGIN_CREDENTIALS': 'Correo o contraseña incorrectos.',
+      'INVALID_EMAIL': 'El correo no es válido.'
+    };
+    fbShowError(msgs[e.code] || ('Error: ' + (e.message || e.code || JSON.stringify(e))));
+  }
 }
 
 function fbSetSession(data) {
-window._fbToken = data.idToken;
-window._fbUser  = { uid: data.localId, email: data.email };
-try { localStorage.setItem(’_fb_session’, JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
-if (typeof window._onAuthReady === ‘function’) window._onAuthReady(window._fbUser);
+  window._fbToken = data.idToken;
+  window._fbUser  = { uid: data.localId, email: data.email };
+  try { localStorage.setItem('_fb_session', JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
+  if (typeof window._onAuthReady === 'function') window._onAuthReady(window._fbUser);
 }
 
 function fbLogout() {
-window._fbToken = null;
-window._fbUser  = null;
-try { localStorage.removeItem(’_fb_session’); } catch(e) {}
-const loggedIn  = document.getElementById(‘authLoggedIn’);
-const loggedOut = document.getElementById(‘authLoggedOut’);
-if (loggedIn)  loggedIn.style.display  = ‘none’;
-if (loggedOut) loggedOut.style.display = ‘block’;
+  window._fbToken = null;
+  window._fbUser  = null;
+  try { localStorage.removeItem('_fb_session'); } catch(e) {}
+  const loggedIn  = document.getElementById('authLoggedIn');
+  const loggedOut = document.getElementById('authLoggedOut');
+  if (loggedIn)  loggedIn.style.display  = 'none';
+  if (loggedOut) loggedOut.style.display = 'block';
 }
 
 function fbShowError(msg) {
-const el = document.getElementById(‘authError’);
-if (el) { el.textContent = msg; el.style.display = ‘block’; }
+  const el = document.getElementById('authError');
+  if (el) el.textContent = msg;
 }
 
 function fbUserPath() { return window._fbUser ? window._fbUser.uid : null; }
@@ -120,174 +121,173 @@ function fbUserPath() { return window._fbUser ? window._fbUser.uid : null; }
 function fbDocUrl(path) { return `${FB_DB_URL}/${path}`; }
 
 function fbToFirestore(obj) {
-function convert(val) {
-if (val === null || val === undefined) return { nullValue: null };
-if (typeof val === ‘boolean’) return { booleanValue: val };
-if (typeof val === ‘number’) return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
-if (typeof val === ‘string’) return { stringValue: val };
-if (Array.isArray(val)) return { arrayValue: { values: val.map(convert) } };
-if (typeof val === ‘object’) return { mapValue: { fields: Object.fromEntries(Object.entries(val).map(([k,v]) => [k, convert(v)])) } };
-return { stringValue: String(val) };
-}
-return { fields: Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, convert(v)])) };
+  function convert(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(convert) } };
+    if (typeof val === 'object') return { mapValue: { fields: Object.fromEntries(Object.entries(val).map(([k,v]) => [k, convert(v)])) } };
+    return { stringValue: String(val) };
+  }
+  return { fields: Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, convert(v)])) };
 }
 
 function fbFromFirestore(fields) {
-function parse(val) {
-if (‘nullValue’ in val) return null;
-if (‘booleanValue’ in val) return val.booleanValue;
-if (‘integerValue’ in val) return parseInt(val.integerValue);
-if (‘doubleValue’ in val) return val.doubleValue;
-if (‘stringValue’ in val) return val.stringValue;
-if (‘arrayValue’ in val) return (val.arrayValue.values || []).map(parse);
-if (‘mapValue’ in val) return fbFromFirestore(val.mapValue.fields || {});
-return null;
-}
-return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, parse(v)]));
+  function parse(val) {
+    if ('nullValue' in val) return null;
+    if ('booleanValue' in val) return val.booleanValue;
+    if ('integerValue' in val) return parseInt(val.integerValue);
+    if ('doubleValue' in val) return val.doubleValue;
+    if ('stringValue' in val) return val.stringValue;
+    if ('arrayValue' in val) return (val.arrayValue.values || []).map(parse);
+    if ('mapValue' in val) return fbFromFirestore(val.mapValue.fields || {});
+    return null;
+  }
+  return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, parse(v)]));
 }
 
 async function fbSetDoc(path, data) {
-if (!window._fbToken) return;
-const url = fbDocUrl(path) + ‘?currentDocument.exists=false’;
-// Use PATCH which creates or updates
-const res = await fetch(fbDocUrl(path), {
-method: ‘PATCH’,
-headers: { ‘Content-Type’: ‘application/json’, ‘Authorization’: `Bearer ${window._fbToken}` },
-body: JSON.stringify(fbToFirestore(data))
-});
-return res.ok;
+  if (!window._fbToken) return;
+  const url = fbDocUrl(path) + '?currentDocument.exists=false';
+  // Use PATCH which creates or updates
+  const res = await fetch(fbDocUrl(path), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window._fbToken}` },
+    body: JSON.stringify(fbToFirestore(data))
+  });
+  return res.ok;
 }
 
 async function fbGetDoc(path) {
-if (!window._fbToken) return null;
-const res = await fetch(fbDocUrl(path), {
-headers: { ‘Authorization’: `Bearer ${window._fbToken}` }
-});
-if (!res.ok) return null;
-const data = await res.json();
-return data.fields ? fbFromFirestore(data.fields) : null;
+  if (!window._fbToken) return null;
+  const res = await fetch(fbDocUrl(path), {
+    headers: { 'Authorization': `Bearer ${window._fbToken}` }
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.fields ? fbFromFirestore(data.fields) : null;
 }
 
 async function fbSaveHistory(hist) {
-const uid = fbUserPath();
-if (!uid) { saveHistory(hist); return; }
-saveHistory(hist); // always keep local cache
-try { await fbSetDoc(`users/${uid}/data/history`, { items: hist, updatedAt: Date.now() }); } catch(e) {}
+  const uid = fbUserPath();
+  if (!uid) { saveHistory(hist); return; }
+  saveHistory(hist); // always keep local cache
+  try { await fbSetDoc(`users/${uid}/data/history`, { items: hist, updatedAt: Date.now() }); } catch(e) {}
 }
 
 async function fbLoadHistory() {
-const uid = fbUserPath();
-if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
-try {
-const data = await fbGetDoc(`users/${uid}/data/history`);
-if (data && data.items) {
-const local = getHistory();
-const remote = data.items;
-const all = […remote];
-local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
-all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-saveHistory(all.slice(0, 30));
-}
-} catch(e) {}
-updateHistoryBadge();
-renderWeeklyAlerts();
+  const uid = fbUserPath();
+  if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
+  try {
+    const data = await fbGetDoc(`users/${uid}/data/history`);
+    if (data && data.items) {
+      const local = getHistory();
+      const remote = data.items;
+      const all = [...remote];
+      local.forEach(l => { if (!all.find(r => r.id === l.id)) all.push(l); });
+      all.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+      saveHistory(all.slice(0, 30));
+    }
+  } catch(e) {}
+  updateHistoryBadge();
+  renderWeeklyAlerts();
 }
 
 async function fbSaveNote(planId, key, value) {
-try { localStorage.setItem(key + ‘_’ + planId, value); } catch(e) {}
-const uid = fbUserPath();
-if (!uid) return;
-try { await fbSetDoc(`users/${uid}/notes/${planId}_${key}`, { value, updatedAt: Date.now() }); } catch(e) {}
+  try { localStorage.setItem(key + '_' + planId, value); } catch(e) {}
+  const uid = fbUserPath();
+  if (!uid) return;
+  try { await fbSetDoc(`users/${uid}/notes/${planId}_${key}`, { value, updatedAt: Date.now() }); } catch(e) {}
 }
 
 async function fbLoadNote(planId, key) {
-const uid = fbUserPath();
-if (uid) {
-try {
-const data = await fbGetDoc(`users/${uid}/notes/${planId}_${key}`);
-if (data && data.value !== undefined) return data.value;
-} catch(e) {}
-}
-try { return localStorage.getItem(key + ‘_’ + planId) || ‘’; } catch(e) { return ‘’; }
+  const uid = fbUserPath();
+  if (uid) {
+    try {
+      const data = await fbGetDoc(`users/${uid}/notes/${planId}_${key}`);
+      if (data && data.value !== undefined) return data.value;
+    } catch(e) {}
+  }
+  try { return localStorage.getItem(key + '_' + planId) || ''; } catch(e) { return ''; }
 }
 
 // ── AUTH READY HANDLER ─────────────────────────────────────────────────────
 
 window._onAuthReady = function(user) {
-const loading   = document.getElementById(‘authLoading’);
-const loggedOut = document.getElementById(‘authLoggedOut’);
-const loggedIn  = document.getElementById(‘authLoggedIn’);
-if (loading)   loading.style.display   = ‘none’;
-if (user) {
-if (loggedOut) loggedOut.style.display = ‘none’;
-if (loggedIn)  loggedIn.style.display  = ‘flex’;
-const nameEl = document.getElementById(‘authName’);
-if (nameEl) nameEl.textContent = user.email;
-fbLoadHistory();
-} else {
-if (loggedOut) loggedOut.style.display = ‘block’;
-if (loggedIn)  loggedIn.style.display  = ‘none’;
-updateHistoryBadge();
-renderWeeklyAlerts();
-}
+  const loading   = document.getElementById('authLoading');
+  const loggedOut = document.getElementById('authLoggedOut');
+  const loggedIn  = document.getElementById('authLoggedIn');
+  if (loading)   loading.style.display   = 'none';
+  if (user) {
+    if (loggedOut) loggedOut.style.display = 'none';
+    if (loggedIn)  loggedIn.style.display  = 'flex';
+    const nameEl = document.getElementById('authName');
+    if (nameEl) nameEl.textContent = user.email;
+    fbLoadHistory();
+  } else {
+    if (loggedOut) loggedOut.style.display = 'block';
+    if (loggedIn)  loggedIn.style.display  = 'none';
+    updateHistoryBadge();
+    renderWeeklyAlerts();
+  }
 };
 
 // ── PATCH HISTORY & NOTES TO SYNC ─────────────────────────────────────────
 
 const _origAddToHistory = addToHistory;
 window.addToHistory = function(plan) {
-const id = _origAddToHistory(plan);
-fbSaveHistory(getHistory());
-return id;
+  const id = _origAddToHistory(plan);
+  fbSaveHistory(getHistory());
+  return id;
 };
 
 const _origSaveChecklist = saveChecklist;
 window.saveChecklist = function(planId, doneIndexes) {
-_origSaveChecklist(planId, doneIndexes);
-fbSaveHistory(getHistory());
+  _origSaveChecklist(planId, doneIndexes);
+  fbSaveHistory(getHistory());
 };
 
 const _origDeleteFromHistory = deleteFromHistory;
 window.deleteFromHistory = function(id, e) {
-_origDeleteFromHistory(id, e);
-fbSaveHistory(getHistory());
+  _origDeleteFromHistory(id, e);
+  fbSaveHistory(getHistory());
 };
 
 window.notasSave = function(planId) {
-if (!planId) return;
-const val = document.getElementById(‘notas-area’)?.value || ‘’;
-try { localStorage.setItem(‘planIA_notas_’ + planId, val); } catch(e){}
-fbSaveNote(planId, ‘planIA_notas’, val);
+  if (!planId) return;
+  const val = document.getElementById('notas-area')?.value || '';
+  try { localStorage.setItem('planIA_notas_' + planId, val); } catch(e){}
+  fbSaveNote(planId, 'planIA_notas', val);
 };
 
 window.notasLoadData = async function(planId) {
-if (!planId) return;
-const val = await fbLoadNote(planId, ‘planIA_notas’);
-const ta = document.getElementById(‘notas-area’);
-if (ta) { ta.value = val; ta.oninput = () => notasSave(currentHistoryId); ta.style.height = ‘auto’; ta.style.height = Math.max(80, ta.scrollHeight) + ‘px’; }
+  if (!planId) return;
+  const val = await fbLoadNote(planId, 'planIA_notas');
+  const ta = document.getElementById('notas-area');
+  if (ta) { ta.value = val; ta.oninput = () => notasSave(currentHistoryId); ta.style.height = 'auto'; ta.style.height = Math.max(80, ta.scrollHeight) + 'px'; }
 };
 
 window.pqSave = function(planId) {
-if (!planId) return;
-const items = [];
-document.querySelectorAll(’#pq-list .pq-item-text’).forEach(el => { if (el.value.trim()) items.push(el.value.trim()); });
-try { localStorage.setItem(‘planIA_pq_’ + planId, JSON.stringify(items)); } catch(e){}
-fbSaveNote(planId, ‘planIA_pq’, JSON.stringify(items));
+  if (!planId) return;
+  const items = [];
+  document.querySelectorAll('#pq-list .pq-item-text').forEach(el => { if (el.value.trim()) items.push(el.value.trim()); });
+  try { localStorage.setItem('planIA_pq_' + planId, JSON.stringify(items)); } catch(e){}
+  fbSaveNote(planId, 'planIA_pq', JSON.stringify(items));
 };
 
 window.pqLoadData = async function(planId) {
-if (!planId) return;
-const raw = await fbLoadNote(planId, ‘planIA_pq’);
-let items = []; try { items = JSON.parse(raw || ‘[]’); } catch(e){}
-const list = document.getElementById(‘pq-list’);
-const empty = document.getElementById(‘pq-empty’);
-if (!list) return;
-list.innerHTML = ‘’;
-items.forEach(text => pqCreateItem(‘pq-list’, ‘pq’, text));
-if (empty) empty.style.display = list.children.length ? ‘none’ : ‘block’;
+  if (!planId) return;
+  const raw = await fbLoadNote(planId, 'planIA_pq');
+  let items = []; try { items = JSON.parse(raw || '[]'); } catch(e){}
+  const list = document.getElementById('pq-list');
+  const empty = document.getElementById('pq-empty');
+  if (!list) return;
+  list.innerHTML = '';
+  items.forEach(text => pqCreateItem('pq-list', 'pq', text));
+  if (empty) empty.style.display = list.children.length ? 'none' : 'block';
 };
 </script>
-
 <style>
 
 :root {
@@ -1464,7 +1464,6 @@ h1 em { color: var(--accent3); font-style: italic; }
 .ann-tooltip { font-family: 'DM Sans', sans-serif !important; }
 
 </style>
-
 </head>
 <body>
 
@@ -1487,56 +1486,50 @@ h1 em { color: var(--accent3); font-style: italic; }
       <button class="badge history-btn" onclick="toggleHistory()" id="historyBtn">📚 Historial <span id="historyBadge" style="display:none;background:var(--accent);color:#fff;border-radius:100px;padding:1px 7px;font-size:10px;margin-left:4px;">0</span></button>
     </div>
 
-```
-<!-- LOGIN FIREBASE -->
-<div id="authBar" style="margin-top:18px;max-width:400px;margin-left:auto;margin-right:auto;width:100%;padding:0 24px;">
+    <!-- LOGIN FIREBASE -->
+    <div id="authBar" style="margin-top:18px;max-width:400px;margin-left:auto;margin-right:auto;width:100%;padding:0 24px;">
 
-  <!-- LOGGED OUT: formulario -->
-  <div id="authLoggedOut" style="display:none;">
-    <div style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:20px;">
-      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;text-align:center;">🔒 Sincronizar entre dispositivos</div>
-      <input id="authEmail" type="email" placeholder="Tu correo electrónico" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;box-sizing:border-box;" />
-      <input id="authPassword" type="password" placeholder="Contraseña (mínimo 6 caracteres)" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;box-sizing:border-box;" />
-      <div style="display:flex;gap:10px;">
-        <button onclick="fbRegister()" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Crear cuenta</button>
-        <button onclick="fbLogin()" style="flex:1;background:var(--card);color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Iniciar sesión</button>
+      <!-- LOGGED OUT: formulario -->
+      <div id="authLoggedOut" style="display:none;">
+        <div style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:20px;">
+          <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;text-align:center;">🔒 Sincronizar entre dispositivos</div>
+          <input id="authEmail" type="email" placeholder="Tu correo electrónico" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;box-sizing:border-box;" />
+          <input id="authPassword" type="password" placeholder="Contraseña (mínimo 6 caracteres)" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;box-sizing:border-box;" />
+          <div style="display:flex;gap:10px;">
+            <button onclick="fbRegister()" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Crear cuenta</button>
+            <button onclick="fbLogin()" style="flex:1;background:var(--card);color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Iniciar sesión</button>
+          </div>
+          <div id="authError" style="margin-top:10px;font-size:13px;color:var(--accent2);text-align:center;min-height:20px;"></div>
+        </div>
       </div>
-      <div id="authError" style="display:none;margin-top:10px;font-size:12px;color:var(--accent2);text-align:center;"></div>
+
+      <!-- LOGGED IN -->
+      <div id="authLoggedIn" style="display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <span id="authName" style="font-size:13px;color:var(--muted2);"></span>
+        <span style="font-size:11px;background:rgba(13,171,139,0.12);color:var(--accent3);border:1px solid rgba(13,171,139,0.3);padding:2px 10px;border-radius:20px;font-weight:700;">✓ Sincronizado</span>
+        <button onclick="fbLogout()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;">Salir</button>
+      </div>
+
+      <div id="authLoading" style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">Conectando...</div>
     </div>
-  </div>
-
-  <!-- LOGGED IN -->
-  <div id="authLoggedIn" style="display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
-    <span id="authName" style="font-size:13px;color:var(--muted2);"></span>
-    <span style="font-size:11px;background:rgba(13,171,139,0.12);color:var(--accent3);border:1px solid rgba(13,171,139,0.3);padding:2px 10px;border-radius:20px;font-weight:700;">✓ Sincronizado</span>
-    <button onclick="fbLogout()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;">Salir</button>
-  </div>
-
-  <div id="authLoading" style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">Conectando...</div>
-</div>
-```
-
   </header>
 
-```
-<!-- TAB NAVIGATION -->
-<div class="tab-nav" id="tabNav">
-  <button class="tab-btn active" id="tab-btn-plania" onclick="switchTab('plania')">
-    <span>⚡</span> Planificador
-  </button>
-  <button class="tab-btn" id="tab-btn-apa" onclick="switchTab('apa')">
-    <span>📐</span> APA 7
-  </button>
-  <button class="tab-btn" id="tab-btn-plagio" onclick="switchTab('plagio')">
-    <span>🔍</span> Plagio
-  </button>
-</div>
-```
+    <!-- TAB NAVIGATION -->
+    <div class="tab-nav" id="tabNav">
+      <button class="tab-btn active" id="tab-btn-plania" onclick="switchTab('plania')">
+        <span>⚡</span> Planificador
+      </button>
+      <button class="tab-btn" id="tab-btn-apa" onclick="switchTab('apa')">
+        <span>📐</span> APA 7
+      </button>
+      <button class="tab-btn" id="tab-btn-plagio" onclick="switchTab('plagio')">
+        <span>🔍</span> Plagio
+      </button>
+    </div>
 
 <div id="tab-plania">
 
   <!-- API KEY -->
-
   <div class="apikey-section">
     <div class="apikey-card" id="apikeyCard">
       <div class="apikey-top">
@@ -1555,7 +1548,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- UPLOAD -->
-
   <div class="upload-section">
     <div class="drop-zone" id="dropZone">
       <span class="drop-icon">📄</span>
@@ -1595,7 +1587,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- CONTEXT -->
-
   <div class="context-section">
     <label class="context-label" for="contextInput">Contexto adicional (opcional)</label>
     <textarea class="context-textarea" id="contextInput"
@@ -1603,7 +1594,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- BUTTON -->
-
   <div class="analyze-section">
     <button class="analyze-btn" id="analyzeBtn" disabled>
       <div class="btn-inner">
@@ -1614,7 +1604,6 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- LOADING -->
-
   <div class="loading-section" id="loadingSection">
     <div class="loading-card">
       <div style="font-size: 36px; margin-bottom: 12px;">🧠</div>
@@ -1630,11 +1619,9 @@ h1 em { color: var(--accent3); font-style: italic; }
   </div>
 
   <!-- ERROR -->
-
   <div class="error-box" id="errorBox"></div>
 
   <!-- RESULT -->
-
   <div id="result">
     <div class="result-header">
       <div class="result-tag">✦ Plan generado</div>
@@ -1654,8 +1641,8 @@ h1 em { color: var(--accent3); font-style: italic; }
 
 </div><!-- end tab-plania -->
 
-<!-- ═══════════════ TAB: APA 7 ═══════════════ -->
 
+<!-- ═══════════════ TAB: APA 7 ═══════════════ -->
 <div id="tab-apa" class="tab-content" style="display:none">
   <div class="apa-layout">
     <aside class="apa-side">
@@ -1701,187 +1688,182 @@ h1 em { color: var(--accent3); font-style: italic; }
 </div>
 
 <!-- ═══════════════ TAB: PLAGIO ═══════════════ -->
-
 <div id="tab-plagio" class="tab-content" style="display:none">
   <div style="max-width:780px;margin:0 auto;padding:0 24px 60px">
 
-```
-<!-- Upload zone -->
-<div class="plag-card">
-  <div class="plag-section-title">📄 Documento principal</div>
-  <div class="plag-dropzone" id="plagDz1">
-    <input type="file" id="plagFile1" accept=".docx">
-    <div style="font-size:2rem;margin-bottom:10px">📝</div>
-    <div class="plag-dz-title">Sube el documento a analizar</div>
-    <div class="plag-dz-sub">Solo .docx · Haz clic o arrastra</div>
-  </div>
-  <div class="plag-file-preview" id="plagPreview1" style="display:none">
-    <span>📄</span>
-    <span id="plagFileName1" style="flex:1;font-size:13px"></span>
-    <button onclick="clearPlagFile(1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
-  </div>
-</div>
-
-<div class="plag-card" id="plagCard2">
-  <div class="plag-section-title">📄 Segundo documento <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional — para comparar entre sí)</span></div>
-  <div class="plag-dropzone" id="plagDz2">
-    <input type="file" id="plagFile2" accept=".docx">
-    <div style="font-size:2rem;margin-bottom:10px">📝</div>
-    <div class="plag-dz-title">Sube un segundo documento</div>
-    <div class="plag-dz-sub">Para detectar similitud entre ambos</div>
-  </div>
-  <div class="plag-file-preview" id="plagPreview2" style="display:none">
-    <span>📄</span>
-    <span id="plagFileName2" style="flex:1;font-size:13px"></span>
-    <button onclick="clearPlagFile(2)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
-  </div>
-</div>
-
-<!-- Analysis options -->
-<div class="plag-card">
-  <div class="plag-section-title">⚙️ Tipo de análisis</div>
-  <div class="plag-options">
-    <div class="plag-option active" id="plag-opt-ia" onclick="togglePlagOption('ia')">
-      <input type="checkbox" id="checkIA" checked style="display:none">
-      <div class="plag-opt-check" id="check-icon-ia">✓</div>
-      <div class="plag-opt-icon">🤖</div>
-      <div>
-        <div class="plag-opt-title">Detección de escritura IA</div>
-        <div class="plag-opt-desc">Identifica señales de texto generado por IA: frases genéricas, estructura artificial, falta de voz propia</div>
+    <!-- Upload zone -->
+    <div class="plag-card">
+      <div class="plag-section-title">📄 Documento principal</div>
+      <div class="plag-dropzone" id="plagDz1">
+        <input type="file" id="plagFile1" accept=".docx">
+        <div style="font-size:2rem;margin-bottom:10px">📝</div>
+        <div class="plag-dz-title">Sube el documento a analizar</div>
+        <div class="plag-dz-sub">Solo .docx · Haz clic o arrastra</div>
+      </div>
+      <div class="plag-file-preview" id="plagPreview1" style="display:none">
+        <span>📄</span>
+        <span id="plagFileName1" style="flex:1;font-size:13px"></span>
+        <button onclick="clearPlagFile(1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
       </div>
     </div>
-    <div class="plag-option active" id="plag-opt-citas" onclick="togglePlagOption('citas')">
-      <input type="checkbox" id="checkCitas" checked style="display:none">
-      <div class="plag-opt-check" id="check-icon-citas">✓</div>
-      <div class="plag-opt-icon">💬</div>
-      <div>
-        <div class="plag-opt-title">Fragmentos sin citar</div>
-        <div class="plag-opt-desc">Detecta párrafos que parecen tomados de fuentes externas sin comillas ni referencia APA</div>
+
+    <div class="plag-card" id="plagCard2">
+      <div class="plag-section-title">📄 Segundo documento <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional — para comparar entre sí)</span></div>
+      <div class="plag-dropzone" id="plagDz2">
+        <input type="file" id="plagFile2" accept=".docx">
+        <div style="font-size:2rem;margin-bottom:10px">📝</div>
+        <div class="plag-dz-title">Sube un segundo documento</div>
+        <div class="plag-dz-sub">Para detectar similitud entre ambos</div>
+      </div>
+      <div class="plag-file-preview" id="plagPreview2" style="display:none">
+        <span>📄</span>
+        <span id="plagFileName2" style="flex:1;font-size:13px"></span>
+        <button onclick="clearPlagFile(2)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">×</button>
       </div>
     </div>
-    <div class="plag-option" id="plag-opt-comp" onclick="togglePlagOption('comp')">
-      <input type="checkbox" id="checkComp" style="display:none">
-      <div class="plag-opt-check" id="check-icon-comp" style="opacity:0">✓</div>
-      <div class="plag-opt-icon">🔄</div>
-      <div>
-        <div class="plag-opt-title">Comparar documentos</div>
-        <div class="plag-opt-desc">Calcula similitud entre el doc 1 y el doc 2. Requiere subir ambos archivos</div>
+
+    <!-- Analysis options -->
+    <div class="plag-card">
+      <div class="plag-section-title">⚙️ Tipo de análisis</div>
+      <div class="plag-options">
+        <div class="plag-option active" id="plag-opt-ia" onclick="togglePlagOption('ia')">
+          <input type="checkbox" id="checkIA" checked style="display:none">
+          <div class="plag-opt-check" id="check-icon-ia">✓</div>
+          <div class="plag-opt-icon">🤖</div>
+          <div>
+            <div class="plag-opt-title">Detección de escritura IA</div>
+            <div class="plag-opt-desc">Identifica señales de texto generado por IA: frases genéricas, estructura artificial, falta de voz propia</div>
+          </div>
+        </div>
+        <div class="plag-option active" id="plag-opt-citas" onclick="togglePlagOption('citas')">
+          <input type="checkbox" id="checkCitas" checked style="display:none">
+          <div class="plag-opt-check" id="check-icon-citas">✓</div>
+          <div class="plag-opt-icon">💬</div>
+          <div>
+            <div class="plag-opt-title">Fragmentos sin citar</div>
+            <div class="plag-opt-desc">Detecta párrafos que parecen tomados de fuentes externas sin comillas ni referencia APA</div>
+          </div>
+        </div>
+        <div class="plag-option" id="plag-opt-comp" onclick="togglePlagOption('comp')">
+          <input type="checkbox" id="checkComp" style="display:none">
+          <div class="plag-opt-check" id="check-icon-comp" style="opacity:0">✓</div>
+          <div class="plag-opt-icon">🔄</div>
+          <div>
+            <div class="plag-opt-title">Comparar documentos</div>
+            <div class="plag-opt-desc">Calcula similitud entre el doc 1 y el doc 2. Requiere subir ambos archivos</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- GUÍA DE ESCRITURA AUTÉNTICA -->
-<div class="plag-card" style="margin-bottom:16px">
-  <div class="plag-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleGuide()">
-    <span>✍️ Guía: cómo escribir con voz propia</span>
-    <span id="guideArrow" style="font-size:18px;color:var(--muted);transition:transform 0.3s">▾</span>
-  </div>
-  <div id="guideContent" style="display:none">
-    <p style="font-size:13px;color:var(--muted2);margin-bottom:20px;line-height:1.7">
-      Estas son las características que diferencian un texto con voz humana auténtica de uno generado por IA. Úsalas como checklist antes de entregar.
-    </p>
-
-    <div class="guide-grid">
-
-      <div class="guide-item danger-item">
-        <div class="guide-item-header">
-          <span class="guide-emoji">🚩</span>
-          <span class="guide-item-title">Señales que delatan escritura IA</span>
-        </div>
-        <ul class="guide-list">
-          <li><strong>"Es importante destacar que..."</strong> — frase de relleno, elimínala</li>
-          <li><strong>"En el mundo actual..."</strong> — apertura genérica sin contexto real</li>
-          <li><strong>"Cabe resaltar que..."</strong> / <strong>"En este sentido..."</strong> — conectores vacíos</li>
-          <li><strong>Párrafos perfectamente equilibrados</strong> — todos igual de largos y ordenados</li>
-          <li><strong>Sin ningún error</strong> — la escritura humana tiene leves imperfecciones naturales</li>
-          <li><strong>Vocabulario demasiado variado</strong> — sinónimos rebuscados donde nadie los usaría</li>
-          <li><strong>Conclusiones que repiten todo</strong> — "En conclusión, como se ha demostrado a lo largo..."</li>
-        </ul>
+    <!-- GUÍA DE ESCRITURA AUTÉNTICA -->
+    <div class="plag-card" style="margin-bottom:16px">
+      <div class="plag-section-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleGuide()">
+        <span>✍️ Guía: cómo escribir con voz propia</span>
+        <span id="guideArrow" style="font-size:18px;color:var(--muted);transition:transform 0.3s">▾</span>
       </div>
+      <div id="guideContent" style="display:none">
+        <p style="font-size:13px;color:var(--muted2);margin-bottom:20px;line-height:1.7">
+          Estas son las características que diferencian un texto con voz humana auténtica de uno generado por IA. Úsalas como checklist antes de entregar.
+        </p>
 
-      <div class="guide-item ok-item">
-        <div class="guide-item-header">
-          <span class="guide-emoji">✅</span>
-          <span class="guide-item-title">Características de escritura humana auténtica</span>
+        <div class="guide-grid">
+
+          <div class="guide-item danger-item">
+            <div class="guide-item-header">
+              <span class="guide-emoji">🚩</span>
+              <span class="guide-item-title">Señales que delatan escritura IA</span>
+            </div>
+            <ul class="guide-list">
+              <li><strong>"Es importante destacar que..."</strong> — frase de relleno, elimínala</li>
+              <li><strong>"En el mundo actual..."</strong> — apertura genérica sin contexto real</li>
+              <li><strong>"Cabe resaltar que..."</strong> / <strong>"En este sentido..."</strong> — conectores vacíos</li>
+              <li><strong>Párrafos perfectamente equilibrados</strong> — todos igual de largos y ordenados</li>
+              <li><strong>Sin ningún error</strong> — la escritura humana tiene leves imperfecciones naturales</li>
+              <li><strong>Vocabulario demasiado variado</strong> — sinónimos rebuscados donde nadie los usaría</li>
+              <li><strong>Conclusiones que repiten todo</strong> — "En conclusión, como se ha demostrado a lo largo..."</li>
+            </ul>
+          </div>
+
+          <div class="guide-item ok-item">
+            <div class="guide-item-header">
+              <span class="guide-emoji">✅</span>
+              <span class="guide-item-title">Características de escritura humana auténtica</span>
+            </div>
+            <ul class="guide-list">
+              <li><strong>Voz personal</strong> — usa "considero", "observé", "en mi experiencia"</li>
+              <li><strong>Ejemplos concretos y propios</strong> — casos reales que viviste o investigaste tú</li>
+              <li><strong>Preguntas retóricas</strong> — "¿Pero qué pasa cuando esto falla en la práctica?"</li>
+              <li><strong>Variación de longitud</strong> — mezcla oraciones cortas con párrafos más largos</li>
+              <li><strong>Dudas o matices</strong> — "aunque esto no siempre aplica a...", "sin embargo"</li>
+              <li><strong>Referencias a contexto local</strong> — Colombia, tu ciudad, tu facultad, tu caso</li>
+              <li><strong>Citas integradas naturalmente</strong> — no solo al final, sino dentro del argumento</li>
+            </ul>
+          </div>
+
+          <div class="guide-item info-item">
+            <div class="guide-item-header">
+              <span class="guide-emoji">🛠️</span>
+              <span class="guide-item-title">Técnicas para humanizar tu escritura</span>
+            </div>
+            <ul class="guide-list">
+              <li><strong>Empieza con el problema</strong>, no con una definición genérica</li>
+              <li><strong>Escribe primero en bruto</strong> sin preocuparte de la forma, luego edita</li>
+              <li><strong>Lee en voz alta</strong> — si suena raro al hablar, reescríbelo</li>
+              <li><strong>Conecta con lo que sabes</strong> — relaciona el tema con algo que hayas visto</li>
+              <li><strong>Varía los comienzos</strong> — no empieces tres párrafos seguidos con "La..."</li>
+              <li><strong>Usa la primera persona cuando aplique</strong> — en análisis y reflexiones</li>
+              <li><strong>Incluye tensiones o contradicciones</strong> — la realidad no es perfecta</li>
+            </ul>
+          </div>
+
+          <div class="guide-item warn-item">
+            <div class="guide-item-header">
+              <span class="guide-emoji">⚠️</span>
+              <span class="guide-item-title">Palabras y frases a evitar</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+              <span class="avoid-tag">es importante destacar</span>
+              <span class="avoid-tag">en el mundo actual</span>
+              <span class="avoid-tag">cabe resaltar</span>
+              <span class="avoid-tag">en este sentido</span>
+              <span class="avoid-tag">a lo largo de la historia</span>
+              <span class="avoid-tag">como se mencionó anteriormente</span>
+              <span class="avoid-tag">en conclusión</span>
+              <span class="avoid-tag">es fundamental</span>
+              <span class="avoid-tag">en la actualidad</span>
+              <span class="avoid-tag">sin lugar a dudas</span>
+              <span class="avoid-tag">es por ello que</span>
+              <span class="avoid-tag">se puede observar</span>
+              <span class="avoid-tag">es necesario mencionar</span>
+              <span class="avoid-tag">a través de los años</span>
+              <span class="avoid-tag">en definitiva</span>
+              <span class="avoid-tag">juega un papel fundamental</span>
+            </div>
+          </div>
+
         </div>
-        <ul class="guide-list">
-          <li><strong>Voz personal</strong> — usa "considero", "observé", "en mi experiencia"</li>
-          <li><strong>Ejemplos concretos y propios</strong> — casos reales que viviste o investigaste tú</li>
-          <li><strong>Preguntas retóricas</strong> — "¿Pero qué pasa cuando esto falla en la práctica?"</li>
-          <li><strong>Variación de longitud</strong> — mezcla oraciones cortas con párrafos más largos</li>
-          <li><strong>Dudas o matices</strong> — "aunque esto no siempre aplica a...", "sin embargo"</li>
-          <li><strong>Referencias a contexto local</strong> — Colombia, tu ciudad, tu facultad, tu caso</li>
-          <li><strong>Citas integradas naturalmente</strong> — no solo al final, sino dentro del argumento</li>
-        </ul>
+
+        <div style="margin-top:20px;padding:16px 20px;background:rgba(99,255,218,0.06);border:1px solid rgba(99,255,218,0.2);border-radius:14px">
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:10px">💡 Regla de oro</div>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.75">
+            Si puedes reemplazar un párrafo tuyo por uno generado por IA y nadie nota la diferencia, es señal de que ese párrafo no tiene suficiente voz propia. <strong style="color:var(--text)">Pregúntate: ¿qué sé yo de esto que nadie más sabe exactamente igual?</strong> Eso es lo que debe aparecer en tu texto.
+          </p>
+        </div>
       </div>
-
-      <div class="guide-item info-item">
-        <div class="guide-item-header">
-          <span class="guide-emoji">🛠️</span>
-          <span class="guide-item-title">Técnicas para humanizar tu escritura</span>
-        </div>
-        <ul class="guide-list">
-          <li><strong>Empieza con el problema</strong>, no con una definición genérica</li>
-          <li><strong>Escribe primero en bruto</strong> sin preocuparte de la forma, luego edita</li>
-          <li><strong>Lee en voz alta</strong> — si suena raro al hablar, reescríbelo</li>
-          <li><strong>Conecta con lo que sabes</strong> — relaciona el tema con algo que hayas visto</li>
-          <li><strong>Varía los comienzos</strong> — no empieces tres párrafos seguidos con "La..."</li>
-          <li><strong>Usa la primera persona cuando aplique</strong> — en análisis y reflexiones</li>
-          <li><strong>Incluye tensiones o contradicciones</strong> — la realidad no es perfecta</li>
-        </ul>
-      </div>
-
-      <div class="guide-item warn-item">
-        <div class="guide-item-header">
-          <span class="guide-emoji">⚠️</span>
-          <span class="guide-item-title">Palabras y frases a evitar</span>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
-          <span class="avoid-tag">es importante destacar</span>
-          <span class="avoid-tag">en el mundo actual</span>
-          <span class="avoid-tag">cabe resaltar</span>
-          <span class="avoid-tag">en este sentido</span>
-          <span class="avoid-tag">a lo largo de la historia</span>
-          <span class="avoid-tag">como se mencionó anteriormente</span>
-          <span class="avoid-tag">en conclusión</span>
-          <span class="avoid-tag">es fundamental</span>
-          <span class="avoid-tag">en la actualidad</span>
-          <span class="avoid-tag">sin lugar a dudas</span>
-          <span class="avoid-tag">es por ello que</span>
-          <span class="avoid-tag">se puede observar</span>
-          <span class="avoid-tag">es necesario mencionar</span>
-          <span class="avoid-tag">a través de los años</span>
-          <span class="avoid-tag">en definitiva</span>
-          <span class="avoid-tag">juega un papel fundamental</span>
-        </div>
-      </div>
-
     </div>
 
-    <div style="margin-top:20px;padding:16px 20px;background:rgba(99,255,218,0.06);border:1px solid rgba(99,255,218,0.2);border-radius:14px">
-      <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:10px">💡 Regla de oro</div>
-      <p style="font-size:13px;color:var(--muted2);line-height:1.75">
-        Si puedes reemplazar un párrafo tuyo por uno generado por IA y nadie nota la diferencia, es señal de que ese párrafo no tiene suficiente voz propia. <strong style="color:var(--text)">Pregúntate: ¿qué sé yo de esto que nadie más sabe exactamente igual?</strong> Eso es lo que debe aparecer en tu texto.
-      </p>
-    </div>
-  </div>
-</div>
+    <button class="plag-analyze-btn" id="plagAnalyzeBtn" onclick="runPlagAnalysis()" disabled>
+      <span id="plagBtnText">🔍 Analizar documento</span>
+      <span id="plagSpinner" style="display:none" class="apa-spinner"></span>
+    </button>
 
-<button class="plag-analyze-btn" id="plagAnalyzeBtn" onclick="runPlagAnalysis()" disabled>
-  <span id="plagBtnText">🔍 Analizar documento</span>
-  <span id="plagSpinner" style="display:none" class="apa-spinner"></span>
-</button>
-
-<!-- Results -->
-<div id="plagResults" style="display:none"></div>
-```
-
+    <!-- Results -->
+    <div id="plagResults" style="display:none"></div>
   </div>
 </div>
 
 <!-- HISTORY PANEL -->
-
 <div class="history-panel" id="historyPanel">
   <div class="history-header">
     <div class="history-title">
@@ -1894,6 +1876,8 @@ h1 em { color: var(--accent3); font-style: italic; }
   <div class="history-list" id="historyList"></div>
 </div>
 <div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
+
+
 
 <script>
 
@@ -3570,6 +3554,5 @@ if (document.readyState === 'loading') {
 
 
 </script>
-
 </body>
 </html>
