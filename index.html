@@ -2110,11 +2110,22 @@ function deleteFromHistory(id, e) {
 function loadFromHistory(id) {
   const entry = getHistory().find(h => h.id === id);
   if (!entry) return;
+  // Close history panel
+  const panel = document.getElementById('historyPanel');
+  const overlay = document.getElementById('historyOverlay');
+  if (panel) panel.classList.remove('open');
+  if (overlay) overlay.classList.remove('show');
+  // Make sure we're on planificador tab
+  switchTab('plania');
   currentPlan = entry.plan;
   currentHistoryId = id;
-  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || [], entry.tasksDone || []);
-  toggleHistory();
-  setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 300);
+  setTimeout(() => {
+    renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || [], entry.tasksDone || []);
+    setTimeout(() => {
+      const result = document.getElementById('result');
+      if (result) result.scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  }, 50);
 }
 
 function updateHistoryBadge() {
@@ -4175,26 +4186,19 @@ function renderAgenda() {
 function irAPlanDesdeAgenda(planId) {
   const entry = getHistory().find(h => h.id === planId);
   if (!entry) return;
-
-  // Close history panel if open
+  // Close history panel
   const panel = document.getElementById('historyPanel');
   const overlay = document.getElementById('historyOverlay');
   if (panel) panel.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
-
-  // Switch to planificador tab FIRST so render target exists
+  // Switch tab
   switchTab('plania');
-
-  // Load plan data
   currentPlan = entry.plan;
   currentHistoryId = entry.id;
+  // Wait for tab to be visible before rendering
   setTimeout(() => {
     renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || [], entry.tasksDone || []);
-    setTimeout(() => {
-      const result = document.getElementById('result');
-      if (result) result.scrollIntoView({ behavior: 'smooth' });
-    }, 200);
-  }, 50);
+  }, 100);
 }
 
 // ══════════════════════════════════════════════════
