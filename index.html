@@ -29,10 +29,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Expose globally so the rest of the app can use them
+// Expose globally
 window._fbAuth = auth;
 window._fbDb = db;
+window._fbReady = true;
 window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged };
+
+// Resolve any pending login calls
+if (window._fbPendingLogin) { window._fbPendingLogin(); window._fbPendingLogin = null; }
 
 // Listen for auth state changes
 onAuthStateChanged(auth, (user) => {
@@ -3344,23 +3348,40 @@ window._onAuthReady = function(user) {
   }
 };
 
-// If Firebase hasn't initialized yet after 3s, show login button anyway
+// If Firebase hasn't initialized yet after 10s, show login button anyway
 setTimeout(() => {
-  if (window._fbUser === undefined) {
+  if (!window._fbReady) {
     const loading = document.getElementById('authLoading');
     const loggedOut = document.getElementById('authLoggedOut');
     if (loading) loading.style.display = 'none';
     if (loggedOut) loggedOut.style.display = 'block';
   }
-}, 3000);
+}, 10000);
 
 async function fbLogin() {
-  if (!window._fbAuth || !window._fbFns) { alert('Firebase no está listo todavía. Espera un momento.'); return; }
+  // If Firebase not ready yet, wait up to 8 seconds
+  if (!window._fbReady) {
+    const btn = document.querySelector('#authLoggedOut button');
+    if (btn) { btn.textContent = 'Cargando Firebase...'; btn.disabled = true; }
+    await new Promise((resolve) => {
+      window._fbPendingLogin = resolve;
+      setTimeout(resolve, 8000); // timeout fallback
+    });
+    if (btn) { btn.textContent = 'Iniciar sesion con Google para sincronizar'; btn.disabled = false; }
+  }
+  if (!window._fbAuth || !window._fbFns) {
+    alert('No se pudo conectar con Firebase. Verifica tu conexión a internet e intenta de nuevo.');
+    return;
+  }
   try {
     const provider = new window._fbFns.GoogleAuthProvider();
     await window._fbFns.signInWithPopup(window._fbAuth, provider);
   } catch(e) {
-    alert('Error al iniciar sesión: ' + e.message);
+    if (e.code === 'auth/popup-blocked') {
+      alert('El navegador bloqueó la ventana de login. Por favor permite las ventanas emergentes para este sitio e intenta de nuevo.');
+    } else {
+      alert('Error al iniciar sesión: ' + e.message);
+    }
   }
 }
 
