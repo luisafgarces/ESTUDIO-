@@ -2085,6 +2085,8 @@ function saveChecklist(planId, doneIndexes) {
     saveHistory(hist);
     renderHistoryList();
     updateHistoryBadge();
+    // Siempre refrescar agenda para reflejar cambios
+    renderAgenda();
   }
 }
 
@@ -3901,6 +3903,13 @@ function renderAgenda() {
     const plan = entry.plan;
     if (!plan || !plan.bloques) return;
 
+    // Skip fully completed plans (all checklist items done)
+    if (plan.checklist?.length > 0) {
+      const total = plan.checklist.length;
+      const done = (entry.checklistDone || []).length;
+      if (done >= total) return; // all done, skip from agenda
+    }
+
     // Parse delivery date
     let deliveryDate = null;
     const entregaStr = plan.fechas?.entrega || entry.entrega || null;
@@ -4120,21 +4129,26 @@ function renderAgenda() {
 function irAPlanDesdeAgenda(planId) {
   const entry = getHistory().find(h => h.id === planId);
   if (!entry) return;
-  // Switch to planificador tab
-  switchTab('plania');
-  // Make sure history panel is closed
+
+  // Close history panel if open
   const panel = document.getElementById('historyPanel');
   const overlay = document.getElementById('historyOverlay');
   if (panel) panel.classList.remove('open');
   if (overlay) overlay.classList.remove('show');
-  // Load the plan directly
+
+  // Switch to planificador tab FIRST so render target exists
+  switchTab('plania');
+
+  // Load plan data
   currentPlan = entry.plan;
   currentHistoryId = entry.id;
-  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
   setTimeout(() => {
-    const result = document.getElementById('result');
-    if (result) result.scrollIntoView({ behavior: 'smooth' });
-  }, 200);
+    renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
+    setTimeout(() => {
+      const result = document.getElementById('result');
+      if (result) result.scrollIntoView({ behavior: 'smooth' });
+    }, 200);
+  }, 50);
 }
 
 // ══════════════════════════════════════════════════
