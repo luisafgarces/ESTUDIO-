@@ -1259,8 +1259,8 @@ font-family: ‘DM Sans’, sans-serif;
   </header>
   <!-- SYNC FIREBASE -->
   <div id="authBar" style="margin-top:18px;max-width:400px;margin-left:auto;margin-right:auto;width:100%;padding:0 24px;">
-    <div id="authLoading" style="text-align:center;color:var(--muted);font-size:13px;padding:8px 0;">Cargando sincronización...</div>
-    <div id="authLoggedOut" style="display:none;">
+    <div id="authLoading" style="display:none;text-align:center;color:var(--muted);font-size:13px;padding:8px 0;">Cargando sincronización...</div>
+    <div id="authLoggedOut" style="">
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;">
         <div style="font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">☁️ Sincronizar entre dispositivos</div>
         <input id="authEmail" type="email" placeholder="Tu correo" autocomplete="email" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--card);color:var(--text);margin-bottom:8px;outline:none;">
@@ -1308,11 +1308,11 @@ font-family: ‘DM Sans’, sans-serif;
   <div class="apikey-section">
     <div class="apikey-card" id="apikeyCard">
       <div class="apikey-top">
-        <div class="apikey-label">🔑 API Key de Anthropic</div>
+        <div class="apikey-label">🔑 API Key de Google</div>
         <div class="apikey-status" id="apikeyStatus">Sin configurar</div>
       </div>
       <div class="apikey-input-row">
-        <input type="password" class="apikey-input" id="apikeyInput" placeholder="sk-ant-api03-..." autocomplete="off" />
+        <input type="password" class="apikey-input" id="apikeyInput" placeholder="AIzaSy......" autocomplete="off" />
         <button class="apikey-save-btn" onclick="saveApiKey()">Guardar</button>
         <button class="apikey-clear-btn" onclick="clearApiKey()" title="Borrar API key">🗑</button>
       </div>
