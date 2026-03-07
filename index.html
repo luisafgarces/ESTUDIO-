@@ -2112,7 +2112,7 @@ function loadFromHistory(id) {
   if (!entry) return;
   currentPlan = entry.plan;
   currentHistoryId = id;
-  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
+  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || [], entry.tasksDone || []);
   toggleHistory();
   setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 300);
 }
@@ -2683,10 +2683,13 @@ function renderPlan(plan, checklistDone, lecturasDone) {
       const taskId = `tarea-${bi}-${ti}`;
       const tipoBorder = { focus: 'rgba(26,154,212,0.35)', action: 'rgba(126,236,212,0.25)', warn: 'rgba(255,209,102,0.3)', normal: 'var(--border2)' };
       const tipoBg = { focus: 'rgba(26,154,212,0.07)', action: 'rgba(126,236,212,0.05)', warn: 'rgba(255,209,102,0.05)', normal: 'var(--surface)' };
-      html += `<div id="${taskId}" style="background:${tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;transition:box-shadow 0.3s,border-color 0.3s;">
+      const globalIdx = _globalTaskIdx;
+      const isDoneTask = tasksDone.includes(globalIdx);
+      html += `<div id="${taskId}" data-task-idx="${globalIdx}" style="background:${isDoneTask ? 'rgba(13,171,139,0.05)' : tipoBg[t.tipo]||tipoBg.normal};border:1px solid ${isDoneTask ? 'rgba(13,171,139,0.3)' : tipoBorder[t.tipo]||tipoBorder.normal};border-radius:12px;padding:14px 16px;margin:8px 0;transition:all 0.3s;${isDoneTask ? 'opacity:0.6;' : ''}">
         <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
           <span style="font-size:18px;flex-shrink:0">${t.emoji}</span>
-          <div style="font-weight:500;font-size:14px;">${t.titulo}</div>
+          <div style="flex:1;font-weight:500;font-size:14px;${isDoneTask ? 'text-decoration:line-through;color:var(--muted);' : ''}">${t.titulo}</div>
+          <div onclick="toggleTareaHecha(${globalIdx}, this)" id="task-done-${globalIdx}" style="width:24px;height:24px;min-width:24px;border:2px solid ${isDoneTask ? 'var(--accent3)' : 'rgba(26,154,212,0.35)'};border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:${isDoneTask ? 'var(--accent3)' : 'transparent'};transition:all 0.2s;font-size:14px;font-weight:700;">${isDoneTask ? '✓' : ''}</div>
         </div>
         <div style="font-size:13px;color:var(--muted2);padding-left:28px;">${t.descripcion}</div>
         ${t.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px;font-style:italic;">💡 ${t.nota}</div>` : ''}
@@ -3108,6 +3111,43 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
 
   btn.textContent = '💬 Ideas para el foro';
   btn.disabled = false;
+}
+
+function toggleTareaHecha(idx, el) {
+  if (!currentHistoryId) return;
+  const hist = getHistory();
+  const entry = hist.find(h => h.id === currentHistoryId);
+  if (!entry) return;
+
+  const tasksDone = entry.tasksDone || [];
+  const alreadyDone = tasksDone.includes(idx);
+
+  if (alreadyDone) {
+    entry.tasksDone = tasksDone.filter(i => i !== idx);
+  } else {
+    entry.tasksDone = [...tasksDone, idx];
+  }
+
+  saveHistory(hist);
+  _fbSaveHistory();
+
+  // Update visual
+  const card = el.closest('[data-task-idx]');
+  const titleEl = card?.querySelector('div[style*="font-weight:500"]') || card?.querySelector('div[style*="flex:1"]');
+  const nowDone = !alreadyDone;
+
+  el.textContent = nowDone ? '✓' : '';
+  el.style.background = nowDone ? 'var(--accent3)' : 'transparent';
+  el.style.borderColor = nowDone ? 'var(--accent3)' : 'rgba(26,154,212,0.35)';
+  if (card) {
+    card.style.opacity = nowDone ? '0.6' : '1';
+    card.style.background = nowDone ? 'rgba(13,171,139,0.05)' : '';
+    card.style.borderColor = nowDone ? 'rgba(13,171,139,0.3)' : '';
+  }
+  if (titleEl) titleEl.style.textDecoration = nowDone ? 'line-through' : '';
+
+  // Refresh agenda
+  renderAgenda();
 }
 
 function irATarea(taskId) {
@@ -3935,27 +3975,33 @@ function renderAgenda() {
       ? (diasRestantes <= 3 ? 'alta' : diasRestantes <= 7 ? 'media' : 'baja')
       : 'media';
 
+    const tasksDonePlan = entry.tasksDone || [];
+    let agendaTaskIdx = 0;
     plan.bloques.forEach(bloque => {
       (bloque.tareas || []).forEach(t => {
-        const urgFinal = bloque.urgencia === 'alta' || urgenciaGlobal === 'alta' ? 'alta'
-                       : bloque.urgencia === 'baja' && urgenciaGlobal === 'baja' ? 'baja'
-                       : 'media';
-        allTasks.push({
-          titulo: t.titulo,
-          descripcion: t.descripcion,
-          nota: t.nota || null,
-          emoji: t.emoji || '📌',
-          tipo: t.tipo || 'normal',
-          urgencia: urgFinal,
-          bloque: bloque.nombre,
-          bloqueEmoji: bloque.emoji || '',
-          materia: plan.materia || plan.titulo || 'Sin materia',
-          actividad: plan.actividad || '',
-          entrega: entregaStr,
-          deliveryDate,
-          diasRestantes,
-          planId: entry.id
-        });
+        // Skip tasks marked as done
+        if (!tasksDonePlan.includes(agendaTaskIdx)) {
+          const urgFinal = bloque.urgencia === 'alta' || urgenciaGlobal === 'alta' ? 'alta'
+                         : bloque.urgencia === 'baja' && urgenciaGlobal === 'baja' ? 'baja'
+                         : 'media';
+          allTasks.push({
+            titulo: t.titulo,
+            descripcion: t.descripcion,
+            nota: t.nota || null,
+            emoji: t.emoji || '📌',
+            tipo: t.tipo || 'normal',
+            urgencia: urgFinal,
+            bloque: bloque.nombre,
+            bloqueEmoji: bloque.emoji || '',
+            materia: plan.materia || plan.titulo || 'Sin materia',
+            actividad: plan.actividad || '',
+            entrega: entregaStr,
+            deliveryDate,
+            diasRestantes,
+            planId: entry.id
+          });
+        }
+        agendaTaskIdx++;
       });
     });
   });
@@ -4143,7 +4189,7 @@ function irAPlanDesdeAgenda(planId) {
   currentPlan = entry.plan;
   currentHistoryId = entry.id;
   setTimeout(() => {
-    renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
+    renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || [], entry.tasksDone || []);
     setTimeout(() => {
       const result = document.getElementById('result');
       if (result) result.scrollIntoView({ behavior: 'smooth' });
