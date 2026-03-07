@@ -2344,7 +2344,7 @@ Reglas:
     const requestBody = {
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 65536, responseMimeType: 'application/json' }
+      generationConfig: { temperature: 0.3, maxOutputTokens: 8192 }
     };
 
     const response = await fetch(apiUrl, {
@@ -2392,21 +2392,43 @@ Reglas:
         return null;
       }
 
-      try {
-        plan = JSON.parse(clean);
-      } catch (_) {
+      // Try 1: direct parse
+      try { plan = JSON.parse(clean); } catch (_) {}
+
+      // Try 2: extract balanced JSON object
+      if (!plan) {
         const extracted = extractJSON(clean);
-        if (extracted) {
-          try {
-            plan = JSON.parse(extracted);
-          } catch(e2) {
-            // Last resort: try to fix truncated JSON
-            throw new Error('La respuesta de la IA fue cortada o mal formateada. Por favor intenta de nuevo.');
-          }
-        } else {
-          throw new Error('La IA no devolvió un JSON válido. Por favor intenta de nuevo.');
-        }
+        if (extracted) try { plan = JSON.parse(extracted); } catch(e2) {}
       }
+
+      // Try 3: repair truncated JSON by closing open structures
+      if (!plan) {
+        try {
+          let repairing = clean;
+          const start = repairing.indexOf('{');
+          if (start > 0) repairing = repairing.slice(start);
+          // Count unclosed braces and brackets
+          let braces = 0, brackets = 0, inStr = false, esc = false;
+          for (const c of repairing) {
+            if (esc) { esc = false; continue; }
+            if (c === '\\' && inStr) { esc = true; continue; }
+            if (c === '"') { inStr = !inStr; continue; }
+            if (inStr) continue;
+            if (c === '{') braces++;
+            if (c === '}') braces--;
+            if (c === '[') brackets++;
+            if (c === ']') brackets--;
+          }
+          // Close any open string, brackets, and braces
+          if (inStr) repairing += '"';
+          repairing += ']'.repeat(Math.max(0, brackets));
+          repairing += '}'.repeat(Math.max(0, braces));
+          plan = JSON.parse(repairing);
+          console.warn('JSON reparado automáticamente');
+        } catch(e3) {}
+      }
+
+      if (!plan) throw new Error('La respuesta de la IA fue cortada o mal formateada. Por favor intenta de nuevo.');
     } catch (e) {
       console.error('Parse error:', e.message);
       console.error('Raw text length:', rawText.length);
