@@ -2048,6 +2048,7 @@ function addToHistory(plan) {
     entrega: plan.fechas?.entrega || null,
     checklistTotal: (plan.checklist || []).length,
     checklistDone: [],
+    lecturasDone: [],
     plan: plan,
     createdAt: Date.now()
   };
@@ -2068,6 +2069,15 @@ function saveChecklist(planId, doneIndexes) {
   }
 }
 
+function saveLecturasDone(planId, doneIndexes) {
+  const hist = getHistory();
+  const entry = hist.find(h => h.id === planId);
+  if (entry) {
+    entry.lecturasDone = doneIndexes;
+    saveHistory(hist);
+  }
+}
+
 function deleteFromHistory(id, e) {
   e.stopPropagation();
   const hist = getHistory().filter(h => h.id !== id);
@@ -2081,7 +2091,7 @@ function loadFromHistory(id) {
   if (!entry) return;
   currentPlan = entry.plan;
   currentHistoryId = id;
-  renderPlan(entry.plan, entry.checklistDone || []);
+  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
   toggleHistory();
   setTimeout(() => document.getElementById('result').scrollIntoView({ behavior: 'smooth' }), 300);
 }
@@ -2576,8 +2586,9 @@ Reglas:
   }
 }
 
-function renderPlan(plan, checklistDone) {
+function renderPlan(plan, checklistDone, lecturasDone) {
   checklistDone = checklistDone || [];
+  lecturasDone = lecturasDone || [];
   document.getElementById('resultTitle').textContent = plan.titulo || 'Tu Plan Personalizado';
 
   let html = '';
@@ -2745,13 +2756,14 @@ function renderPlan(plan, checklistDone) {
       const obligColor = lec.obligatorio ? 'rgba(255,107,107,0.7)' : 'rgba(126,236,212,0.7)';
       const obligLabel = lec.obligatorio ? 'Obligatoria' : 'Recomendada';
       const lecId = `lec-${li}`;
-      html += `<div id="${lecId}" style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:0;margin-bottom:16px;overflow:hidden;transition:border-color 0.3s,opacity 0.3s;">
+      const lecDoneInit = lecturasDone.includes(li);
+      html += `<div id="${lecId}" style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:0;margin-bottom:16px;overflow:hidden;transition:border-color 0.3s,opacity 0.3s;${lecDoneInit ? 'opacity:0.6;border-color:rgba(126,236,212,0.4);' : ''}">
 
         <!-- Cabecera con checkbox -->
         <div style="padding:14px 18px 12px;border-bottom:1px solid var(--border);">
           <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;">
             <!-- Checkbox lectura -->
-            <div onclick="toggleLectura(${li})" id="lec-cb-${li}" style="width:22px;height:22px;min-width:22px;border:2px solid rgba(26,154,212,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-top:1px;"></div>
+            <div onclick="toggleLectura(${li})" id="lec-cb-${li}" data-done="${lecDoneInit ? '1' : '0'}" style="width:22px;height:22px;min-width:22px;border:2px solid rgba(26,154,212,0.4);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;margin-top:1px;${lecDoneInit ? 'background:var(--accent3);border-color:var(--accent3);color:#000;font-weight:700;font-size:13px;' : ''}">${lecDoneInit ? '✓' : ''}</div>
             <div style="width:24px;height:24px;min-width:24px;background:rgba(26,154,212,0.2);border:1px solid rgba(26,154,212,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);">${lec.numero}</div>
             <div style="font-weight:600;font-size:14px;flex:1;min-width:0;">${lec.titulo}</div>
             <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${obligColor};border:1px solid ${obligColor};padding:2px 8px;border-radius:20px;white-space:nowrap;">${obligLabel}</span>
@@ -3032,6 +3044,14 @@ function toggleLectura(i) {
   const label = document.getElementById('lecProgressLabel');
   if (bar) { bar.style.width = pct + '%'; bar.style.background = barColor; }
   if (label) { label.textContent = `${doneCount}/${total} — ${pct}%`; label.style.color = barColor; }
+
+  // Save lecturas state to history
+  if (currentHistoryId) {
+    const doneIndexes = Array.from(allCbs)
+      .map((el, idx) => el.dataset.done === '1' ? idx : null)
+      .filter(x => x !== null);
+    saveLecturasDone(currentHistoryId, doneIndexes);
+  }
 }
 
 function toggleCheck(i) {
