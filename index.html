@@ -2618,9 +2618,10 @@ Reglas:
   }
 }
 
-function renderPlan(plan, checklistDone, lecturasDone) {
+function renderPlan(plan, checklistDone, lecturasDone, tasksDone) {
   checklistDone = checklistDone || [];
   lecturasDone = lecturasDone || [];
+  tasksDone = tasksDone || [];
   document.getElementById('resultTitle').textContent = plan.titulo || 'Tu Plan Personalizado';
 
   let html = '';
