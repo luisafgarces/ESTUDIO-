@@ -1303,6 +1303,9 @@ h1 em { color: var(--accent3); font-style: italic; }
       <button class="tab-btn" id="tab-btn-plagio" onclick="switchTab('plagio')">
         <span>🔍</span> Plagio
       </button>
+      <button class="tab-btn" id="tab-btn-agenda" onclick="switchTab('agenda')">
+        <span>📅</span> Agenda
+      </button>
     </div>
 
 <div id="tab-plania">
@@ -1404,6 +1407,27 @@ h1 em { color: var(--accent3); font-style: italic; }
 
 </div><!-- end tab-plania -->
 
+
+
+<!-- ═══════════════ TAB: AGENDA ═══════════════ -->
+<div id="tab-agenda" class="tab-content" style="display:none">
+  <div style="max-width:720px;margin:0 auto;padding:24px 16px 60px;">
+
+    <div style="margin-bottom:24px;">
+      <h2 style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;">📅 Tu Agenda</h2>
+      <p style="font-size:13px;color:var(--muted2);line-height:1.6;">Todas las tareas de todos tus planes, ordenadas por urgencia y fecha de entrega. Toca cualquiera para ver el plan completo.</p>
+    </div>
+
+    <div id="agendaContent">
+      <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+        <div style="font-size:40px;margin-bottom:12px;">📋</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Sin planes todavía</div>
+        <div style="font-size:13px;">Genera un plan en la pestaña ⚡ Planificador y aparecerá aquí automáticamente.</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- end tab-agenda -->
 
 <!-- ═══════════════ TAB: APA 7 ═══════════════ -->
 <div id="tab-apa" class="tab-content" style="display:none">
@@ -1646,10 +1670,11 @@ h1 em { color: var(--accent3); font-style: italic; }
 
 // ══ TAB SWITCHING ══
 function switchTab(tab) {
-  ['plania','apa','plagio'].forEach(t => {
+  ['plania','apa','plagio','agenda'].forEach(t => {
     document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
     document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
   });
+  if (tab === 'agenda') renderAgenda();
 }
 
 
@@ -3843,6 +3868,165 @@ if (document.readyState === 'loading') {
 
 
 
+
+
+// ══ AGENDA ══════════════════════════════════════════════════════════════════
+
+function renderAgenda() {
+  const container = document.getElementById('agendaContent');
+  if (!container) return;
+
+  const hist = getHistory();
+  if (!hist.length) {
+    container.innerHTML = `<div style="text-align:center;padding:60px 20px;color:var(--muted);">
+      <div style="font-size:40px;margin-bottom:12px;">📋</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;">Sin planes todavía</div>
+      <div style="font-size:13px;">Genera un plan en la pestaña ⚡ Planificador y aparecerá aquí.</div>
+    </div>`;
+    return;
+  }
+
+  // Collect all tasks from all plans with metadata
+  const allTasks = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  hist.forEach(entry => {
+    const plan = entry.plan;
+    if (!plan || !plan.bloques) return;
+
+    // Parse delivery date
+    let deliveryDate = null;
+    const entregaStr = plan.fechas?.entrega || entry.entrega || null;
+    if (entregaStr) {
+      const d = new Date(entregaStr);
+      if (!isNaN(d)) deliveryDate = d;
+      else {
+        // Try parsing Spanish date formats
+        const months = {enero:0,febrero:1,marzo:2,abril:3,mayo:4,junio:5,julio:6,agosto:7,septiembre:8,octubre:9,noviembre:10,diciembre:11};
+        const m = entregaStr.toLowerCase().match(/(\d+)\s+de\s+(\w+)/);
+        if (m) {
+          const mn = months[m[2]];
+          if (mn !== undefined) {
+            deliveryDate = new Date(today.getFullYear(), mn, parseInt(m[1]));
+            if (deliveryDate < today) deliveryDate.setFullYear(today.getFullYear() + 1);
+          }
+        }
+      }
+    }
+
+    const diasRestantes = plan.fechas?.diasRestantes ?? null;
+    const urgenciaGlobal = diasRestantes !== null
+      ? (diasRestantes <= 3 ? 'alta' : diasRestantes <= 7 ? 'media' : 'baja')
+      : 'media';
+
+    plan.bloques.forEach(bloque => {
+      (bloque.tareas || []).forEach(t => {
+        const urgFinal = bloque.urgencia === 'alta' || urgenciaGlobal === 'alta' ? 'alta'
+                       : bloque.urgencia === 'baja' && urgenciaGlobal === 'baja' ? 'baja'
+                       : 'media';
+        allTasks.push({
+          titulo: t.titulo,
+          descripcion: t.descripcion,
+          nota: t.nota || null,
+          emoji: t.emoji || '📌',
+          tipo: t.tipo || 'normal',
+          urgencia: urgFinal,
+          bloque: bloque.nombre,
+          bloqueEmoji: bloque.emoji || '',
+          materia: plan.materia || plan.titulo || 'Sin materia',
+          actividad: plan.actividad || '',
+          entrega: entregaStr,
+          deliveryDate,
+          diasRestantes,
+          planId: entry.id
+        });
+      });
+    });
+  });
+
+  if (!allTasks.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px;">Los planes guardados no tienen tareas. Genera un plan nuevo.</div>`;
+    return;
+  }
+
+  // Sort: urgencia first, then by delivery date
+  const urgOrder = { alta: 0, media: 1, baja: 2 };
+  const tipoOrder = { warn: 0, focus: 1, action: 2, normal: 3 };
+  allTasks.sort((a, b) => {
+    const uDiff = (urgOrder[a.urgencia]??1) - (urgOrder[b.urgencia]??1);
+    if (uDiff !== 0) return uDiff;
+    if (a.deliveryDate && b.deliveryDate) return a.deliveryDate - b.deliveryDate;
+    if (a.deliveryDate) return -1;
+    if (b.deliveryDate) return 1;
+    return (tipoOrder[a.tipo]??3) - (tipoOrder[b.tipo]??3);
+  });
+
+  const urgLabel  = { alta: '🔴 Urgente — entrega próxima', media: '🟡 Importante', baja: '🟢 Cuando puedas' };
+  const urgColor  = { alta: '#e05a7a', media: '#d4920a', baja: '#0dab8b' };
+  const urgBg     = { alta: 'rgba(224,90,122,0.07)', media: 'rgba(212,146,10,0.06)', baja: 'rgba(13,171,139,0.06)' };
+  const urgBorder = { alta: 'rgba(224,90,122,0.25)', media: 'rgba(212,146,10,0.2)', baja: 'rgba(13,171,139,0.18)' };
+
+  let html = '';
+  let lastUrgencia = null;
+  let groupCount = 0;
+
+  allTasks.forEach((t, idx) => {
+    const u = t.urgencia;
+    if (u !== lastUrgencia) {
+      if (lastUrgencia !== null) html += `</div><div style="height:20px;"></div>`;
+      html += `<div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:${urgColor[u]};text-transform:uppercase;">${urgLabel[u]}</div>
+          <div style="flex:1;height:1px;background:${urgBorder[u]};"></div>
+        </div>`;
+      lastUrgencia = u;
+      groupCount = 0;
+    }
+
+    const entregaTag = t.entrega
+      ? `<span style="background:rgba(255,255,255,0.5);color:${urgColor[u]};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;">⏰ Entrega: ${t.entrega}</span>`
+      : '';
+    const diasTag = t.diasRestantes !== null
+      ? `<span style="background:rgba(255,255,255,0.5);color:${urgColor[u]};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;">${t.diasRestantes} días</span>`
+      : '';
+
+    html += `
+    <div onclick="irAPlanDesdeAgenda('${t.planId}')"
+         style="background:${urgBg[u]};border:1px solid ${urgBorder[u]};border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;"
+         onmouseover="this.style.borderColor='${urgColor[u]}';this.style.transform='translateX(3px)'"
+         onmouseout="this.style.borderColor='${urgBorder[u]}';this.style.transform='translateX(0)'">
+
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="font-size:20px;flex-shrink:0;margin-top:1px;">${t.emoji}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${t.titulo}</div>
+          <div style="font-size:13px;color:var(--muted2);line-height:1.5;margin-bottom:6px;">${t.descripcion}</div>
+          ${t.nota ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px;">💡 ${t.nota}</div>` : ''}
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px;">
+            <span style="font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:2px 10px;border-radius:20px;">${t.materia}</span>
+            <span style="font-size:11px;color:var(--muted);">${t.bloqueEmoji} ${t.bloque}</span>
+            ${entregaTag}${diasTag}
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:2px;">Ver plan →</div>
+      </div>
+    </div>`;
+    groupCount++;
+  });
+
+  if (lastUrgencia) html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+function irAPlanDesdeAgenda(planId) {
+  switchTab('plania');
+  const hist = getHistory();
+  const entry = hist.find(h => h.id === planId);
+  if (entry) {
+    setTimeout(() => loadFromHistory(planId), 100);
+  }
+}
 
 // ══════════════════════════════════════════════════
 // FIREBASE REST API — sincronización entre dispositivos
