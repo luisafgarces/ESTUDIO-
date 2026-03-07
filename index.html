@@ -12,7 +12,7 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -33,10 +33,18 @@ const db = getFirestore(app);
 window._fbAuth = auth;
 window._fbDb = db;
 window._fbReady = true;
-window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged };
 
 // Resolve any pending login calls
 if (window._fbPendingLogin) { window._fbPendingLogin(); window._fbPendingLogin = null; }
+window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged };
+
+// Handle redirect result on page load (for mobile Safari)
+getRedirectResult(auth).then((result) => {
+if (result && result.user) {
+window._fbUser = result.user;
+if (typeof window._onAuthReady === ‘function’) window._onAuthReady(result.user);
+}
+}).catch((e) => console.warn(‘Redirect result error:’, e));
 
 // Listen for auth state changes
 onAuthStateChanged(auth, (user) => {
@@ -3375,13 +3383,15 @@ async function fbLogin() {
   }
   try {
     const provider = new window._fbFns.GoogleAuthProvider();
-    await window._fbFns.signInWithPopup(window._fbAuth, provider);
-  } catch(e) {
-    if (e.code === 'auth/popup-blocked') {
-      alert('El navegador bloqueó la ventana de login. Por favor permite las ventanas emergentes para este sitio e intenta de nuevo.');
+    // Use redirect for mobile Safari (popup is blocked)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      await window._fbFns.signInWithRedirect(window._fbAuth, provider);
     } else {
-      alert('Error al iniciar sesión: ' + e.message);
+      await window._fbFns.signInWithPopup(window._fbAuth, provider);
     }
+  } catch(e) {
+    alert('Error al iniciar sesión: ' + e.message);
   }
 }
 
