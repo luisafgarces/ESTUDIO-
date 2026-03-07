@@ -3879,7 +3879,11 @@ function renderAgenda() {
   const urgBorder = { alta: 'rgba(224,90,122,0.25)', media: 'rgba(212,146,10,0.2)', baja: 'rgba(13,171,139,0.18)' };
 
   // ── SECCIÓN "ESTA SEMANA SÍ O SÍ" ─────────────────────────────────────────
-  const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + 7);
+  // Semana real: lunes a domingo
+  const endOfWeek = new Date(today);
+  const dayOfWeek = today.getDay(); // 0=domingo, 1=lunes...
+  const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+  endOfWeek.setDate(today.getDate() + daysUntilSunday);
   const estaSemanaTareas = allTasks.filter(t => {
     if (t.urgencia === 'alta') return true;
     if (t.deliveryDate && t.deliveryDate <= endOfWeek) return true;
