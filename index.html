@@ -4023,12 +4023,23 @@ function renderAgenda() {
 }
 
 function irAPlanDesdeAgenda(planId) {
+  const entry = getHistory().find(h => h.id === planId);
+  if (!entry) return;
+  // Switch to planificador tab
   switchTab('plania');
-  const hist = getHistory();
-  const entry = hist.find(h => h.id === planId);
-  if (entry) {
-    setTimeout(() => loadFromHistory(planId), 100);
-  }
+  // Make sure history panel is closed
+  const panel = document.getElementById('historyPanel');
+  const overlay = document.getElementById('historyOverlay');
+  if (panel) panel.classList.remove('open');
+  if (overlay) overlay.classList.remove('show');
+  // Load the plan directly
+  currentPlan = entry.plan;
+  currentHistoryId = entry.id;
+  renderPlan(entry.plan, entry.checklistDone || [], entry.lecturasDone || []);
+  setTimeout(() => {
+    const result = document.getElementById('result');
+    if (result) result.scrollIntoView({ behavior: 'smooth' });
+  }, 200);
 }
 
 // ══════════════════════════════════════════════════
