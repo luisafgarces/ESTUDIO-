@@ -12,7 +12,7 @@
 <!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -36,15 +36,7 @@ window._fbReady = true;
 
 // Resolve any pending login calls
 if (window._fbPendingLogin) { window._fbPendingLogin(); window._fbPendingLogin = null; }
-window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged };
-
-// Handle redirect result on page load (for mobile Safari)
-getRedirectResult(auth).then((result) => {
-if (result && result.user) {
-window._fbUser = result.user;
-if (typeof window._onAuthReady === ‘function’) window._onAuthReady(result.user);
-}
-}).catch((e) => console.warn(‘Redirect result error:’, e));
+window._fbFns = { doc, setDoc, getDoc, collection, getDocs, deleteDoc, query, orderBy, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged };
 
 // Listen for auth state changes
 onAuthStateChanged(auth, (user) => {
@@ -1254,19 +1246,30 @@ h1 em { color: var(--accent3); font-style: italic; }
 
 ```
 <!-- LOGIN FIREBASE -->
-<div id="authBar" style="margin-top:18px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+<div id="authBar" style="margin-top:18px;max-width:400px;margin-left:auto;margin-right:auto;width:100%;padding:0 24px;">
+
+  <!-- LOGGED OUT: formulario -->
   <div id="authLoggedOut" style="display:none;">
-    <button onclick="fbLogin()" style="display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;font-family:Syne,sans-serif;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;transition:all 0.2s;">
-      Iniciar sesion con Google para sincronizar
-    </button>
+    <div style="background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:20px;">
+      <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;text-align:center;">🔒 Sincronizar entre dispositivos</div>
+      <input id="authEmail" type="email" placeholder="Tu correo electrónico" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;box-sizing:border-box;" />
+      <input id="authPassword" type="password" placeholder="Contraseña (mínimo 6 caracteres)" style="width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:14px;box-sizing:border-box;" />
+      <div style="display:flex;gap:10px;">
+        <button onclick="fbRegister()" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Crear cuenta</button>
+        <button onclick="fbLogin()" style="flex:1;background:var(--card);color:var(--accent);border:1px solid var(--accent);border-radius:10px;padding:11px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Iniciar sesión</button>
+      </div>
+      <div id="authError" style="display:none;margin-top:10px;font-size:12px;color:var(--accent2);text-align:center;"></div>
+    </div>
   </div>
-  <div id="authLoggedIn" style="display:none;align-items:center;gap:10px;">
-    <img id="authAvatar" src="" style="width:28px;height:28px;border-radius:50%;border:2px solid var(--accent);" />
+
+  <!-- LOGGED IN -->
+  <div id="authLoggedIn" style="display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
     <span id="authName" style="font-size:13px;color:var(--muted2);"></span>
-    <span style="font-size:11px;background:rgba(13,171,139,0.12);color:var(--accent3);border:1px solid rgba(13,171,139,0.3);padding:2px 10px;border-radius:20px;font-weight:700;">Sincronizado</span>
-    <button onclick="fbLogout()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;">Salir</button>
+    <span style="font-size:11px;background:rgba(13,171,139,0.12);color:var(--accent3);border:1px solid rgba(13,171,139,0.3);padding:2px 10px;border-radius:20px;font-weight:700;">✓ Sincronizado</span>
+    <button onclick="fbLogout()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;">Salir</button>
   </div>
-  <div id="authLoading" style="font-size:12px;color:var(--muted);">Conectando...</div>
+
+  <div id="authLoading" style="font-size:12px;color:var(--muted);text-align:center;padding:10px;">Conectando...</div>
 </div>
 ```
 
@@ -3341,10 +3344,8 @@ window._onAuthReady = function(user) {
   if (user) {
     if (loggedOut) loggedOut.style.display = 'none';
     if (loggedIn) { loggedIn.style.display = 'flex'; }
-    const avatar = document.getElementById('authAvatar');
     const nameEl = document.getElementById('authName');
-    if (avatar && user.photoURL) avatar.src = user.photoURL;
-    if (nameEl) nameEl.textContent = user.displayName || user.email;
+    if (nameEl) nameEl.textContent = user.email;
     // Load history from Firestore
     fbLoadHistory();
   } else {
@@ -3366,32 +3367,63 @@ setTimeout(() => {
   }
 }, 10000);
 
-async function fbLogin() {
-  // If Firebase not ready yet, wait up to 8 seconds
-  if (!window._fbReady) {
-    const btn = document.querySelector('#authLoggedOut button');
-    if (btn) { btn.textContent = 'Cargando Firebase...'; btn.disabled = true; }
-    await new Promise((resolve) => {
-      window._fbPendingLogin = resolve;
-      setTimeout(resolve, 8000); // timeout fallback
-    });
-    if (btn) { btn.textContent = 'Iniciar sesion con Google para sincronizar'; btn.disabled = false; }
-  }
-  if (!window._fbAuth || !window._fbFns) {
-    alert('No se pudo conectar con Firebase. Verifica tu conexión a internet e intenta de nuevo.');
-    return;
-  }
+function fbShowError(msg) {
+  const el = document.getElementById('authError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function fbGetCredentials() {
+  const email = document.getElementById('authEmail')?.value.trim();
+  const pass = document.getElementById('authPassword')?.value;
+  if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return null; }
+  if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return null; }
+  return { email, pass };
+}
+
+// Wait up to 12 seconds for Firebase to be ready
+function waitForFirebase() {
+  return new Promise((resolve, reject) => {
+    if (window._fbReady && window._fbAuth && window._fbFns) { resolve(); return; }
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (window._fbReady && window._fbAuth && window._fbFns) {
+        clearInterval(interval); resolve();
+      } else if (attempts > 24) { // 24 * 500ms = 12 seconds
+        clearInterval(interval); reject(new Error('No se pudo conectar con Firebase. Verifica tu internet e intenta de nuevo.'));
+      }
+    }, 500);
+  });
+}
+
+async function fbRegister() {
+  const creds = fbGetCredentials(); if (!creds) return;
   try {
-    const provider = new window._fbFns.GoogleAuthProvider();
-    // Use redirect for mobile Safari (popup is blocked)
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      await window._fbFns.signInWithRedirect(window._fbAuth, provider);
-    } else {
-      await window._fbFns.signInWithPopup(window._fbAuth, provider);
-    }
+    await waitForFirebase();
+    await window._fbFns.createUserWithEmailAndPassword(window._fbAuth, creds.email, creds.pass);
   } catch(e) {
-    alert('Error al iniciar sesión: ' + e.message);
+    const msgs = {
+      'auth/email-already-in-use': 'Ese correo ya tiene cuenta. Usa "Iniciar sesión".',
+      'auth/invalid-email': 'El correo no es válido.',
+      'auth/weak-password': 'La contraseña es muy débil.'
+    };
+    fbShowError(msgs[e.code] || e.message);
+  }
+}
+
+async function fbLogin() {
+  const creds = fbGetCredentials(); if (!creds) return;
+  try {
+    await waitForFirebase();
+    await window._fbFns.signInWithEmailAndPassword(window._fbAuth, creds.email, creds.pass);
+  } catch(e) {
+    const msgs = {
+      'auth/user-not-found': 'No existe cuenta con ese correo. Usa "Crear cuenta".',
+      'auth/wrong-password': 'Contraseña incorrecta.',
+      'auth/invalid-email': 'El correo no es válido.',
+      'auth/invalid-credential': 'Correo o contraseña incorrectos.'
+    };
+    fbShowError(msgs[e.code] || e.message);
   }
 }
 
