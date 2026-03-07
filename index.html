@@ -3895,7 +3895,7 @@ function renderAgenda() {
   const materiasEsta = {};
   estaSemanaTareas.forEach(t => {
     const key = t.materia;
-    if (!materiasEsta[key]) materiasEsta[key] = { materia: key, entrega: t.entrega, diasRestantes: t.diasRestantes, tareas: [] };
+    if (!materiasEsta[key]) materiasEsta[key] = { materia: key, entrega: t.entrega, diasRestantes: t.diasRestantes, planId: t.planId, tareas: [] };
     materiasEsta[key].tareas.push(t);
   });
 
@@ -3921,7 +3921,7 @@ function renderAgenda() {
 
       html += `<div style="margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-size:13px;font-weight:700;color:var(--text);">📚 ${grupo.materia}</div>
+          <div onclick="irAPlanDesdeAgenda('${grupo.planId}')" style="font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">📚 ${grupo.materia} →</div>
           <div style="display:flex;gap:6px;">
             ${entregaLabel ? `<span style="font-size:10px;color:${diasColor};font-weight:700;background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:20px;">${entregaLabel}</span>` : ''}
             ${diasLabel ? `<span style="font-size:10px;color:${diasColor};font-weight:800;background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:20px;">${diasLabel}</span>` : ''}
