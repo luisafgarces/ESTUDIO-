@@ -4213,14 +4213,19 @@ async function fbLoadHistory() {
   const uid = window._fbUser && window._fbUser.uid;
   if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
   try {
+    const local = getHistory();
     const remote = await _fsGet('users/' + uid + '/data/history');
-    if (remote && remote.items) {
-      const local = getHistory();
-      const merged = [...remote.items];
-      local.forEach(l => { if (!merged.find(r => r.id === l.id)) merged.push(l); });
-      merged.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
-      saveHistory(merged.slice(0, 30));
-    }
+    const remoteItems = (remote && remote.items) ? remote.items : [];
+
+    // Merge: start with local, add any remote items not in local
+    const merged = [...local];
+    remoteItems.forEach(r => { if (!merged.find(l => l.id === r.id)) merged.push(r); });
+    merged.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    const final = merged.slice(0, 30);
+    saveHistory(final);
+
+    // Always push merged result back to Firebase so all devices stay in sync
+    await _fsSet('users/' + uid + '/data/history', { items: final, updatedAt: Date.now() });
   } catch(e) { console.warn('fbLoadHistory error:', e); }
   updateHistoryBadge();
   renderWeeklyAlerts();
