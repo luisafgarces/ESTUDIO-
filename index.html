@@ -4663,10 +4663,81 @@ window._fbToken = null;
       if (s && s.idToken && s.localId) {
         window._fbToken = s.idToken;
         window._fbUser  = { uid: s.localId, email: s.email };
+        window._fbRefreshToken = s.refreshToken || null;
       }
     }
   } catch(e) {}
 })();
+
+// Renueva el token usando el refreshToken de Firebase
+async function _fbRefreshIdToken() {
+  const rt = window._fbRefreshToken;
+  if (!rt) return false;
+  try {
+    const res = await fetch(
+      'https://securetoken.googleapis.com/v1/token?key=' + FB_API_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
+      }
+    );
+    if (!res.ok) return false;
+    const d = await res.json();
+    if (!d.id_token) return false;
+    window._fbToken = d.id_token;
+    window._fbRefreshToken = d.refresh_token;
+    // Actualizar sesión guardada
+    try {
+      const saved = JSON.parse(localStorage.getItem('_fb_session') || '{}');
+      saved.idToken = d.id_token;
+      saved.refreshToken = d.refresh_token;
+      localStorage.setItem('_fb_session', JSON.stringify(saved));
+    } catch(e) {}
+    return true;
+  } catch(e) { return false; }
+}
+
+// Wrapper: si la llamada falla por 401, refresca token y reintenta una vez
+async function _fsSetSafe(path, data) {
+  if (!window._fbToken) return false;
+  const res = await fetch(FB_DB_URL + '/' + path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window._fbToken },
+    body: JSON.stringify(_toFS(data))
+  });
+  if (res.status === 401) {
+    const ok = await _fbRefreshIdToken();
+    if (!ok) return false;
+    const res2 = await fetch(FB_DB_URL + '/' + path, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window._fbToken },
+      body: JSON.stringify(_toFS(data))
+    });
+    return res2.ok;
+  }
+  return res.ok;
+}
+
+async function _fsGetSafe(path) {
+  if (!window._fbToken) return null;
+  const res = await fetch(FB_DB_URL + '/' + path, {
+    headers: { 'Authorization': 'Bearer ' + window._fbToken }
+  });
+  if (res.status === 401) {
+    const ok = await _fbRefreshIdToken();
+    if (!ok) return null;
+    const res2 = await fetch(FB_DB_URL + '/' + path, {
+      headers: { 'Authorization': 'Bearer ' + window._fbToken }
+    });
+    if (!res2.ok) return null;
+    const d2 = await res2.json();
+    return d2.fields ? _fromFS(d2.fields) : null;
+  }
+  if (!res.ok) return null;
+  const d = await res.json();
+  return d.fields ? _fromFS(d.fields) : null;
+}
 
 // Una vez cargado el DOM, mostrar estado de sesión
 // Safari fix: si DOMContentLoaded ya se disparó, ejecutar de inmediato
@@ -4724,8 +4795,9 @@ async function _fbApiAuth(action, body) {
 
 function _saveSession(data) {
   window._fbToken = data.idToken;
+  window._fbRefreshToken = data.refreshToken || null;
   window._fbUser  = { uid: data.localId, email: data.email };
-  try { localStorage.setItem('_fb_session', JSON.stringify({ idToken: data.idToken, localId: data.localId, email: data.email })); } catch(e) {}
+  try { localStorage.setItem('_fb_session', JSON.stringify({ idToken: data.idToken, refreshToken: data.refreshToken || '', localId: data.localId, email: data.email })); } catch(e) {}
   _showLoggedIn(window._fbUser);
   fbLoadHistory();
 }
@@ -4795,25 +4867,8 @@ function _fromFS(fields) {
   return Object.fromEntries(Object.entries(fields || {}).map(([k,v]) => [k, pv(v)]));
 }
 
-async function _fsSet(path, data) {
-  if (!window._fbToken) return false;
-  const res = await fetch(FB_DB_URL + '/' + path, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window._fbToken },
-    body: JSON.stringify(_toFS(data))
-  });
-  return res.ok;
-}
-
-async function _fsGet(path) {
-  if (!window._fbToken) return null;
-  const res = await fetch(FB_DB_URL + '/' + path, {
-    headers: { 'Authorization': 'Bearer ' + window._fbToken }
-  });
-  if (!res.ok) return null;
-  const d = await res.json();
-  return d.fields ? _fromFS(d.fields) : null;
-}
+async function _fsSet(path, data) { return _fsSetSafe(path, data); }
+async function _fsGet(path) { return _fsGetSafe(path); }
 
 // ── SYNC HISTORY ────────────────────────────────────────────────────────────
 
