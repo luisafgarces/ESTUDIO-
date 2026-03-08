@@ -1270,8 +1270,8 @@ h1 em { color: var(--accent3); font-style: italic; }
         <input id="authEmail" type="email" placeholder="Tu correo" autocomplete="email" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--card);color:var(--text);margin-bottom:8px;outline:none;">
         <input id="authPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="current-password" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:var(--card);color:var(--text);margin-bottom:10px;outline:none;">
         <div style="display:flex;gap:8px;">
-          <button onclick="fbRegister()" style="flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Crear cuenta</button>
-          <button onclick="fbLogin()" style="flex:1;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--accent);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Iniciar sesión</button>
+          <button type="button" onclick="fbRegister()" style="flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none;">Crear cuenta</button>
+          <button type="button" onclick="fbLogin()" style="flex:1;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--accent);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;-webkit-appearance:none;">Iniciar sesión</button>
         </div>
         <div id="authError" style="margin-top:10px;font-size:13px;color:var(--accent2);text-align:center;min-height:18px;"></div>
       </div>
@@ -1868,7 +1868,7 @@ ${text}
         const d=await resp.json();
         let raw=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
         if(!raw){lastError=`${model}: respuesta vacía`;break;}
-        raw=raw.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/i,'').trim();
+        raw=raw.replace(/^[\s\S]*?({)/,'$1').replace(/}[^}]*$/,'}').trim();
         try{return JSON.parse(raw);}
         catch(e){
           const m=raw.match(/\{[\s\S]*\}/);
@@ -2546,7 +2546,7 @@ Reglas:
     // Parse JSON — robust extraction with brace-balancing
     let plan;
     try {
-      let clean = rawText.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      let clean = rawText.replace(/^[\s\S]*?({)/,'$1').replace(/}[^}]*$/,'}').trim();
 
       // Find the JSON object using brace-balancing (handles truncation gracefully)
       function extractJSON(str) {
@@ -3112,15 +3112,14 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
 
     let ideas = null;
     try {
-      const clean = text.replace(/```json[\s\S]*?```/g, m => m.slice(7,-3))
-                        .replace(/```json/g,'').replace(/```/g,'').trim();
+      const clean = text.replace(/^[\s\S]*?({)/,'$1').replace(/}[\s\S]*$/,'}').trim();
       ideas = JSON.parse(clean);
     } catch(e) { ideas = null; }
 
     if (!ideas) {
       // Show raw text formatted nicely
-      container.innerHTML = `<div style="font-size:13px;color:var(--text);line-height:1.6;background:rgba(26,154,212,0.06);border:1px solid rgba(26,154,212,0.2);border-radius:10px;padding:12px;">${text.replace(/
-/g,'<br>')}</div>`;
+      const textHtml = text.split('\n').join('<br>');
+      container.innerHTML = '<div style="font-size:13px;color:var(--text);line-height:1.6;background:rgba(26,154,212,0.06);border:1px solid rgba(26,154,212,0.2);border-radius:10px;padding:12px;">' + textHtml + '</div>';
     } else {
       const tipos = [
         { key: 'respuesta_docente', label: '❓ Responder al docente', color: 'rgba(26,154,212,0.08)', border: 'rgba(26,154,212,0.25)' },
@@ -3688,7 +3687,7 @@ async function callGeminiPlag(apiKey, prompt) {
       if (!resp.ok) { const e = await resp.json().catch(()=>({})); lastErr = e.error?.message || resp.status; continue; }
       const data = await resp.json();
       let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      raw = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+      raw = raw.replace(/^[\s\S]*?({)/,'$1').replace(/}[^}]*$/,'}').trim();
       const m = raw.match(/\{[\s\S]*\}/);
       return JSON.parse(m ? m[0] : raw);
     } catch(e) { lastErr = e.message; }
@@ -4315,11 +4314,11 @@ function _saveSession(data) {
 }
 
 async function fbRegister() {
-  const email = (document.getElementById('authEmail') || {}).value.trim();
-  const pass  = (document.getElementById('authPassword') || {}).value;
+  const email = (document.getElementById('authEmail') || {}).value?.trim() || '';
+  const pass  = (document.getElementById('authPassword') || {}).value || '';
   if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
   if (pass.length < 6) { fbShowError('La contraseña debe tener mínimo 6 caracteres.'); return; }
-  fbShowError('Creando cuenta...');
+  fbShowError('⏳ Creando cuenta...');
   try {
     const data = await _fbApiAuth('signUp', { email, password: pass });
     _saveSession(data);
@@ -4330,10 +4329,10 @@ async function fbRegister() {
 }
 
 async function fbLogin() {
-  const email = (document.getElementById('authEmail') || {}).value.trim();
-  const pass  = (document.getElementById('authPassword') || {}).value;
+  const email = (document.getElementById('authEmail') || {}).value?.trim() || '';
+  const pass  = (document.getElementById('authPassword') || {}).value || '';
   if (!email || !pass) { fbShowError('Ingresa tu correo y contraseña.'); return; }
-  fbShowError('Iniciando sesión...');
+  fbShowError('⏳ Iniciando sesión...');
   try {
     const data = await _fbApiAuth('signInWithPassword', { email, password: pass });
     _saveSession(data);
