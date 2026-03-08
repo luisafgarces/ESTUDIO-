@@ -3266,50 +3266,34 @@ async function _foroCargarNuevaIdea(apiKey, container, triggerBtn, version) {
     `${e.numero}. ${e.descripcion}${e.nota ? ' (' + e.nota + ')' : ''}`
   ).join('\n');
 
-  // temperature sube un poco con cada versión para más variedad
-  const temp = Math.min(0.3 + (version - 1) * 0.15, 0.9);
+  const temp = Math.min(0.4 + (version - 1) * 0.15, 0.95);
 
-  const prompt = `Eres un tutor universitario experto. El estudiante tiene TDAH y TOC y necesita participar en un foro académico virtual.
+  const prompt = `Eres un tutor universitario. El estudiante tiene TDAH y TOC y necesita participar en un foro académico.
 
-===== CONTEXTO COMPLETO DEL PLAN =====
+CONTEXTO DEL PLAN:
 Materia: ${currentPlan.materia || currentPlan.titulo || ''}
-Tipo de actividad: ${currentPlan.actividad || ''}
-Resumen del trabajo: ${currentPlan.resumen || ''}
+Actividad: ${currentPlan.actividad || ''}
+Resumen: ${currentPlan.resumen || ''}
+Entregables: ${entregables}
+Tareas del plan: ${tareasCompletas}
+Tareas de foro: ${foroTareas || 'participación general'}
+Lecturas: ${lecturas}
 
-Entregables:
-${entregables}
+Escribe 4 participaciones completas para el foro, cada una lista para copiar y pegar. Esta es la versión ${version}, así que si ya generaste antes, escribe ideas DIFERENTES.
 
-Todas las tareas del plan:
-${tareasCompletas}
+Usa EXACTAMENTE este formato (respeta los separadores):
 
-Tareas específicas de foro identificadas:
-${foroTareas || '(participación general en foro)'}
+###DOCENTE###
+Escribe aquí un párrafo de 4 a 6 oraciones completas respondiendo la pregunta del docente. Usa conceptos específicos del tema. No uses puntos suspensivos. Termina con punto final.
 
-Lecturas requeridas:
-${lecturas}
-======================================
+###COMPAÑERO###
+Escribe aquí un párrafo de 3 a 5 oraciones completas comentando el aporte de un compañero. Amplía con ideas del trabajo. Termina con punto final.
 
-Con base en TODO ese contexto, genera 4 ideas de participación en el foro. Cada idea debe ser un párrafo completo, bien redactado, listo para copiar y usar directamente en el foro. No cortes frases. No uses puntos suspensivos.
+###APORTE###
+Escribe aquí un párrafo de 4 a 6 oraciones completas con tu reflexión original sobre el tema. Usa terminología de la materia. Termina con punto final.
 
-Responde ÚNICAMENTE en este formato JSON, sin markdown ni texto extra:
-{
-  "docente": {
-    "titulo": "Respuesta al docente",
-    "texto": "Párrafo completo de 3-5 oraciones respondiendo la pregunta orientadora del docente, usando conceptos específicos del tema."
-  },
-  "companero": {
-    "titulo": "Comentario a un compañero",
-    "texto": "Párrafo completo de 2-4 oraciones comentando el aporte de un compañero, ampliando o relacionando con el contenido del trabajo."
-  },
-  "aporte": {
-    "titulo": "Aporte original al debate",
-    "texto": "Párrafo completo de 3-5 oraciones con una reflexión o argumento original directamente relacionado con el tema del trabajo, usando terminología de la materia."
-  },
-  "ejemplo": {
-    "titulo": "Ejemplo o caso aplicado",
-    "texto": "Párrafo completo de 2-4 oraciones con un ejemplo concreto, caso de la vida real o aplicación práctica del tema tratado en el plan."
-  }
-}`;
+###EJEMPLO###
+Escribe aquí un párrafo de 3 a 5 oraciones completas con un ejemplo concreto o caso real del tema. Termina con punto final.`;
 
   try {
     const resp = await fetch(
@@ -3319,20 +3303,45 @@ Responde ÚNICAMENTE en este formato JSON, sin markdown ni texto extra:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: temp, maxOutputTokens: 2000, responseMimeType: 'application/json' }
+          generationConfig: { temperature: temp, maxOutputTokens: 2048 }
         })
       }
     );
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
 
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    let ideas;
-    try {
-      const clean = rawText.replace(/^```json\s*/,'').replace(/```\s*$/,'').trim();
-      ideas = JSON.parse(clean);
-    } catch(e) {
-      throw new Error('La IA devolvió un formato inesperado. Intenta de nuevo.');
+    const rawText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    if (!rawText) throw new Error('La IA no devolvió contenido. Intenta de nuevo.');
+
+    // Parse por separadores — robusto sin depender de JSON
+    function extraerSeccion(texto, tag) {
+      const marker = '###' + tag + '###';
+      const next = ['###DOCENTE###','###COMPAÑERO###','###APORTE###','###EJEMPLO###'];
+      const start = texto.indexOf(marker);
+      if (start === -1) return '';
+      let end = texto.length;
+      for (const n of next) {
+        if (n === marker) continue;
+        const idx = texto.indexOf(n, start + marker.length);
+        if (idx !== -1 && idx < end) end = idx;
+      }
+      return texto.slice(start + marker.length, end).replace(/\*\*/g,'').replace(/\*/g,'').trim();
+    }
+
+    const ideas = {
+      docente:   { titulo: 'Respuesta al docente',      texto: extraerSeccion(rawText, 'DOCENTE') },
+      companero: { titulo: 'Comentario a un compañero', texto: extraerSeccion(rawText, 'COMPAÑERO') },
+      aporte:    { titulo: 'Aporte original al debate', texto: extraerSeccion(rawText, 'APORTE') },
+      ejemplo:   { titulo: 'Ejemplo aplicado',          texto: extraerSeccion(rawText, 'EJEMPLO') }
+    };
+
+    // Si los separadores fallaron (Gemini los ignoró), intentar dividir por párrafos
+    const totalExtraido = Object.values(ideas).filter(i => i.texto.length > 20).length;
+    if (totalExtraido < 2) {
+      const parrafos = rawText.split(/\n{2,}/).map(p => p.replace(/\*\*/g,'').replace(/\*/g,'').trim()).filter(p => p.length > 40);
+      const keys = ['docente','companero','aporte','ejemplo'];
+      const titulos = ['Respuesta al docente','Comentario a un compañero','Aporte original al debate','Ejemplo aplicado'];
+      keys.forEach((k, i) => { if (parrafos[i]) ideas[k] = { titulo: titulos[i], texto: parrafos[i] }; });
     }
 
     const tipos = [
