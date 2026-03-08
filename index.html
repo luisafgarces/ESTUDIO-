@@ -4672,7 +4672,8 @@ window._fbToken = null;
 // Renueva el token usando el refreshToken de Firebase
 async function _fbRefreshIdToken() {
   const rt = window._fbRefreshToken;
-  if (!rt) return false;
+  if (!rt) { _syncLog('Refresh: sin refreshToken guardado', 'var(--accent2)'); return false; }
+  _syncLog('Refrescando token...', 'var(--muted2)');
   try {
     const res = await fetch(
       'https://securetoken.googleapis.com/v1/token?key=' + FB_API_KEY,
@@ -4682,12 +4683,12 @@ async function _fbRefreshIdToken() {
         body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: rt })
       }
     );
-    if (!res.ok) return false;
+    if (!res.ok) { _syncLog('Refresh HTTP error: ' + res.status, 'var(--accent2)'); return false; }
     const d = await res.json();
-    if (!d.id_token) return false;
+    if (!d.id_token) { _syncLog('Refresh: sin id_token en respuesta', 'var(--accent2)'); return false; }
     window._fbToken = d.id_token;
     window._fbRefreshToken = d.refresh_token;
-    // Actualizar sesión guardada
+    _syncLog('Token renovado OK', 'var(--accent3)');
     try {
       const saved = JSON.parse(localStorage.getItem('_fb_session') || '{}');
       saved.idToken = d.id_token;
@@ -4695,7 +4696,7 @@ async function _fbRefreshIdToken() {
       localStorage.setItem('_fb_session', JSON.stringify(saved));
     } catch(e) {}
     return true;
-  } catch(e) { return false; }
+  } catch(e) { _syncLog('Refresh error: ' + e.message, 'var(--accent2)'); return false; }
 }
 
 // Wrapper: si la llamada falla por 401, refresca token y reintenta una vez
@@ -4720,32 +4721,86 @@ async function _fsSetSafe(path, data) {
 }
 
 async function _fsGetSafe(path) {
-  if (!window._fbToken) return null;
+  if (!window._fbToken) { _syncLog('GET sin token', 'var(--accent2)'); return null; }
   const res = await fetch(FB_DB_URL + '/' + path, {
     headers: { 'Authorization': 'Bearer ' + window._fbToken }
   });
   if (res.status === 401) {
+    _syncLog('GET 401 — token expirado, refrescando...', 'var(--warn)');
     const ok = await _fbRefreshIdToken();
-    if (!ok) return null;
+    if (!ok) { _syncLog('No se pudo refrescar token', 'var(--accent2)'); return null; }
     const res2 = await fetch(FB_DB_URL + '/' + path, {
       headers: { 'Authorization': 'Bearer ' + window._fbToken }
     });
-    if (!res2.ok) return null;
+    if (!res2.ok) { _syncLog('GET reintento falló: ' + res2.status, 'var(--accent2)'); return null; }
     const d2 = await res2.json();
     return d2.fields ? _fromFS(d2.fields) : null;
   }
-  if (!res.ok) return null;
+  if (!res.ok) { _syncLog('GET error HTTP: ' + res.status, 'var(--accent2)'); return null; }
   const d = await res.json();
   return d.fields ? _fromFS(d.fields) : null;
+}
+
+// ── DIAGNÓSTICO VISIBLE ────────────────────────────────────────────────────
+function _syncLog(msg, color) {
+  color = color || 'var(--muted2)';
+  const el = document.getElementById('syncDebugLog');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.style.cssText = 'font-size:11px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05);color:' + color;
+  line.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+  el.insertBefore(line, el.firstChild);
+  // Mantener máx 20 líneas
+  while (el.children.length > 20) el.removeChild(el.lastChild);
+}
+
+function toggleSyncDebug() {
+  const panel = document.getElementById('syncDebugPanel');
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+// Inyectar panel de debug en el DOM cuando esté listo
+function _injectDebugPanel() {
+  if (document.getElementById('syncDebugPanel')) return;
+  const div = document.createElement('div');
+  div.id = 'syncDebugPanel';
+  div.style.cssText = 'display:none;position:fixed;bottom:60px;right:12px;width:320px;max-height:280px;background:#0d1f2d;border:1px solid rgba(26,154,212,0.4);border-radius:14px;z-index:9999;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
+  div.innerHTML = '<div style="padding:10px 14px;background:rgba(26,154,212,0.15);display:flex;justify-content:space-between;align-items:center;">'
+    + '<span style="font-family:Syne,sans-serif;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;">🔧 DIAGNÓSTICO SYNC</span>'
+    + '<div style="display:flex;gap:8px;">'
+    + '<button onclick="fbLoadHistory().then(()=>_syncLog(\'Sync manual OK\',\'var(--accent3)\'))" style="background:rgba(26,154,212,0.2);border:1px solid rgba(26,154,212,0.4);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🔄 Sync</button>'
+    + '<button onclick="toggleSyncDebug()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>'
+    + '</div></div>'
+    + '<div id="syncDebugLog" style="padding:8px 12px;overflow-y:auto;max-height:220px;"></div>';
+  document.body.appendChild(div);
+
+  // Botón flotante para abrir el panel
+  const fab = document.createElement('button');
+  fab.id = 'syncDebugFab';
+  fab.onclick = toggleSyncDebug;
+  fab.title = 'Diagnóstico sync';
+  fab.style.cssText = 'position:fixed;bottom:14px;right:14px;width:44px;height:44px;border-radius:50%;background:rgba(26,154,212,0.15);border:1px solid rgba(26,154,212,0.35);color:var(--accent);font-size:18px;cursor:pointer;z-index:9998;display:flex;align-items:center;justify-content:center;';
+  fab.textContent = '🔧';
+  document.body.appendChild(fab);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _injectDebugPanel);
+} else {
+  setTimeout(_injectDebugPanel, 500);
 }
 
 // Una vez cargado el DOM, mostrar estado de sesión
 // Safari fix: si DOMContentLoaded ya se disparó, ejecutar de inmediato
 function _initAuthUI() {
   if (window._fbUser) {
+    _syncLog('Sesión restaurada: ' + (window._fbUser.email || window._fbUser.uid), 'var(--accent3)');
+    _syncLog('Token: ' + (window._fbToken ? window._fbToken.slice(0,20) + '...' : 'VACÍO'), window._fbToken ? 'var(--muted2)' : 'var(--accent2)');
+    _syncLog('RefreshToken: ' + (window._fbRefreshToken ? 'presente' : 'AUSENTE'), window._fbRefreshToken ? 'var(--muted2)' : 'var(--accent2)');
     _showLoggedIn(window._fbUser);
     fbLoadHistory();
   } else {
+    _syncLog('Sin sesión activa', 'var(--warn)');
     _showLoggedOut();
   }
 }
@@ -4874,13 +4929,15 @@ async function _fsGet(path) { return _fsGetSafe(path); }
 
 async function fbLoadHistory() {
   const uid = window._fbUser && window._fbUser.uid;
-  if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); return; }
+  if (!uid) { updateHistoryBadge(); renderWeeklyAlerts(); _syncLog('fbLoadHistory: sin usuario', 'var(--warn)'); return; }
+  _syncLog('fbLoadHistory: iniciando...', 'var(--muted2)');
   try {
     const local = getHistory();
+    _syncLog('Local: ' + local.length + ' planes', 'var(--muted2)');
     const remote = await _fsGet('users/' + uid + '/data/history');
     const remoteItems = (remote && remote.items) ? remote.items : [];
+    _syncLog('Firebase: ' + remoteItems.length + ' planes' + (remote ? '' : ' (null — posible error)'), remote ? 'var(--accent3)' : 'var(--accent2)');
 
-    // Merge: para cada id, gana la versión con mayor updatedAt
     const map = {};
     [...local, ...remoteItems].forEach(item => {
       const existing = map[item.id];
@@ -4891,10 +4948,11 @@ async function fbLoadHistory() {
     const merged = Object.values(map).sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     const final = merged.slice(0, 30);
     saveHistory(final);
+    _syncLog('Merge OK: ' + final.length + ' planes guardados', 'var(--accent3)');
 
-    // Subir resultado fusionado para que todos los dispositivos queden igual
     await _fsSet('users/' + uid + '/data/history', { items: final, updatedAt: Date.now() });
-  } catch(e) { console.warn('fbLoadHistory error:', e); }
+    _syncLog('Upload a Firebase: OK', 'var(--accent3)');
+  } catch(e) { _syncLog('ERROR: ' + e.message, 'var(--accent2)'); console.warn('fbLoadHistory error:', e); }
   updateHistoryBadge();
   renderWeeklyAlerts();
 }
