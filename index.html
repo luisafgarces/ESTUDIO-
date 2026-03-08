@@ -2434,6 +2434,7 @@ Estructura requerida:
 
 Reglas:
 - 3 a 5 bloques concretos y accionables
+- Si el documento menciona foro, participación en foro, aportes en foro o retroalimentación entre compañeros, SIEMPRE incluye una tarea específica para eso en el bloque correspondiente (ej: "Publicar aporte en el foro", "Comentar a un compañero en el foro"). Tipo: "action".
 - Checklist de 5-6 ítems
 - 2 consejos TDAH y 2 consejos TOC
 - materia: extrae el nombre exacto de la materia o curso del documento. Si no aparece, infiere por el tema.
@@ -3044,7 +3045,7 @@ function notasLoadData(planId) {
 
 async function generarIdeasForo(taskId, btn) {
   const container = document.getElementById('foro-' + taskId);
-  if (!container) return;
+  if (!container) { console.error('No container for', taskId); return; }
 
   // Toggle off if already showing
   if (container.style.display !== 'none') {
@@ -3054,13 +3055,16 @@ async function generarIdeasForo(taskId, btn) {
   }
 
   const apiKey = getApiKey();
-  if (!apiKey) { alert('Primero configura tu API Key.'); return; }
+  if (!apiKey) { alert('Primero configura tu API Key de Google.'); return; }
 
-  // Get task context from DOM
-  const taskEl = document.getElementById(taskId);
-  const titulo = taskEl ? taskEl.querySelector('div[style*="font-weight:500"]')?.textContent?.trim() : '';
-  const descripcion = taskEl ? taskEl.querySelectorAll('div')[2]?.textContent?.trim() : '';
-  const materia = currentPlan?.titulo || '';
+  // Get task context from currentPlan data (more reliable than DOM)
+  const parts = taskId.replace('tarea-','').split('-');
+  const bi = parseInt(parts[0]), ti = parseInt(parts[1]);
+  const bloque = currentPlan?.bloques?.[bi];
+  const t = bloque?.tareas?.[ti];
+  const titulo = t?.titulo || taskId;
+  const descripcion = t?.descripcion || '';
+  const materia = currentPlan?.titulo || currentPlan?.materia || '';
 
   btn.textContent = '⏳ Generando ideas...';
   btn.disabled = true;
