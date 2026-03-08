@@ -3115,10 +3115,12 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
 
     let ideas = null;
     try {
-      // Always extract first { ... } block regardless of fences
+      // Extract JSON block and normalize quotes
       const jsonStart = text.indexOf('{');
       const jsonEnd = text.lastIndexOf('}');
-      const clean = (jsonStart !== -1 && jsonEnd !== -1) ? text.slice(jsonStart, jsonEnd + 1) : text;
+      let clean = (jsonStart !== -1 && jsonEnd !== -1) ? text.slice(jsonStart, jsonEnd + 1) : text;
+      // Normalize curly/smart quotes to straight quotes
+      clean = clean.replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'");
       ideas = JSON.parse(clean);
     } catch(e) { ideas = null; }
 
