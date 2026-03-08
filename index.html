@@ -3086,7 +3086,9 @@ Genera 4 ideas para participar en el foro académico sobre este tema. Cada idea 
 DOCENTE: Escribe aquí una idea completa y detallada de cómo responder la pregunta del docente, conectando el tema con conceptos clave del curso.
 COMPAÑERO: Escribe aquí una idea completa de cómo comentar el aporte de un compañero, ya sea complementando, preguntando o relacionando con otro concepto.
 APORTE: Escribe aquí una idea completa de un aporte original que puedas hacer al foro, con un argumento o ejemplo concreto del tema.
-PUBLICAR: Escribe aquí una idea completa de qué publicar para enriquecer el debate del foro, puede ser un caso, reflexión o conexión con la realidad.`;
+PUBLICAR: Escribe aquí una idea completa de qué publicar para enriquecer el debate del foro, puede ser un caso, reflexión o conexión con la realidad.
+
+IMPORTANTE: No uses asteriscos, negrillas, cursivas ni ningún formato markdown. Solo texto plano.`;
 
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -3112,8 +3114,10 @@ PUBLICAR: Escribe aquí una idea completa de qué publicar para enriquecer el de
       return;
     }
 
+    // Clean markdown from response
+    const cleanText = text.replace(/\*\*([^*]+)\*\*/g,'$1').replace(/\*([^*]+)\*/g,'$1').replace(/#+\s/g,'').replace(/_([^_]+)_/g,'$1');
     // Parse plain text response
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    const lines = cleanText.split('\n').map(l => l.trim()).filter(l => l);
     const ideas = {};
     lines.forEach(line => {
       if (line.startsWith('DOCENTE:')) ideas.docente = line.replace('DOCENTE:','').trim();
