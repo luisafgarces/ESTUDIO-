@@ -3092,15 +3092,31 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
     );
 
     const data = await resp.json();
+    console.log('foro response:', JSON.stringify(data).slice(0, 300));
+    
+    // Check for API error
+    if (data.error) {
+      container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Error API: ${data.error.message}</div>`;
+      return;
+    }
+
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    let ideas = {};
+    if (!text) {
+      container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Sin respuesta de la IA. Verifica tu API Key.</div>`;
+      return;
+    }
+
+    let ideas = null;
     try {
-      const clean = text.replace(/```json|```/g, '').trim();
+      const clean = text.replace(/```json[\s\S]*?```/g, m => m.slice(7,-3))
+                        .replace(/```json/g,'').replace(/```/g,'').trim();
       ideas = JSON.parse(clean);
     } catch(e) { ideas = null; }
 
     if (!ideas) {
-      container.innerHTML = `<div style="font-size:12px;color:var(--muted2);">${text}</div>`;
+      // Show raw text formatted nicely
+      container.innerHTML = `<div style="font-size:13px;color:var(--text);line-height:1.6;background:rgba(26,154,212,0.06);border:1px solid rgba(26,154,212,0.2);border-radius:10px;padding:12px;">${text.replace(/
+/g,'<br>')}</div>`;
     } else {
       const tipos = [
         { key: 'respuesta_docente', label: '❓ Responder al docente', color: 'rgba(26,154,212,0.08)', border: 'rgba(26,154,212,0.25)' },
@@ -3121,7 +3137,8 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
       container.innerHTML = html;
     }
   } catch(e) {
-    container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Error al generar ideas. Intenta de nuevo.</div>`;
+    container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Error: ${e.message}. Intenta de nuevo.</div>`;
+    console.error('foro error:', e);
   }
 
   btn.textContent = '💬 Ideas para el foro';
