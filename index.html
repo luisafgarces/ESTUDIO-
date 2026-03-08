@@ -3081,13 +3081,12 @@ Materia: ${materia}
 Tarea: ${titulo}
 Descripción: ${descripcion}
 
-Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada tipo, da 1-2 ideas específicas sobre este tema. Responde SOLO en JSON:
-{
-  "respuesta_docente": "idea concreta de cómo responder la pregunta del docente sobre este tema",
-  "comentar_compañero": "idea concreta de cómo comentar el aporte de un compañero sobre este tema",
-  "aporte_propio": "idea concreta de un aporte original que puedas hacer sobre este tema",
-  "publicar": "idea de qué publicar relacionado con este tema para enriquecer el foro"
-}`;
+Genera 4 ideas CONCRETAS y CORTAS para participar en el foro. Responde EXACTAMENTE en este formato (sin JSON, sin markdown, solo este texto):
+
+DOCENTE: [idea de cómo responder la pregunta del docente sobre este tema]
+COMPAÑERO: [idea de cómo comentar el aporte de un compañero]
+APORTE: [idea de un aporte original que puedas hacer]
+PUBLICAR: [idea de qué publicar para enriquecer el foro]`;
 
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -3113,40 +3112,40 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
       return;
     }
 
-    let ideas = null;
-    try {
-      // Extract JSON block and normalize quotes
-      const jsonStart = text.indexOf('{');
-      const jsonEnd = text.lastIndexOf('}');
-      let clean = (jsonStart !== -1 && jsonEnd !== -1) ? text.slice(jsonStart, jsonEnd + 1) : text;
-      // Normalize curly/smart quotes to straight quotes
-      clean = clean.replace(/[“”„‟]/g, '"').replace(/[‘’‚‛]/g, "'");
-      ideas = JSON.parse(clean);
-    } catch(e) { ideas = null; }
+    // Parse plain text response
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    const ideas = {};
+    lines.forEach(line => {
+      if (line.startsWith('DOCENTE:')) ideas.docente = line.replace('DOCENTE:','').trim();
+      else if (line.startsWith('COMPAÑERO:')) ideas.companero = line.replace('COMPAÑERO:','').trim();
+      else if (line.startsWith('APORTE:')) ideas.aporte = line.replace('APORTE:','').trim();
+      else if (line.startsWith('PUBLICAR:')) ideas.publicar = line.replace('PUBLICAR:','').trim();
+    });
 
-    if (!ideas) {
-      // Show raw text formatted nicely
-      const textHtml = text.split('\n').join('<br>');
-      container.innerHTML = '<div style="font-size:13px;color:var(--text);line-height:1.6;background:rgba(26,154,212,0.06);border:1px solid rgba(26,154,212,0.2);border-radius:10px;padding:12px;">' + textHtml + '</div>';
-    } else {
-      const tipos = [
-        { key: 'respuesta_docente', label: '❓ Responder al docente', color: 'rgba(26,154,212,0.08)', border: 'rgba(26,154,212,0.25)' },
-        { key: 'comentar_compañero', label: '🗣️ Comentar a un compañero', color: 'rgba(13,171,139,0.08)', border: 'rgba(13,171,139,0.25)' },
-        { key: 'aporte_propio', label: '✍️ Tu aporte propio', color: 'rgba(212,146,10,0.08)', border: 'rgba(212,146,10,0.25)' },
-        { key: 'publicar', label: '📢 Qué publicar', color: 'rgba(224,90,122,0.08)', border: 'rgba(224,90,122,0.25)' }
-      ];
-      let html = `<div style="display:flex;flex-direction:column;gap:8px;">`;
-      tipos.forEach(tipo => {
-        if (ideas[tipo.key]) {
-          html += `<div style="background:${tipo.color};border:1px solid ${tipo.border};border-radius:10px;padding:10px 12px;">
-            <div style="font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:4px;letter-spacing:0.5px;">${tipo.label}</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.5;">${ideas[tipo.key]}</div>
-          </div>`;
-        }
-      });
-      html += `</div>`;
-      container.innerHTML = html;
+    const tipos = [
+      { key: 'docente',   label: '❓ Responder al docente',      color: 'rgba(26,154,212,0.08)',  border: 'rgba(26,154,212,0.25)' },
+      { key: 'companero', label: '🗣️ Comentar a un compañero',   color: 'rgba(13,171,139,0.08)',  border: 'rgba(13,171,139,0.25)' },
+      { key: 'aporte',    label: '✍️ Tu aporte propio',           color: 'rgba(212,146,10,0.08)',  border: 'rgba(212,146,10,0.25)' },
+      { key: 'publicar',  label: '📢 Qué publicar',               color: 'rgba(224,90,122,0.08)', border: 'rgba(224,90,122,0.25)' }
+    ];
+
+    let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    let found = false;
+    tipos.forEach(tipo => {
+      if (ideas[tipo.key]) {
+        found = true;
+        html += '<div style="background:' + tipo.color + ';border:1px solid ' + tipo.border + ';border-radius:10px;padding:10px 12px;">'
+              + '<div style="font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:4px;">' + tipo.label + '</div>'
+              + '<div style="font-size:13px;color:var(--text);line-height:1.5;">' + ideas[tipo.key] + '</div>'
+              + '</div>';
+      }
+    });
+    if (!found) {
+      // Fallback: show raw text
+      html += '<div style="font-size:13px;color:var(--text);line-height:1.6;padding:4px;">' + text.split('\n').join('<br>') + '</div>';
     }
+    html += '</div>';
+    container.innerHTML = html;
   } catch(e) {
     container.innerHTML = `<div style="font-size:12px;color:var(--accent2);">Error: ${e.message}. Intenta de nuevo.</div>`;
     console.error('foro error:', e);
