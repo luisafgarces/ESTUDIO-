@@ -4754,6 +4754,23 @@ function _syncLog(msg, color) {
   while (el.children.length > 20) el.removeChild(el.lastChild);
 }
 
+async function _forceUpload() {
+  const uid = window._fbUser && window._fbUser.uid;
+  if (!uid) { _syncLog('Sin usuario', 'var(--accent2)'); return; }
+  const local = getHistory();
+  // Sellar updatedAt en todos los planes locales que no lo tengan
+  const now = Date.now();
+  local.forEach(item => { if (!item.updatedAt) item.updatedAt = now; });
+  saveHistory(local);
+  _syncLog('Subiendo ' + local.length + ' planes a Firebase...', 'var(--warn)');
+  const ok = await _fsSet('users/' + uid + '/data/history', { items: local, updatedAt: now });
+  if (ok) {
+    _syncLog('✅ Subida forzada OK — recarga el iPad', 'var(--accent3)');
+  } else {
+    _syncLog('❌ Error al subir', 'var(--accent2)');
+  }
+}
+
 async function _debugFirebase() {
   const uid = window._fbUser && window._fbUser.uid;
   if (!uid) { _syncLog('Sin usuario', 'var(--accent2)'); return; }
@@ -4791,6 +4808,7 @@ function _injectDebugPanel() {
     + '<div style="display:flex;gap:8px;">'
     + '<button onclick="fbLoadHistory().then(()=>_syncLog(\'Sync manual OK\',\'var(--accent3)\'))" style="background:rgba(26,154,212,0.2);border:1px solid rgba(26,154,212,0.4);color:var(--accent);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🔄 Sync</button>'
     + '<button onclick="_debugFirebase()" style="background:rgba(212,146,10,0.2);border:1px solid rgba(212,146,10,0.4);color:var(--warn);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">🔍 Ver FB</button>'
+    + '<button onclick="_forceUpload()" style="background:rgba(13,171,139,0.2);border:1px solid rgba(13,171,139,0.4);color:var(--accent3);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">⬆️ Subir</button>'
     + '<button onclick="toggleSyncDebug()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>'
     + '</div></div>'
     + '<div id="syncDebugLog" style="padding:8px 12px;overflow-y:auto;max-height:220px;"></div>';
