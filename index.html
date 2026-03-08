@@ -4939,9 +4939,10 @@ async function fbLoadHistory() {
     _syncLog('Firebase: ' + remoteItems.length + ' planes' + (remote ? '' : ' (null — posible error)'), remote ? 'var(--accent3)' : 'var(--accent2)');
 
     const map = {};
-    [...local, ...remoteItems].forEach(item => {
+    // Remoto primero, local segundo: cuando hay empate (updatedAt igual o ausente) gana Firebase
+    [...remoteItems, ...local].forEach(item => {
       const existing = map[item.id];
-      if (!existing || (item.updatedAt || 0) > (existing.updatedAt || 0)) {
+      if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
         map[item.id] = item;
       }
     });
@@ -4949,9 +4950,18 @@ async function fbLoadHistory() {
     const final = merged.slice(0, 30);
     saveHistory(final);
     _syncLog('Merge OK: ' + final.length + ' planes guardados', 'var(--accent3)');
+    renderHistoryList();
 
     await _fsSet('users/' + uid + '/data/history', { items: final, updatedAt: Date.now() });
     _syncLog('Upload a Firebase: OK', 'var(--accent3)');
+
+    // Si hay un plan abierto, refrescarlo con los datos más recientes
+    if (currentHistoryId) {
+      const updated = final.find(h => h.id === currentHistoryId);
+      if (updated && updated.plan) {
+        renderPlan(updated.plan, updated.checklistDone || [], updated.lecturasDone || [], updated.tasksDone || []);
+      }
+    }
   } catch(e) { _syncLog('ERROR: ' + e.message, 'var(--accent2)'); console.warn('fbLoadHistory error:', e); }
   updateHistoryBadge();
   renderWeeklyAlerts();
