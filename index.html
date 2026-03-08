@@ -1830,7 +1830,7 @@ ${text}
   // Modelos en orden de preferencia — si uno falla por demanda, prueba el siguiente
   const MODELS = [
     'gemini-2.5-flash',
-    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash',
     'gemini-1.5-flash'
   ];
 
@@ -2434,7 +2434,10 @@ Estructura requerida:
 
 Reglas:
 - 3 a 5 bloques concretos y accionables
-- Si el documento menciona foro, participación en foro, aportes en foro o retroalimentación entre compañeros, SIEMPRE incluye una tarea específica para eso en el bloque correspondiente (ej: "Publicar aporte en el foro", "Comentar a un compañero en el foro"). Tipo: "action".
+- Si el documento menciona foro, participación en foro, aportes o retroalimentación entre compañeros, SIEMPRE incluye 2 tareas separadas en el bloque correspondiente:
+  1. Tarea "Publicar mi aporte en el foro" con descripción concreta de QUÉ escribir basado en el tema del documento (no solo decir "participa", sino "escribe sobre X"). Tipo: "action".
+  2. Tarea "Comentar a un compañero en el foro" con descripción de cómo hacerlo (qué preguntar o aportar al comentario de otro). Tipo: "action".
+  La nota de cada tarea debe incluir el plazo o fecha límite si está en el documento.
 - Checklist de 5-6 ítems
 - 2 consejos TDAH y 2 consejos TOC
 - materia: extrae el nombre exacto de la materia o curso del documento. Si no aparece, infiere por el tema.
@@ -2449,7 +2452,7 @@ Reglas:
     // Auto-detect best available model
     const CANDIDATE_MODELS = [
       'gemini-2.5-flash',
-      'gemini-2.0-flash-lite',
+      'gemini-2.0-flash',
       'gemini-1.5-flash'
     ];
 
@@ -3656,7 +3659,7 @@ async function callGeminiPlag(apiKey, prompt) {
   // Auto-detect available models (same candidates as main planner)
   const CANDIDATES = [
     'gemini-2.5-flash',
-    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash',
     'gemini-1.5-flash'
   ];
   let MODELS = CANDIDATES;
