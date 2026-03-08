@@ -3075,27 +3075,21 @@ async function generarIdeasForo(taskId, btn) {
   container.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;">Pensando ideas para tu foro...</div>`;
 
   try {
-    const prompt = `Eres un tutor universitario de la UNAD. El estudiante tiene TDAH y TOC.
+    const prompt = `Eres un tutor de la UNAD. Responde SOLO con estas 4 líneas, sin nada más, sin markdown, sin asteriscos, sin introducción:
 
-Materia: ${materia}
-Tarea: ${titulo}
-Descripción: ${descripcion}
+DOCENTE: [escribe UNA oración completa diciendo qué responderías al docente sobre "${titulo}" en la materia ${materia}]
+COMPAÑERO: [escribe UNA oración completa diciendo cómo comentarías el aporte de un compañero sobre este tema]
+APORTE: [escribe UNA oración completa con un aporte original tuyo para el foro sobre este tema]
+PUBLICAR: [escribe UNA oración completa sobre qué publicarías en el foro para enriquecer el debate]
 
-Genera 4 ideas para participar en el foro académico sobre este tema. Cada idea debe ser COMPLETA (2-3 oraciones), específica y accionable. Responde EXACTAMENTE en este formato (sin JSON, sin markdown, sin asteriscos):
-
-DOCENTE: Escribe aquí una idea completa y detallada de cómo responder la pregunta del docente, conectando el tema con conceptos clave del curso.
-COMPAÑERO: Escribe aquí una idea completa de cómo comentar el aporte de un compañero, ya sea complementando, preguntando o relacionando con otro concepto.
-APORTE: Escribe aquí una idea completa de un aporte original que puedas hacer al foro, con un argumento o ejemplo concreto del tema.
-PUBLICAR: Escribe aquí una idea completa de qué publicar para enriquecer el debate del foro, puede ser un caso, reflexión o conexión con la realidad.
-
-IMPORTANTE: No uses asteriscos, negrillas, cursivas ni ningún formato markdown. Solo texto plano.`;
+Cada línea debe terminar con punto. Máximo 30 palabras por línea.`;
 
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 1200 } })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 400 } })
       }
     );
 
