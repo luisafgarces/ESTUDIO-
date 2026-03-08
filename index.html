@@ -3081,19 +3081,19 @@ Materia: ${materia}
 Tarea: ${titulo}
 Descripción: ${descripcion}
 
-Genera 4 ideas CONCRETAS y CORTAS para participar en el foro. Responde EXACTAMENTE en este formato (sin JSON, sin markdown, solo este texto):
+Genera 4 ideas para participar en el foro académico sobre este tema. Cada idea debe ser COMPLETA (2-3 oraciones), específica y accionable. Responde EXACTAMENTE en este formato (sin JSON, sin markdown, sin asteriscos):
 
-DOCENTE: [idea de cómo responder la pregunta del docente sobre este tema]
-COMPAÑERO: [idea de cómo comentar el aporte de un compañero]
-APORTE: [idea de un aporte original que puedas hacer]
-PUBLICAR: [idea de qué publicar para enriquecer el foro]`;
+DOCENTE: Escribe aquí una idea completa y detallada de cómo responder la pregunta del docente, conectando el tema con conceptos clave del curso.
+COMPAÑERO: Escribe aquí una idea completa de cómo comentar el aporte de un compañero, ya sea complementando, preguntando o relacionando con otro concepto.
+APORTE: Escribe aquí una idea completa de un aporte original que puedas hacer al foro, con un argumento o ejemplo concreto del tema.
+PUBLICAR: Escribe aquí una idea completa de qué publicar para enriquecer el debate del foro, puede ser un caso, reflexión o conexión con la realidad.`;
 
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 600 } })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 1200 } })
       }
     );
 
