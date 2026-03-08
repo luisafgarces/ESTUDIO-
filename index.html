@@ -1669,7 +1669,18 @@ function switchTab(tab) {
     document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
   });
   if (tab === 'agenda') renderAgenda();
+  // Sincronizar con Firebase al volver al planificador o agenda
+  if ((tab === 'plania' || tab === 'agenda') && window._fbUser) {
+    fbLoadHistory();
+  }
 }
+
+// Sincronizar cuando el usuario vuelve a la pestaña del navegador (ej: venía del iPad)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && window._fbUser) {
+    fbLoadHistory();
+  }
+});
 
 
 // ══ APA 7 MODULE ══
@@ -2082,10 +2093,10 @@ function saveChecklist(planId, doneIndexes) {
   const entry = hist.find(h => h.id === planId);
   if (entry) {
     entry.checklistDone = doneIndexes;
+    entry.updatedAt = Date.now();
     saveHistory(hist);
     renderHistoryList();
     updateHistoryBadge();
-    // Siempre refrescar agenda para reflejar cambios
     renderAgenda();
   }
 }
@@ -3568,7 +3579,7 @@ function toggleTareaHecha(idx, el) {
   } else {
     entry.tasksDone = [...tasksDone, idx];
   }
-
+  entry.updatedAt = Date.now();
   saveHistory(hist);
   _fbSaveHistory();
 
@@ -4814,14 +4825,19 @@ async function fbLoadHistory() {
     const remote = await _fsGet('users/' + uid + '/data/history');
     const remoteItems = (remote && remote.items) ? remote.items : [];
 
-    // Merge: start with local, add any remote items not in local
-    const merged = [...local];
-    remoteItems.forEach(r => { if (!merged.find(l => l.id === r.id)) merged.push(r); });
-    merged.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+    // Merge: para cada id, gana la versión con mayor updatedAt
+    const map = {};
+    [...local, ...remoteItems].forEach(item => {
+      const existing = map[item.id];
+      if (!existing || (item.updatedAt || 0) > (existing.updatedAt || 0)) {
+        map[item.id] = item;
+      }
+    });
+    const merged = Object.values(map).sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
     const final = merged.slice(0, 30);
     saveHistory(final);
 
-    // Always push merged result back to Firebase so all devices stay in sync
+    // Subir resultado fusionado para que todos los dispositivos queden igual
     await _fsSet('users/' + uid + '/data/history', { items: final, updatedAt: Date.now() });
   } catch(e) { console.warn('fbLoadHistory error:', e); }
   updateHistoryBadge();
