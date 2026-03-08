@@ -2709,11 +2709,10 @@ function renderPlan(plan, checklistDone, lecturasDone, tasksDone) {
         </div>
         <div style="font-size:13px;color:var(--muted2);padding-left:28px;">${t.descripcion}</div>
         ${t.nota ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;padding-left:28px;font-style:italic;">💡 ${t.nota}</div>` : ''}
-        ${(t.titulo + ' ' + (t.descripcion||'')).toLowerCase().match(/foro|participaci/) ? `
         <div style="padding-left:28px;margin-top:10px;">
           <button onclick="generarIdeasForo('${taskId}', this)" style="background:rgba(26,154,212,0.1);border:1px solid rgba(26,154,212,0.3);color:var(--accent);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(26,154,212,0.2)'" onmouseout="this.style.background='rgba(26,154,212,0.1)'">💬 Ideas para el foro</button>
           <div id="foro-${taskId}" style="display:none;margin-top:10px;"></div>
-        </div>` : ''}
+        </div>
       </div>`;
       _globalTaskIdx++;
     });
@@ -3076,14 +3075,28 @@ async function generarIdeasForo(taskId, btn) {
   container.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;">Pensando ideas para tu foro...</div>`;
 
   try {
-    const prompt = `Eres un tutor de la UNAD. Responde SOLO con estas 4 líneas, sin nada más, sin markdown, sin asteriscos, sin introducción:
+    // Build full plan context
+    const planResumen = currentPlan?.resumen || '';
+    const planActividad = currentPlan?.actividad || '';
+    const todasTareas = (currentPlan?.bloques || []).flatMap(b => (b.tareas||[]).map(t => t.titulo)).join(', ');
 
-DOCENTE: [escribe UNA oración completa diciendo qué responderías al docente sobre "${titulo}" en la materia ${materia}]
-COMPAÑERO: [escribe UNA oración completa diciendo cómo comentarías el aporte de un compañero sobre este tema]
-APORTE: [escribe UNA oración completa con un aporte original tuyo para el foro sobre este tema]
-PUBLICAR: [escribe UNA oración completa sobre qué publicarías en el foro para enriquecer el debate]
+    const prompt = `Eres un tutor de la UNAD. El estudiante tiene TDAH y TOC.
 
-Cada línea debe terminar con punto. Máximo 30 palabras por línea.`;
+Materia: ${materia}
+Actividad: ${planActividad}
+Resumen del trabajo: ${planResumen}
+Tarea específica: ${titulo} — ${descripcion}
+Otras tareas del plan: ${todasTareas}
+
+Con base en TODO el contenido del trabajo, genera ideas concretas para participar en el foro académico.
+Responde SOLO con estas 4 líneas, sin markdown, sin asteriscos, sin introducción:
+
+DOCENTE: [UNA oración completa sobre qué aportarías respondiendo al docente, relacionado con el contenido del trabajo]
+COMPAÑERO: [UNA oración completa sobre cómo comentarías el aporte de un compañero usando conceptos del trabajo]
+APORTE: [UNA oración completa con un aporte original al foro basado en el contenido del trabajo]
+PUBLICAR: [UNA oración completa sobre qué publicarías en el foro para enriquecer el debate]
+
+Cada línea termina con punto. Máximo 30 palabras por línea. Sin cortar frases.`;
 
     const resp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
