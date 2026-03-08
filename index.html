@@ -3115,7 +3115,18 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
 
     let ideas = null;
     try {
-      const clean = text.replace(/^[\s\S]*?({)/,'$1').replace(/}[\s\S]*$/,'}').trim();
+      // Strip markdown code fences and find JSON object
+      let clean = text;
+      // Remove ```json ... ``` or ``` ... ```
+      const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) {
+        clean = fenceMatch[1].trim();
+      } else {
+        // Extract first { ... } block
+        const start = clean.indexOf('{');
+        const end = clean.lastIndexOf('}');
+        if (start !== -1 && end !== -1) clean = clean.slice(start, end + 1);
+      }
       ideas = JSON.parse(clean);
     } catch(e) { ideas = null; }
 
