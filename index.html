@@ -3115,18 +3115,10 @@ Genera IDEAS CONCRETAS y CORTAS para participar en el foro académico. Para cada
 
     let ideas = null;
     try {
-      // Strip markdown code fences and find JSON object
-      let clean = text;
-      // Remove ```json ... ``` or ``` ... ```
-      const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (fenceMatch) {
-        clean = fenceMatch[1].trim();
-      } else {
-        // Extract first { ... } block
-        const start = clean.indexOf('{');
-        const end = clean.lastIndexOf('}');
-        if (start !== -1 && end !== -1) clean = clean.slice(start, end + 1);
-      }
+      // Always extract first { ... } block regardless of fences
+      const jsonStart = text.indexOf('{');
+      const jsonEnd = text.lastIndexOf('}');
+      const clean = (jsonStart !== -1 && jsonEnd !== -1) ? text.slice(jsonStart, jsonEnd + 1) : text;
       ideas = JSON.parse(clean);
     } catch(e) { ideas = null; }
 
