@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForenseU — Tu Universidad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fdf0f5;--s1:#fff5f9;--s2:#ffeaf3;--s3:#ffe0ee;
+  --b1:#f5c8dd;--b2:#edb0cc;--b3:#e098b8;
+  --ac:#e05a9a;--ac-d:rgba(224,90,154,.09);--ac-b:rgba(224,90,154,.2);
+  --ac2:#6ab8e8;--ac2-d:rgba(106,184,232,.12);
+  --ac3:#e03a7a;--ac3-d:rgba(224,58,122,.09);
+  --gold:#f0c030;--gold-d:rgba(240,192,48,.12);
+  --pur:#c870d0;--pur-d:rgba(200,112,208,.1);
+  --grn:#6ab8e8;--grn-d:rgba(106,184,232,.12);
+  --tx:#5a2a48;--txd:#9a6080;--txm:#c8a0b8;
+  --ph1:#e05a9a;--ph2:#6ab8e8;--ph3:#f0c030;
+  --ph4:#e03a7a;--ph5:#c870d0;--ph6:#50c8a0;
+  --r:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0%,#fdf5e0 40%,#e8f4fd 100%);color:var(--tx);min-height:100vh;overflow-x:hidden;}
+
+/* ── SIDEBAR ── */
+.sb{position:fixed;left:0;top:0;bottom:0;width:228px;background:linear-gradient(180deg,#fff0f7 0%,#fde8f2 100%);border-right:1px solid var(--b1);display:flex;flex-direction:column;z-index:200;transition:transform .3s;}
+.sb-logo{padding:22px 20px 16px;}
+.sb-wordmark{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--ac);letter-spacing:-.5px;}
+.sb-tagline{font-size:9px;color:var(--txm);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px;}
+.sb-user{margin:10px 0 0;background:rgba(255,240,250,.6);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:var(--ac-d);border:1.5px solid var(--ac);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ac);font-weight:900;flex-shrink:0;}
+.sb-uname{font-size:11px;color:var(--tx);font-weight:500;}
+.sb-urole{font-size:9px;color:var(--txm);margin-top:1px;}
+.sb-divider{height:1px;background:var(--b1);margin:14px 0 8px;}
+.sb-section{padding:4px 20px 4px;font-size:9px;color:var(--txm);letter-spacing:2.5px;text-transform:uppercase;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:11px;color:var(--txd);cursor:pointer;transition:all .15s;border-left:2px solid transparent;position:relative;}
+.sb-item:hover{color:var(--tx);background:var(--s2);}
+.sb-item.on{color:var(--ac);border-left-color:var(--ac);background:var(--ac-d);}
+.sb-ico{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.sb-badge{position:absolute;right:16px;background:var(--ac);color:#1a0612;font-size:8px;font-weight:900;padding:1px 6px;border-radius:10px;}
+.sb-foot{padding:12px 16px 20px;border-top:1px solid var(--b1);}
+.sb-streak{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(255,245,200,.5);border:1px solid rgba(255,184,217,.15);border-radius:9px;padding:8px;font-size:11px;color:var(--gold);margin-bottom:10px;}
+.focus-btn{width:100%;padding:9px;background:transparent;border:1px solid rgba(255,110,180,.2);border-radius:9px;color:var(--ac);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.focus-btn:hover{background:var(--ac-d);border-color:rgba(255,110,180,.4);}
+
+/* ── MAIN ── */
+.main{margin-left:228px;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 36px;border-bottom:1px solid var(--b1);background:rgba(253,240,245,.88);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100;}
+.topbar-left h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;line-height:1;}
+.topbar-left p{font-size:10px;color:var(--txm);margin-top:3px;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.tb-chip{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:11px;border:1px solid;cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace;}
+.tc-timer{color:var(--ac2);border-color:rgba(255,157,214,.2);background:var(--ac2-d);}
+.tc-timer:hover{border-color:rgba(255,157,214,.4);}
+.content{padding:30px 36px;}
+.page{display:none;}.page.on{display:block;}
+
+/* ── UTILS ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.card{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);padding:24px;box-shadow:0 2px 12px rgba(224,90,154,.06);}
+.card-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:600;color:var(--txd);letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;transition:all .2s;white-space:nowrap;}
+.btn-p{background:var(--ac);color:#1a0612;font-weight:700;}.btn-p:hover{filter:brightness(1.1);}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;}
+.btn-s{background:rgba(255,240,250,.7);color:var(--txd);border:1px solid var(--b2);}.btn-s:hover{color:var(--tx);border-color:var(--b3);}
+.btn-d{background:var(--ac3-d);color:var(--ac3);border:1px solid rgba(255,61,127,.2);}.btn-d:hover{background:rgba(255,61,127,.15);}
+.btn-g{background:var(--grn-d);color:var(--grn);border:1px solid rgba(64,255,184,.2);font-size:11px;padding:10px 22px;}.btn-g:hover{background:rgba(255,173,212,.15);}
+.pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:9px;letter-spacing:.5px;text-transform:uppercase;}
+
+/* ── STAT ── */
+.stat{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);padding:20px;box-shadow:0 2px 10px rgba(224,90,154,.05);}
+.stat-label{font-size:9px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.stat-value{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1;}
+.stat-value span{font-size:13px;color:var(--txd);font-weight:400;}
+.stat-sub{font-size:10px;color:var(--txd);margin-top:6px;}
+
+/* ── WELCOME ── */
+.welcome{background:linear-gradient(135deg,rgba(255,210,230,.5) 0%,rgba(255,245,200,.4) 50%,rgba(210,235,255,.4) 100%);border:1px solid rgba(224,90,154,.18);border-radius:16px;padding:28px 32px;margin-bottom:26px;position:relative;overflow:hidden;}
+.welcome::after{content:'⚖';position:absolute;right:28px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.03;pointer-events:none;}
+.welcome h2{font-family:'Fraunces',serif;font-size:26px;font-weight:600;margin-bottom:6px;line-height:1.2;}
+.welcome h2 em{color:var(--ac);font-style:normal;}
+.welcome p{font-size:12px;color:var(--txd);line-height:1.8;max-width:520px;}
+
+/* ── AI BOX ── */
+.ai-box{background:linear-gradient(135deg,rgba(255,220,238,.45),rgba(255,245,200,.35));border:1px solid rgba(224,90,154,.2);border:1px solid rgba(255,110,180,.12);border-radius:var(--r);padding:24px;margin-bottom:24px;}
+.ai-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.ai-icon{width:36px;height:36px;border-radius:10px;background:var(--ac-d);border:1px solid rgba(255,110,180,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ai-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ac);}
+.ai-sub{font-size:10px;color:var(--txm);margin-top:2px;}
+.ai-body{font-size:12px;color:var(--tx);line-height:1.9;min-height:40px;}
+.ai-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.dots{display:inline-flex;gap:5px;align-items:center;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ac);opacity:.25;animation:pulse 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+@keyframes pulse{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ── PHASE / MODULE ── */
+.phase-block{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:0 2px 10px rgba(224,90,154,.05);}
+.phase-hdr{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;user-select:none;transition:background .15s;}
+.phase-hdr:hover{background:var(--s2);}
+.phase-num{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;flex-shrink:0;}
+.phase-info{flex:1;}
+.phase-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.phase-meta{font-size:10px;color:var(--txd);margin-top:3px;}
+.phase-pct{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
+.phase-bar{width:60px;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;margin-left:8px;}
+.phase-bar-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+.phase-expand{max-height:0;overflow:hidden;transition:max-height .45s ease;}
+.phase-expand.open{max-height:4000px;}
+.mod-row{display:flex;align-items:center;gap:14px;padding:14px 22px 14px 74px;border-top:1px solid var(--b1);cursor:pointer;transition:background .15s;}
+.mod-row:hover:not(.locked){background:var(--s2);}
+.mod-row.locked{opacity:.45;cursor:not-allowed;}
+.mod-indicator{width:24px;height:24px;border-radius:50%;border:2px solid var(--b3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all .2s;}
+.mod-indicator.done{background:var(--ac);border-color:var(--ac);color:#1a0612;font-weight:900;}
+.mod-indicator.active{border-color:var(--ac2);color:var(--ac2);}
+.mod-indicator.failed{border-color:var(--ac3);color:var(--ac3);}
+.mod-info{flex:1;}
+.mod-name{font-size:12px;color:var(--tx);}
+.mod-detail{font-size:10px;color:var(--txd);margin-top:2px;}
+.mod-tag{font-size:9px;padding:3px 9px;border-radius:6px;background:var(--s2);color:var(--txd);border:1px solid var(--b1);}
+.mod-grade{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-left:6px;}
+
+/* ── AULA ── */
+.aula-banner{background:linear-gradient(135deg,rgba(255,110,180,.07),rgba(255,61,127,.04));border:1px solid rgba(255,110,180,.12);border-radius:14px;padding:26px;margin-bottom:24px;}
+.aula-crumb{font-size:10px;color:var(--txd);margin-bottom:10px;cursor:pointer;}
+.aula-crumb span{color:var(--ac);text-decoration:underline;text-underline-offset:3px;}
+.aula-title{font-family:'Fraunces',serif;font-size:22px;color:var(--tx);margin-bottom:6px;line-height:1.2;}
+.aula-meta{font-size:11px;color:var(--txd);}
+.tab-strip{display:flex;gap:4px;margin-bottom:24px;background:rgba(255,240,250,.7);border:1px solid var(--b1);border-radius:10px;padding:4px;}
+.tab{flex:1;padding:9px;border-radius:7px;font-size:11px;text-align:center;cursor:pointer;color:var(--txd);transition:all .2s;}
+.tab.on{background:rgba(255,248,252,.95);color:var(--tx);border:1px solid var(--b2);}
+.tab-panel{display:none;}.tab-panel.on{display:block;}
+
+/* ── QUIZ ── */
+.quiz-q{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);padding:22px;margin-bottom:14px;}
+.quiz-qnum{font-size:9px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.quiz-qtext{font-size:13px;color:var(--tx);line-height:1.65;margin-bottom:16px;}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border:1px solid var(--b2);border-radius:9px;cursor:pointer;transition:all .2s;font-size:12px;color:var(--txd);line-height:1.5;}
+.quiz-opt:hover{border-color:rgba(255,110,180,.3);color:var(--tx);background:var(--ac-d);}
+.quiz-opt.sel{border-color:var(--ac);color:var(--tx);background:var(--ac-d);}
+.quiz-opt.correct{border-color:var(--grn);color:var(--grn);background:var(--grn-d);}
+.quiz-opt.wrong{border-color:var(--ac3);color:var(--ac3);background:var(--ac3-d);}
+.quiz-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--b3);flex-shrink:0;margin-top:1px;transition:all .2s;}
+.quiz-opt.sel .quiz-radio{border-color:var(--ac);background:var(--ac);}
+.quiz-result-box{background:rgba(255,240,250,.7);border-radius:var(--r);padding:22px;text-align:center;margin-top:16px;}
+.quiz-big-score{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1;}
+.quiz-result-msg{font-size:13px;color:var(--txd);margin-top:8px;}
+
+/* ── WORK ── */
+.work-card{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);padding:24px;margin-bottom:16px;}
+.subtab-strip{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,240,250,.7);border:1px solid var(--b1);border-radius:8px;padding:3px;width:fit-content;}
+.subtab{padding:6px 16px;border-radius:6px;font-size:10px;cursor:pointer;color:var(--txd);transition:all .2s;letter-spacing:.5px;text-transform:uppercase;}
+.subtab.on{background:rgba(255,248,252,.95);color:var(--tx);border:1px solid var(--b2);}
+.work-ta{width:100%;background:rgba(255,245,252,.8);border:1px solid var(--b2);border-radius:10px;padding:16px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;resize:vertical;min-height:240px;outline:none;transition:border-color .2s;line-height:1.75;}
+.work-ta:focus{border-color:rgba(255,110,180,.3);}
+.work-ta::placeholder{color:var(--txm);}
+.upload-area{border:2px dashed var(--b2);border-radius:10px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-area:hover{border-color:rgba(224,90,154,.35);background:rgba(255,220,238,.25);}
+.upload-area .upload-icon{font-size:30px;margin-bottom:10px;}
+.upload-area p{font-size:12px;color:var(--txd);}
+.upload-area span{font-size:10px;color:var(--txm);}
+.grade-card{background:rgba(255,240,250,.7);border:1px solid var(--b2);border-radius:var(--r);padding:24px;margin-top:18px;}
+.grade-big{font-family:'Syne',sans-serif;font-size:58px;font-weight:800;line-height:1;}
+.grade-criteria{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.crit-item{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:9px;padding:13px;}
+.crit-label{font-size:10px;color:var(--txd);margin-bottom:5px;}
+.crit-score{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;}
+.grade-fb{font-size:12px;color:var(--tx);line-height:1.85;margin-top:16px;white-space:pre-wrap;}
+
+/* ── BOLETIN ── */
+.bol-phase{background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:14px;overflow:hidden;}
+.bol-ph-hdr{display:flex;align-items:center;gap:14px;padding:17px 22px;border-bottom:1px solid var(--b1);}
+.bol-ph-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;flex:1;}
+.bol-ph-avg{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;}
+.bol-row{display:flex;align-items:center;padding:12px 22px;border-bottom:1px solid var(--b1);}
+.bol-row:last-child{border-bottom:none;}
+.bol-mod-name{flex:1;font-size:12px;color:var(--tx);}
+.bol-col{font-size:11px;width:80px;text-align:center;}
+.bol-final{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;width:60px;text-align:center;}
+.gpa-hero{background:linear-gradient(135deg,rgba(255,110,180,.07),rgba(255,61,127,.04));border:1px solid rgba(255,110,180,.12);border-radius:16px;padding:32px;text-align:center;margin-bottom:26px;}
+.gpa-value{font-family:'Syne',sans-serif;font-size:72px;font-weight:800;color:var(--ac);line-height:1;}
+.gpa-label{font-size:12px;color:var(--txd);margin-top:8px;}
+
+/* ── POMODORO ── */
+.ring-wrap{position:relative;width:150px;height:150px;margin:0 auto 20px;}
+.ring-svg{width:150px;height:150px;transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--b2);stroke-width:8;}
+.ring-prog{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.ring-inner{position:absolute;inset:12px;background:rgba(255,245,252,.95);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-time{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.ring-mode{font-size:8px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.pomo-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
+.pomo-dot{width:8px;height:8px;border-radius:50%;background:var(--b2);transition:all .3s;}
+.pomo-dot.done{background:var(--ac);}
+.break-banner{background:var(--ac2-d);border:1px solid rgba(255,157,214,.15);border-radius:9px;padding:11px;font-size:11px;color:var(--ac2);margin-top:12px;display:none;text-align:center;line-height:1.6;}
+.break-banner.show{display:block;}
+
+/* ── HEATMAP ── */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;}
+.hm-cell{aspect-ratio:1;border-radius:3px;background:rgba(224,90,154,.1);transition:all .3s;}
+.hm-cell.l1{background:rgba(255,110,180,.2);}
+.hm-cell.l2{background:rgba(200,255,80,.5);}
+.hm-cell.l3{background:rgba(200,255,80,.8);}
+.hm-cell.l4{background:var(--ac);}
+
+/* ── REFLECTION ── */
+.refl-q{background:rgba(255,240,250,.6);border:1px solid var(--b1);border-radius:9px;padding:16px;margin-bottom:12px;}
+.refl-label{font-size:10px;color:var(--txd);margin-bottom:8px;letter-spacing:.5px;}
+.refl-ta{width:100%;background:rgba(255,248,252,.9);border:1px solid var(--b2);border-radius:8px;padding:12px;color:var(--tx);font-family:'DM Mono',monospace;font-size:11px;resize:none;height:72px;outline:none;transition:border-color .2s;line-height:1.6;}
+.refl-ta:focus{border-color:rgba(255,110,180,.3);}
+.refl-ta::placeholder{color:var(--txm);}
+.refl-hist{background:rgba(255,240,250,.6);border:1px solid var(--b1);border-radius:9px;padding:16px;margin-bottom:10px;}
+.refl-hist-date{font-size:10px;color:var(--txm);margin-bottom:8px;}
+.refl-hist-item{font-size:11px;color:var(--txd);margin-bottom:6px;line-height:1.6;}
+
+/* ── TASKS ── */
+.task-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(255,240,250,.65);border:1px solid var(--b1);border-radius:9px;margin-bottom:8px;transition:all .2s;}
+.task-item.done-t{opacity:.5;}
+.task-cb{width:18px;height:18px;border-radius:5px;border:2px solid var(--b3);cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.task-cb.chk{background:var(--ac);border-color:var(--ac);color:#1a0612;font-weight:900;}
+.task-name{flex:1;font-size:12px;color:var(--tx);}
+.task-del{background:none;border:none;color:var(--txm);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:5px;transition:all .2s;}
+.task-del:hover{color:var(--ac3);background:var(--ac3-d);}
+.task-add{display:flex;gap:8px;margin-bottom:16px;}
+.task-in{flex:1;background:rgba(255,245,252,.8);border:1px solid var(--b2);border-radius:9px;padding:10px 14px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+.task-in:focus{border-color:rgba(255,110,180,.3);}
+.task-in::placeholder{color:var(--txm);}
+
+/* ── AUTH ── */
+.auth-sc{position:fixed;inset:0;z-index:1000;background:linear-gradient(160deg,#fde8f2,#fdf5e0,#e8f4fd);display:flex;align-items:center;justify-content:center;}
+.auth-box{background:linear-gradient(160deg,#fff5f9,#fffbf0,#f0f8ff);border:1px solid var(--b1);border-radius:18px;padding:48px;width:380px;text-align:center;box-shadow:0 8px 40px rgba(224,90,154,.12);}
+.auth-logo{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--ac);margin-bottom:4px;}
+.auth-tagline{font-size:11px;color:var(--txm);margin-bottom:32px;}
+.auth-in{width:100%;background:rgba(255,240,250,.7);border:1px solid var(--b2);border-radius:10px;padding:13px 16px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;margin-bottom:10px;display:block;}
+.auth-in:focus{border-color:rgba(255,110,180,.3);}
+.auth-in::placeholder{color:var(--txm);}
+.auth-btn{width:100%;padding:14px;background:var(--ac);color:#1a0612;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;transition:filter .2s;}
+.auth-btn:hover{filter:brightness(1.1);}
+.auth-switch{font-size:11px;color:var(--txd);cursor:pointer;}
+.auth-switch span{color:var(--ac);text-decoration:underline;text-underline-offset:3px;}
+.auth-err{font-size:11px;color:var(--ac3);min-height:18px;margin-bottom:8px;}
+
+/* ── LOADING ── */
+.load-sc{position:fixed;inset:0;z-index:999;background:linear-gradient(160deg,#fde8f2,#fdf5e0,#e8f4fd);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.load-logo{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;color:var(--ac);}
+.load-bar-w{width:200px;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;}
+.load-bar{height:100%;background:var(--ac);border-radius:2px;animation:lb 1.6s ease-in-out infinite;}
+@keyframes lb{0%{width:0;margin-left:0}50%{width:55%;margin-left:22%}100%{width:0;margin-left:100%}}
+
+/* ── FOCUS OVERLAY ── */
+.focus-ov{position:fixed;inset:0;background:rgba(253,232,242,.97);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.focus-ov.on{display:flex;}
+.focus-close{position:absolute;top:20px;right:20px;background:none;border:1px solid var(--b2);color:var(--txd);border-radius:8px;padding:8px 16px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;}
+.focus-task-label{font-size:10px;color:var(--txm);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;}
+.focus-task-name{font-family:'Fraunces',serif;font-size:26px;color:var(--ac);margin-bottom:32px;max-width:500px;text-align:center;line-height:1.3;}
+.focus-time{font-family:'Syne',sans-serif;font-size:88px;font-weight:800;color:var(--ac);letter-spacing:-4px;line-height:1;margin-bottom:30px;}
+.focus-phase-label{font-size:10px;color:var(--txm);margin-bottom:20px;}
+
+/* ── NOTIF ── */
+.notif{position:fixed;bottom:24px;right:24px;background:rgba(255,248,252,.96);border:1px solid var(--b1);backdrop-filter:blur(12px);border-radius:12px;padding:14px 18px;font-size:12px;z-index:999;max-width:300px;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.notif.show{transform:translateY(0);opacity:1;}
+.notif strong{display:block;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.notif.ok strong{color:var(--ac);}
+.notif.brk strong{color:var(--ac2);}
+.notif.done strong{color:var(--gold);}
+.notif.fail strong{color:var(--ac3);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;} ::-webkit-scrollbar-track{background:var(--bg);}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="load-sc" id="ls">
+  <div class="load-logo">ForenseU</div>
+  <div class="load-bar-w"><div class="load-bar"></div></div>
+  <div style="font-size:10px;color:var(--txm);letter-spacing:1px">Cargando tu universidad...</div>
+</div>
+
+<!-- AUTH -->
+<div class="auth-sc" id="auth-sc" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">ForenseU</div>
+    <div class="auth-tagline">Tu universidad autodidacta · Psicología Jurídica Colombia</div>
+    <div class="auth-err" id="auth-err"></div>
+    <div id="login-form">
+      <input class="auth-in" id="l-email" type="email" placeholder="Correo electrónico">
+      <input class="auth-in" id="l-pass" type="password" placeholder="Contraseña">
+      <button class="auth-btn" onclick="doLogin()">Entrar</button>
+      <div class="auth-switch">¿Sin cuenta? <span onclick="showReg()">Crear cuenta gratis</span></div>
+    </div>
+    <div id="reg-form" style="display:none">
+      <input class="auth-in" id="r-name" type="text" placeholder="Tu nombre">
+      <input class="auth-in" id="r-email" type="email" placeholder="Correo electrónico">
+      <input class="auth-in" id="r-pass" type="password" placeholder="Contraseña (mín. 6 caracteres)">
+      <button class="auth-btn" onclick="doReg()">Crear cuenta</button>
+      <div class="auth-switch">¿Ya tienes cuenta? <span onclick="showLogin()">Iniciar sesión</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="sb-wordmark">ForenseU</div>
+    <div class="sb-tagline">LMS · Psicología Jurídica</div>
+    <div class="sb-user">
+      <div class="sb-avatar" id="sb-av">L</div>
+      <div>
+        <div class="sb-uname" id="sb-name">Estudiante</div>
+        <div class="sb-urole" id="sb-role">Cargando...</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:0 16px"><div class="sb-divider"></div></div>
+  <div style="flex:1;overflow-y:auto;padding:4px 0">
+    <div class="sb-section">Principal</div>
+    <div class="sb-item on" data-page="dashboard" onclick="nav('dashboard',this)"><span class="sb-ico">◉</span>Dashboard</div>
+    <div class="sb-item" data-page="curriculum" onclick="nav('curriculum',this)"><span class="sb-ico">⬡</span>Programa</div>
+    <div class="sb-item" data-page="boletin" onclick="nav('boletin',this)"><span class="sb-ico">◈</span>Boletín de Notas</div>
+    <div class="sb-section" style="margin-top:8px">Herramientas</div>
+    <div class="sb-item" data-page="timer" onclick="nav('timer',this)"><span class="sb-ico">⏱</span>Temporizador</div>
+    <div class="sb-item" data-page="tareas" onclick="nav('tareas',this)"><span class="sb-ico">✓</span>Tareas del día</div>
+    <div class="sb-item" data-page="reflexion" onclick="nav('reflexion',this)"><span class="sb-ico">✦</span>Reflexión semanal</div>
+    <div class="sb-section" style="margin-top:8px">Cuenta</div>
+    <div class="sb-item" onclick="doLogout()"><span class="sb-ico">⊘</span>Cerrar sesión</div>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-streak">🔥 <span id="streak-val">0</span> días de racha</div>
+    <button class="focus-btn" onclick="openFocus()">⊕ Modo Foco</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="page-title">Dashboard</h1>
+      <p id="page-sub">Cargando...</p>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-chip tc-timer" onclick="nav('timer',document.querySelector('[data-page=timer]'))">⏱ <span id="topbar-timer">25:00</span></div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ═══════ DASHBOARD ═══════ -->
+    <div class="page on" id="page-dashboard">
+      <div class="welcome">
+        <h2>Bienvenida, <em id="welcome-name">Luisa</em> 👩‍⚖️</h2>
+        <p id="welcome-msg">Tu universidad, tus reglas — con la disciplina de una real.</p>
+      </div>
+      <div class="ai-box">
+        <div class="ai-hdr">
+          <div class="ai-icon">✦</div>
+          <div>
+            <div class="ai-title">Asistente académico</div>
+            <div class="ai-sub">Sugerencia personalizada para hoy</div>
+          </div>
+        </div>
+        <div class="ai-body" id="ai-text"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Analizando tu progreso...</span></div></div>
+        <div class="ai-actions">
+          <button class="btn btn-p" onclick="loadAI(true)">↺ Nueva sugerencia</button>
+          <button class="btn btn-s" onclick="nav('curriculum',document.querySelector('[data-page=curriculum]'))">Ver programa</button>
+        </div>
+      </div>
+      <div class="grid4" style="margin-bottom:20px">
+        <div class="stat"><div class="stat-label">Módulos aprobados</div><div class="stat-value" id="stat-mods">0 <span>/ 23</span></div><div class="stat-sub" id="stat-mods-sub">Empieza hoy</div></div>
+        <div class="stat"><div class="stat-label">GPA actual</div><div class="stat-value" id="stat-gpa">— <span>/ 5.0</span></div><div class="stat-sub" id="stat-gpa-sub">Sin notas aún</div></div>
+        <div class="stat"><div class="stat-label">Racha</div><div class="stat-value" id="stat-streak">0 <span>días</span></div><div class="stat-sub" id="stat-streak-sub">¡Empieza hoy!</div></div>
+        <div class="stat"><div class="stat-label">Horas totales</div><div class="stat-value" id="stat-hours">0 <span>hrs</span></div><div class="stat-sub">Meta: 5 hrs / semana</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">◉ Módulo en curso</div>
+          <div id="current-mod-body" style="font-size:12px;color:var(--txd)">Cargando...</div>
+        </div>
+        <div class="card">
+          <div class="card-title">📅 Actividad — últimas 4 semanas</div>
+          <div class="heatmap" id="heatmap"></div>
+          <div style="display:flex;gap:4px;margin-top:10px;align-items:center">
+            <div class="hm-cell" style="width:10px;height:10px"></div>
+            <div class="hm-cell l1" style="width:10px;height:10px"></div>
+            <div class="hm-cell l2" style="width:10px;height:10px"></div>
+            <div class="hm-cell l4" style="width:10px;height:10px"></div>
+            <span style="font-size:9px;color:var(--txm);margin-left:4px">Menos → Más</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ PROGRAMA ═══════ -->
+    <div class="page" id="page-curriculum">
+      <div id="phases-list"></div>
+    </div>
+
+    <!-- ═══════ AULA ═══════ -->
+    <div class="page" id="page-aula">
+      <div class="aula-banner">
+        <div class="aula-crumb" onclick="nav('curriculum',document.querySelector('[data-page=curriculum]'))">← <span>Volver al programa</span></div>
+        <div class="aula-title" id="aula-title">Módulo</div>
+        <div class="aula-meta" id="aula-meta">Cargando...</div>
+      </div>
+      <div class="tab-strip">
+        <div class="tab on" onclick="aulaTab('contenido',this)">📖 Contenido</div>
+        <div class="tab" onclick="aulaTab('trabajo',this)">📝 Trabajo</div>
+        <div class="tab" onclick="aulaTab('examen',this)">🎯 Examen</div>
+        <div class="tab" onclick="aulaTab('notas',this)">📊 Mis Notas</div>
+      </div>
+      <!-- Contenido -->
+      <div class="tab-panel on" id="tp-contenido">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">📖 Temas del módulo</div>
+          <div id="mod-topics"></div>
+        </div>
+        <div class="ai-box">
+          <div class="ai-hdr"><div class="ai-icon">✦</div><div><div class="ai-title">Guía de estudio — IA</div><div class="ai-sub">Estrategia y explicación personalizadas</div></div></div>
+          <div class="ai-body" id="mod-guide"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Generando...</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-p" onclick="aulaTab('trabajo',document.querySelectorAll('.tab')[1])">Ir al trabajo →</button>
+          <button class="btn btn-s" onclick="aulaTab('examen',document.querySelectorAll('.tab')[2])">Ir al examen →</button>
+        </div>
+      </div>
+      <!-- Trabajo -->
+      <div class="tab-panel" id="tp-trabajo">
+        <div class="work-card">
+          <div class="card-title">📝 Trabajo asignado</div>
+          <div id="work-assignment" style="font-size:12px;color:var(--tx);line-height:1.8;padding:14px;background:rgba(255,240,250,.7);border-radius:9px;border:1px solid var(--b2);margin-bottom:18px"></div>
+          <div class="subtab-strip">
+            <div class="subtab on" onclick="workTab('text',this)">Texto</div>
+            <div class="subtab" onclick="workTab('file',this)">Archivo</div>
+          </div>
+          <div id="wt-text">
+            <textarea class="work-ta" id="work-text" placeholder="Escribe tu trabajo aquí. La IA lo calificará con rúbrica detallada..."></textarea>
+          </div>
+          <div id="wt-file" style="display:none">
+            <div class="upload-area" onclick="document.getElementById('file-in').click()">
+              <div class="upload-icon">📄</div>
+              <p>Haz clic para subir tu archivo</p>
+              <span>PDF, Word o TXT — máx. 10 MB</span>
+              <div id="file-name" style="margin-top:8px;font-size:11px;color:var(--ac)"></div>
+            </div>
+            <input type="file" id="file-in" accept=".pdf,.docx,.doc,.txt" style="display:none" onchange="handleFile(event)">
+          </div>
+          <div id="work-prev-msg" style="display:none;margin-top:10px;padding:10px;background:var(--ac-d);border:1px solid rgba(255,110,180,.15);border-radius:8px;font-size:11px;color:var(--ac)">✓ Trabajo ya entregado. Puedes reenviar para mejorar tu nota.</div>
+        </div>
+        <button class="btn btn-g" id="submit-btn" onclick="submitWork()">Entregar y calificar con IA →</button>
+        <div id="grade-result"></div>
+      </div>
+      <!-- Examen -->
+      <div class="tab-panel" id="tp-examen">
+        <div class="card">
+          <div class="card-title">🎯 Examen del módulo</div>
+          <div style="font-size:12px;color:var(--txd);margin-bottom:18px">5 preguntas · Necesitas ≥70% para aprobar · Hasta 3 intentos</div>
+          <div id="quiz-body"></div>
+          <div id="quiz-result-area"></div>
+          <button class="btn btn-p" id="quiz-submit" onclick="submitQuiz()" style="margin-top:16px;display:none">Enviar respuestas →</button>
+          <button class="btn btn-s" id="quiz-retry" onclick="loadQuiz()" style="margin-top:10px;display:none">↺ Intentar de nuevo</button>
+          <button class="btn btn-p" id="quiz-gen" onclick="loadQuiz()">Generar examen →</button>
+        </div>
+      </div>
+      <!-- Notas -->
+      <div class="tab-panel" id="tp-notas">
+        <div class="card"><div class="card-title">📊 Mis notas en este módulo</div><div id="mod-grades-body"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══════ BOLETÍN ═══════ -->
+    <div class="page" id="page-boletin">
+      <div class="gpa-hero">
+        <div class="gpa-value" id="gpa-val">—</div>
+        <div class="gpa-label">GPA General · Escala 0 – 5.0</div>
+        <div style="font-size:11px;color:var(--txd);margin-top:6px" id="gpa-sub">Sin notas registradas aún</div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;font-size:10px;color:var(--txm);letter-spacing:.5px;text-transform:uppercase;padding:0 4px">
+          <div style="flex:1">Módulo</div>
+          <div style="width:80px;text-align:center">Examen</div>
+          <div style="width:80px;text-align:center">Trabajo</div>
+          <div style="width:60px;text-align:center">Final</div>
+          <div style="width:80px;text-align:center">Estado</div>
+        </div>
+      </div>
+      <div id="boletin-body"></div>
+    </div>
+
+    <!-- ═══════ TIMER ═══════ -->
+    <div class="page" id="page-timer">
+      <div class="grid2">
+        <div class="card" style="text-align:center">
+          <div class="card-title" style="justify-content:center">⏱ Temporizador Pomodoro</div>
+          <div class="ring-wrap">
+            <svg class="ring-svg" viewBox="0 0 150 150">
+              <circle class="ring-bg" cx="75" cy="75" r="65"/>
+              <circle class="ring-prog" id="ring-prog" cx="75" cy="75" r="65" stroke="var(--ac)"/>
+            </svg>
+            <div class="ring-inner">
+              <div class="ring-time" id="ring-time">25:00</div>
+              <div class="ring-mode" id="ring-mode">Foco</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-bottom:14px">
+            <button class="btn btn-p" id="timer-btn" onclick="timerToggle()">Iniciar</button>
+            <button class="btn btn-s" onclick="timerReset()">Reset</button>
+          </div>
+          <div class="pomo-dots" id="pomo-dots">
+            <div class="pomo-dot" id="pd0"></div><div class="pomo-dot" id="pd1"></div>
+            <div class="pomo-dot" id="pd2"></div><div class="pomo-dot" id="pd3"></div>
+          </div>
+          <div class="break-banner" id="break-banner">☕ ¡Tiempo de descanso!<br><span style="font-size:10px">Levántate · estira · toma agua</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Configuración</div>
+          <div style="font-size:12px;color:var(--txd);line-height:2.2">
+            <div>🟢 Foco: <strong style="color:var(--tx)">25 minutos</strong></div>
+            <div>🔵 Descanso corto: <strong style="color:var(--tx)">5 minutos</strong></div>
+            <div>🟣 Descanso largo: <strong style="color:var(--tx)">15 min (cada 4 pomodoros)</strong></div>
+          </div>
+          <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--b1)">
+            <div style="font-size:10px;color:var(--txm);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">Hoy</div>
+            <div style="display:flex;gap:20px">
+              <div><div style="font-size:10px;color:var(--txd);margin-bottom:4px">Pomodoros</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--ac)" id="pomo-count">0</div></div>
+              <div><div style="font-size:10px;color:var(--txd);margin-bottom:4px">Minutos</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--ac)" id="mins-count">0</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ TAREAS ═══════ -->
+    <div class="page" id="page-tareas">
+      <div class="card">
+        <div class="card-title">✓ Tareas de hoy</div>
+        <div class="task-add">
+          <input class="task-in" id="task-in" type="text" placeholder="Nueva tarea..." onkeydown="if(event.key==='Enter')addTask()">
+          <button class="btn btn-p" onclick="addTask()">Agregar</button>
+        </div>
+        <div id="task-list"></div>
+        <div id="task-empty" style="font-size:12px;color:var(--txm);text-align:center;padding:24px 0">Sin tareas por hoy ✓</div>
+      </div>
+    </div>
+
+    <!-- ═══════ REFLEXIÓN ═══════ -->
+    <div class="page" id="page-reflexion">
+      <div class="grid2">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-title">✦ Reflexión semanal</div>
+            <div class="refl-q">
+              <div class="refl-label">¿Qué avancé esta semana?</div>
+              <textarea class="refl-ta" id="r1" placeholder="Describe tu progreso..."></textarea>
+            </div>
+            <div class="refl-q">
+              <div class="refl-label">¿Qué fue difícil y cómo lo manejé?</div>
+              <textarea class="refl-ta" id="r2" placeholder="Obstáculos y estrategias..."></textarea>
+            </div>
+            <div class="refl-q">
+              <div class="refl-label">¿Qué haré diferente la próxima semana?</div>
+              <textarea class="refl-ta" id="r3" placeholder="Ajustes y compromisos..."></textarea>
+            </div>
+            <button class="btn btn-p" onclick="saveRefl()" style="margin-top:4px">Guardar reflexión →</button>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">📚 Reflexiones anteriores</div>
+            <div id="refl-hist" style="font-size:12px;color:var(--txm)">Sin reflexiones guardadas aún.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOCUS OVERLAY -->
+<div class="focus-ov" id="focus-ov">
+  <button class="focus-close" onclick="closeFocus()">✕ Salir</button>
+  <div class="focus-task-label">Sesión activa</div>
+  <div class="focus-task-name" id="focus-task">Foco profundo</div>
+  <div class="focus-time" id="focus-time">25:00</div>
+  <div class="focus-phase-label" id="focus-phase">Modo: Foco</div>
+  <div style="display:flex;gap:10px">
+    <button class="btn btn-p" onclick="timerToggle()">▶ Iniciar / Pausar</button>
+    <button class="btn btn-s" onclick="timerReset()">↺ Reset</button>
+  </div>
+</div>
+
+<!-- NOTIF -->
+<div class="notif" id="notif"><strong id="notif-title">Aviso</strong><span id="notif-body">...</span></div>
+
+<script>
+// ═══════════════════════════════════════
+//  FIREBASE CONFIG
+// ═══════════════════════════════════════
+const FBB="https://plania-f7102-default-rtdb.firebaseio.com";
+const FBKEY="AIzaSyBRygwioA7lRM4HIavz02z7Ir8nUQpKdnY";
+const FBAUTH="https://identitytoolkit.googleapis.com/v1";
+let CU=null,TOK=null;
+
+const fbG=p=>fetch(`${FBB}${p}.json?auth=${TOK}`).then(r=>r.json()).catch(()=>null);
+const fbS=(p,d)=>fetch(`${FBB}${p}.json?auth=${TOK}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).then(r=>r.json()).catch(()=>null);
+const fbP=(p,d)=>fetch(`${FBB}${p}.json?auth=${TOK}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).then(r=>r.json()).catch(()=>null);
+const authReq=(a,b)=>fetch(`${FBAUTH}/accounts:${a}?key=${FBKEY}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json());
+
+async function doLogin(){
+  setErr("");
+  const emailVal=$("l-email").value.trim(),passVal=$("l-pass").value;
+  if(!emailVal||!passVal){setErr("Completa correo y contraseña");return;}
+  const btns=document.querySelectorAll(".auth-btn");
+  btns.forEach(b=>{b.disabled=true;b.textContent="Entrando...";});
+  try{
+    const r=await authReq("signInWithPassword",{email:emailVal,password:passVal,returnSecureToken:true});
+    if(r.idToken)await afterAuth(r);
+    else setErr(r.error?.message==="INVALID_PASSWORD"||r.error?.message?.includes("INVALID")?"Correo o contraseña incorrectos":"Error: "+( r.error?.message||"intenta de nuevo"));
+  }catch(e){setErr("Sin conexión. Verifica tu internet.");}
+  btns.forEach(b=>{b.disabled=false;b.textContent="Entrar";});
+}
+async function doReg(){
+  setErr("");
+  const n=$("r-name").value.trim(),e=$("r-email").value.trim(),p=$("r-pass").value;
+  if(!n){setErr("Escribe tu nombre");return;}
+  if(!e){setErr("Escribe tu correo");return;}
+  if(p.length<6){setErr("La contraseña debe tener mínimo 6 caracteres");return;}
+  const btns=document.querySelectorAll(".auth-btn");
+  btns.forEach(b=>{b.disabled=true;b.textContent="Creando cuenta...";});
+  try{
+    const r=await authReq("signUp",{email:e,password:p,returnSecureToken:true});
+    if(r.idToken){TOK=r.idToken;await fbS(`/users/${r.localId}/profile`,{name:n,email:e,created:Date.now()});await afterAuth(r,n);}
+    else setErr(r.error?.message==="EMAIL_EXISTS"?"Ese correo ya está registrado":"Error al crear cuenta: "+(r.error?.message||""));
+  }catch(err){setErr("Sin conexión. Verifica tu internet.");}
+  btns.forEach(b=>{b.disabled=false;b.textContent="Crear cuenta";});
+}
+async function afterAuth(r,nOverride){
+  try{
+    TOK=r.idToken;
+    const uid=r.localId;
+    const prof=await fbG(`/users/${uid}/profile`);
+    const name=nOverride||prof?.name||r.email?.split("@")[0]||"Estudiante";
+    CU={uid,name};
+    localStorage.setItem("fu_uid",uid);localStorage.setItem("fu_tok",TOK);
+    localStorage.setItem("fu_exp",Date.now()+(parseInt(r.expiresIn)*1000));
+    localStorage.setItem("fu_name",name);
+    showApp();
+  }catch(e){setErr("Error al cargar perfil. Intenta de nuevo.");}
+}
+async function doLogout(){localStorage.clear();CU=null;TOK=null;location.reload();}
+function showLogin(){$("login-form").style.display="";$("reg-form").style.display="none";setErr("");}
+function showReg(){$("login-form").style.display="none";$("reg-form").style.display="";setErr("");}
+function setErr(m){$("auth-err").textContent=m;}
+
+// ═══════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════
+let D={grades:{},studyDays:{},streak:0,totalMinutes:0,tasks:[],reflections:[],lastAI:null};
+
+async function loadD(){
+  const remote=await fbG(`/users/${CU.uid}/lms`);
+  if(remote){
+    D={...D,...remote};
+    if(!D.grades)D.grades={};
+    if(!D.studyDays)D.studyDays={};
+    if(!D.tasks)D.tasks=[];
+    if(!D.reflections)D.reflections=[];
+  }
+  calcStreak();
+}
+async function saveD(){if(CU)await fbS(`/users/${CU.uid}/lms`,D);}
+
+function today(){return new Date().toISOString().split("T")[0];}
+function calcStreak(){
+  let s=0;const t=today();let d=new Date();
+  for(let i=0;i<400;i++){
+    const ds=d.toISOString().split("T")[0];
+    if(D.studyDays[ds])s++;
+    else if(ds!==t)break;
+    d.setDate(d.getDate()-1);
+  }
+  D.streak=s;
+}
+async function logMins(m){
+  const t=today();D.studyDays[t]=(D.studyDays[t]||0)+m;D.totalMinutes=(D.totalMinutes||0)+m;
+  calcStreak();await saveD();renderAll();
+}
+
+// ═══════════════════════════════════════
+//  CURRICULUM DATA
+// ═══════════════════════════════════════
+const PHASES=[
+  {id:1,color:"var(--ph1)",title:"Fundamentos Jurídicos y Psicológicos",modules:[
+    {id:"1.1",name:"Historia y Epistemología de la Psicología Jurídica",detail:"2 semanas",
+     topics:["Orígenes: Münsterberg, Binet, Lombroso","Psicología jurídica vs. forense vs. criminológica","Rol del psicólogo en el sistema judicial colombiano","Enfoque científico-empírico como estándar"],
+     work:"Ensayo de 3 páginas: ¿Qué hace a la psicología jurídica una ciencia? Argumenta desde la epistemología contemporánea con referencia al contexto colombiano."},
+    {id:"1.2",name:"Sistema Acusatorio y Proceso Penal Colombiano",detail:"3 semanas",
+     topics:["Ley 906/2004: actores, etapas, principios","Audiencias: imputación, acusación, preparatoria, juicio oral","La prueba pericial en el sistema acusatorio","Cadena de custodia y relevancia psicológica"],
+     work:"Mapa de flujo del proceso penal colombiano (puede ser escrito o diagrama descrito) señalando los momentos específicos de intervención del psicólogo jurídico."},
+    {id:"1.3",name:"Derecho Civil, Familia e Infancia para Psicólogos",detail:"2 semanas",
+     topics:["Código Civil: capacidad, incapacidad, interdicción","Código de Infancia Ley 1098/2006","Régimen de custodia y rol del psicólogo","Comisaría de Familia: estructura y funciones"],
+     work:"Glosario jurídico especializado de 50 términos con definición técnica y relevancia psicológica en cada uno. Incluye artículo normativo de referencia donde aplique."},
+    {id:"1.4",name:"Ética y Deontología del Psicólogo Jurídico",detail:"1 semana",
+     topics:["Código Deontológico Ley 1090/2006 — énfasis forense","Ética clínica vs. ética forense: diferencias críticas","Conflictos de interés en el peritaje","Sesgo del evaluador: identificación y control"],
+     work:"Análisis ético de 2 dilemas reales del campo forense colombiano (mínimo 2 páginas cada uno). Identifica el dilema, aplica el marco deontológico y propone resolución fundamentada."},
+  ]},
+  {id:2,color:"var(--ph2)",title:"Psicopatología y Evaluación Forense",modules:[
+    {id:"2.1",name:"Psicopatología Relevante en Contextos Jurídicos",detail:"2 semanas",
+     topics:["DSM-5 y CIE-11: criterios diagnósticos forenses","Trastornos de personalidad: antisocial, límite, narcisista","Imputabilidad e inimputabilidad Arts. 33-36 C.P.","Psicosis y esquizofrenia en contextos legales"],
+     work:"Tabla comparativa de 12 diagnósticos DSM-5 relacionando cada uno con: criterios de imputabilidad colombiana, instrumentos de evaluación pertinentes y consideraciones forenses específicas."},
+    {id:"2.2",name:"Evaluación Psicológica Forense: Fundamentos",detail:"3 semanas",
+     topics:["Diferencia evaluación clínica vs. forense","Proceso de evaluación: fases y triangulación","Entrevista forense estructurada","Instrumentos: MMPI-2, PCL-R, HCR-20, SAVRY"],
+     work:"Protocolo propio de evaluación psicológica forense de 6-8 páginas. Debe incluir: justificación teórica, fases del proceso, instrumentos seleccionados y fundamentación de cada elección."},
+    {id:"2.3",name:"Simulación, Malingering y Credibilidad",detail:"2 semanas",
+     topics:["Tipos de distorsión: simulación, disimulación, sobresimulación","Escalas de validez MMPI-2: F, Fp, L, K, S","CBCA y SVA para credibilidad del testimonio","Informe forense ante indicios de simulación"],
+     work:"Aplicación del sistema CBCA y SVA a un testimonio escrito proporcionado (puedes usar un caso de jurisprudencia colombiana). Resultado: informe de credibilidad de 3-4 páginas."},
+    {id:"2.4",name:"Instrumentos de Evaluación de Riesgo",detail:"1 semana",
+     topics:["HCR-20 v3: riesgo de violencia general","SVR-20: riesgo de violencia sexual","SARA/EPV-R: violencia en pareja","PCL-R (Hare): evaluación de psicopatía"],
+     work:"Cuadro comparativo profundo: HCR-20 v3, PCL-R, SARA y SAVRY — dimensiones: validación colombiana, propósito, ítems clave, tipo de riesgo evaluado y limitaciones reportadas."},
+  ]},
+  {id:3,color:"var(--ph3)",title:"Psicología del Testimonio y Entrevista Forense",modules:[
+    {id:"3.1",name:"Memoria, Percepción y Fiabilidad del Testimonio",detail:"2 semanas",
+     topics:["Modelo de memoria de Baddeley: relevancia forense","Falsas memorias: Loftus y el efecto post-evento","Identificación de sospechosos y sesgos","Testimonio infantil vs. adulto"],
+     work:"Análisis crítico de 3 páginas: ¿Cómo el fenómeno de las falsas memorias (Loftus) debería cambiar los procedimientos de interrogatorio en la Fiscalía colombiana? Propón cambios concretos."},
+    {id:"3.2",name:"Técnicas de Entrevista Forense",detail:"2 semanas",
+     topics:["Entrevista Cognitiva: Geiselman & Fisher","Protocolo NICHD: estructura y preguntas abiertas","SATAC/RATAC para menores víctimas de abuso","Errores frecuentes: preguntas sugestivas"],
+     work:"Transcripción de una entrevista forense simulada usando el Protocolo NICHD completo. Debe incluir: fase de rapport, transición, narración libre, preguntas abiertas y cierre. Mínimo 15 intercambios."},
+    {id:"3.3",name:"Evaluación de Credibilidad del Testimonio",detail:"1 semana",
+     topics:["CBCA: los 19 criterios de Steller y Köhnken","SVA: marco metodológico completo","Limitaciones del método","Redacción del informe de credibilidad"],
+     work:"Aplicación CBCA completa a dos testimonios escritos (uno adulto, uno menor de edad). Puntúa cada uno de los 19 criterios con justificación y elabora el informe SVA final para ambos."},
+  ]},
+  {id:4,color:"var(--ph4)",title:"Victimología e Intervención con Víctimas",modules:[
+    {id:"4.1",name:"Victimología: Fundamentos y Marco Legal",detail:"2 semanas",
+     topics:["Teorías victimológicas: Von Hentig, Mendelsohn, Fattah","Victimización primaria, secundaria y terciaria","Marco legal: Ley 1719/2014, Ley 1448/2011","Víctimas del conflicto armado y la JEP"],
+     work:"Análisis comparativo de 4-5 páginas: marco de atención a víctimas en Colombia vs. un país latinoamericano. Evalúa fortalezas, debilidades y propón 3 mejoras concretas al modelo colombiano."},
+    {id:"4.2",name:"Violencia de Género, VIF y Abuso Sexual",detail:"2 semanas",
+     topics:["Ciclo de la violencia de Walker","Síndrome de la Mujer Maltratada (BWS)","Evaluación del riesgo de feminicidio: SARA, EPV-R","Abuso sexual infantil: indicadores y evaluación"],
+     work:"Protocolo completo de evaluación psicológica forense para un caso de violencia de pareja. Debe incluir: instrumentos, estructura de entrevista, indicadores de riesgo y formato de informe."},
+    {id:"4.3",name:"Daño Psicológico: Evaluación e Informe",detail:"1 semana",
+     topics:["Daño psicológico vs. trastorno mental: diferencia jurídica","Categorías: daño moral, daño a la salud, daño a la vida de relación","Nexo causal: cómo establecerlo y documentarlo","Instrumentos: PCL-C, IES-R, BDI-II"],
+     work:"Borrador de informe pericial de daño psicológico sobre un caso ficticio de tu elección. Debe incluir: hipótesis diagnóstica, instrumentos aplicados, hallazgos y argumentación del nexo causal."},
+  ]},
+  {id:5,color:"var(--ph5)",title:"El Informe Pericial y la Audiencia",modules:[
+    {id:"5.1",name:"Estructura y Redacción del Informe Pericial",detail:"2 semanas",
+     topics:["Estructura del informe pericial: secciones obligatorias","Lenguaje técnico-jurídico accesible para el juez","Hipótesis diagnóstica vs. conclusión forense","Errores frecuentes en informes periciales"],
+     work:"Redacción completa de un informe pericial psicológico en formato oficial colombiano (Medicina Legal) sobre un caso de tu elección. Mínimo 5 secciones obligatorias, lenguaje técnico-jurídico."},
+    {id:"5.2",name:"El Perito en Audiencia",detail:"2 semanas",
+     topics:["Rol del perito en audiencia oral colombiana","Presentación del informe en juicio oral","Contrainterrogatorio: técnicas y defensa técnica","Peritaje de parte vs. peritaje oficial"],
+     work:"Guion completo para la presentación oral de un peritaje en audiencia: introducción, presentación de hallazgos, manejo de 5 posibles preguntas de contrainterrogatorio con respuestas técnicas."},
+  ]},
+  {id:6,color:"var(--ph6)",title:"Criminología, Sistema Penitenciario y Justicia Restaurativa",modules:[
+    {id:"6.1",name:"Criminología y Psicología de la Conducta Criminal",detail:"2 semanas",
+     topics:["Teorías criminológicas: control social, anomia, aprendizaje social","Factores de riesgo y protección","Psicopatía: teoría de Hare y neurobiología","Violencia instrumental vs. expresiva"],
+     work:"Análisis criminológico de un caso documentado de delincuencia en Colombia (puedes elegir un caso de jurisprudencia o prensa). Aplica mínimo 2 marcos teóricos criminológicos y evalúa factores de riesgo."},
+    {id:"6.2",name:"Psicología Penitenciaria y Resocialización",detail:"2 semanas",
+     topics:["INPEC y Ley 65/1993","Efectos psicológicos del encarcelamiento","Evaluación de riesgo de reincidencia","Programas de tratamiento: evidence-based"],
+     work:"Propuesta fundamentada de programa de intervención psicológica para una población penitenciaria específica (ej. jóvenes infractores, violencia de género). Incluye objetivos, metodología, duración y evaluación."},
+    {id:"6.3",name:"Mediación, Conciliación y Justicia Restaurativa",detail:"2 semanas",
+     topics:["Fundamentos de la justicia restaurativa","Mediación en Derecho de Familia","La JEP: rol de los psicólogos","Psicología del conflicto: principios de Harvard"],
+     work:"Diseño completo de una sesión de mediación familiar (Comisaría de Familia): objetivos, fases con tiempos, técnicas específicas para cada momento, criterios de éxito y posibles obstáculos con manejo."},
+  ]},
+];
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+const $=id=>document.getElementById(id);
+const countDone=()=>Object.values(D.grades).filter(g=>g?.approved).length;
+function getGrade(id){
+  const g=D.grades[id];if(!g)return null;
+  const q=g.quizScore??null,w=g.workScore??null;
+  let final=null;
+  if(q!==null&&w!==null)final=Math.round(q*.4+w*.6);
+  else if(q!==null)final=q;
+  else if(w!==null)final=w;
+  return{...g,quiz:q,work:w,final};
+}
+function toGPA(s){if(s===null)return null;if(s>=90)return 5.0;if(s>=80)return 4.0;if(s>=70)return 3.5;if(s>=60)return 3.0;if(s>=50)return 2.0;return 1.0;}
+function letter(s){if(s===null)return"—";if(s>=90)return"A";if(s>=80)return"B";if(s>=70)return"C";if(s>=60)return"D";return"F";}
+function gradeColor(s){if(s===null||s===undefined)return"var(--txd)";if(s>=70)return"var(--ac)";if(s>=60)return"var(--gold)";return"var(--ac3)";}
+function isUnlocked(modId){
+  const all=PHASES.flatMap(p=>p.modules);
+  const idx=all.findIndex(m=>m.id===modId);
+  if(idx===0)return true;
+  return D.grades[all[idx-1].id]?.approved===true;
+}
+function checkApproval(id){
+  const g=D.grades[id];if(!g)return;
+  D.grades[id].approved=(g.quizScore>=70)&&(g.workScore>=60);
+}
+
+// ═══════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════
+function renderAll(){
+  updateSidebar();updateStats();buildHeatmap();buildCurriculum();buildBoletin();updateCurrentMod();renderTasks();renderRefl();
+}
+
+function updateSidebar(){
+  const n=CU?.name||"Estudiante";
+  $("sb-av").textContent=n[0]?.toUpperCase()||"L";
+  $("sb-name").textContent=n;
+  $("welcome-name").textContent=n.split(" ")[0];
+  const done=countDone();
+  $("sb-role").textContent=done>0?`${done} módulos aprobados`:"Módulo 1.1 en curso";
+  $("streak-val").textContent=D.streak||0;
+}
+
+function updateStats(){
+  const done=countDone();
+  const hrs=Math.round((D.totalMinutes||0)/60);
+  $("stat-mods").innerHTML=`${done} <span>/ 23</span>`;
+  $("stat-streak").innerHTML=`${D.streak||0} <span>días</span>`;
+  $("stat-hours").innerHTML=`${hrs} <span>hrs</span>`;
+  $("stat-mods-sub").textContent=done>0?`${done} aprobado${done>1?"s":""}`:"Empieza hoy";
+  $("stat-streak-sub").textContent=D.streak>0?`${D.streak} día${D.streak>1?"s":""} consecutivos`:"¡Empieza hoy!";
+  const allG=Object.values(D.grades).map(g=>{
+    const q=g?.quizScore??null,w=g?.workScore??null;
+    if(q!==null&&w!==null)return Math.round(q*.4+w*.6);
+    if(q!==null)return q;if(w!==null)return w;return null;
+  }).filter(x=>x!==null);
+  if(allG.length>0){
+    const avg=allG.reduce((a,b)=>a+b,0)/allG.length;
+    const gpa=toGPA(avg);
+    $("stat-gpa").innerHTML=`${gpa.toFixed(1)} <span>/ 5.0</span>`;
+    $("stat-gpa-sub").textContent=`${allG.length} calificaciones`;
+    $("gpa-val").textContent=gpa.toFixed(1);
+    $("gpa-val").style.color=gradeColor(avg);
+    $("gpa-sub").textContent=`Promedio de ${allG.length} módulo${allG.length>1?"s":""} calificados`;
+  }
+}
+
+function buildHeatmap(){
+  const hm=$("heatmap");if(!hm)return;hm.innerHTML="";
+  const days=28;const now=new Date();
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split("T")[0];
+    const m=D.studyDays[ds]||0;
+    const el=document.createElement("div");el.className="hm-cell";
+    if(m>=60)el.classList.add("l4");
+    else if(m>=30)el.classList.add("l3");
+    else if(m>=10)el.classList.add("l2");
+    else if(m>0)el.classList.add("l1");
+    el.title=`${ds}: ${m} min`;
+    hm.appendChild(el);
+  }
+}
+
+function updateCurrentMod(){
+  const el=$("current-mod-body");if(!el)return;
+  let found=null;
+  for(const ph of PHASES)for(const m of ph.modules)if(!D.grades[m.id]?.approved){found={m,ph};break;if(found)break;}
+  if(!found){el.innerHTML=`<div style="color:var(--ac)">🎓 ¡Completaste todos los módulos!</div>`;return;}
+  const {m,ph}=found;const g=getGrade(m.id);
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:16px">
+    <div style="width:46px;height:46px;border-radius:11px;background:${ph.color}15;border:1px solid ${ph.color}35;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;color:${ph.color};flex-shrink:0">${m.id}</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${m.name}</div>
+      <div style="font-size:10px;color:var(--txd);margin-top:3px">${m.detail} · ${ph.title}</div>
+      <div style="display:flex;gap:16px;margin-top:8px;font-size:11px">
+        <span>Examen: <strong style="color:${gradeColor(g?.quiz??null)}">${g?.quiz!=null?g.quiz+"%":"Pendiente"}</strong></span>
+        <span>Trabajo: <strong style="color:${gradeColor(g?.work??null)}">${g?.work!=null?g.work+"%":"Pendiente"}</strong></span>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="openModule('${m.id}')">Ir al aula →</button>
+  </div>`;
+}
+
+function buildCurriculum(){
+  const c=$("phases-list");if(!c)return;c.innerHTML="";
+  PHASES.forEach(ph=>{
+    const done=ph.modules.filter(m=>D.grades[m.id]?.approved).length;
+    const pct=Math.round(done/ph.modules.length*100);
+    const div=document.createElement("div");div.className="phase-block";
+    div.innerHTML=`
+      <div class="phase-hdr" onclick="togglePhase(this)">
+        <div class="phase-num" style="background:${ph.color}12;color:${ph.color}">F${ph.id}</div>
+        <div class="phase-info">
+          <div class="phase-title" style="color:${ph.color}">${ph.title}</div>
+          <div class="phase-meta">${ph.modules.length} módulos · Fase ${ph.id}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="phase-pct" style="color:${ph.color}">${pct}%</div>
+          <div class="phase-bar"><div class="phase-bar-fill" style="width:${pct}%;background:${ph.color}"></div></div>
+          <span style="color:var(--txm)">›</span>
+        </div>
+      </div>
+      <div class="phase-expand" id="pe${ph.id}">
+        ${ph.modules.map(m=>{
+          const ul=isUnlocked(m.id);
+          const g=getGrade(m.id);
+          const approved=D.grades[m.id]?.approved;
+          const hasAny=g?.quiz!=null||g?.work!=null;
+          const st=approved?"done":hasAny?"active":"";
+          return`<div class="mod-row${!ul?" locked":""}" onclick="${ul?`openModule('${m.id}')`:''}" title="${!ul?"Completa el módulo anterior para desbloquear":""}">
+            <div class="mod-indicator ${st}">${st==="done"?"✓":st==="active"?"▶":!ul?"🔒":""}</div>
+            <div class="mod-info">
+              <div class="mod-name">${m.id} — ${m.name}</div>
+              <div class="mod-detail">${m.detail}</div>
+            </div>
+            ${g?.final!=null?`<div class="mod-grade" style="color:${gradeColor(g.final)}">${g.final}%</div>`:""}
+            <div class="mod-tag" style="${approved?"background:var(--ac-d);color:var(--ac);border-color:rgba(255,110,180,.2)":hasAny?"border-color:rgba(255,157,214,.2);color:var(--ac2)":""}">${approved?"✓ Aprobado":hasAny?"En curso":!ul?"🔒 Bloqueado":"Pendiente"}</div>
+          </div>`;
+        }).join("")}
+      </div>`;
+    c.appendChild(div);
+  });
+}
+function togglePhase(hdr){hdr.nextElementSibling.classList.toggle("open");}
+
+function buildBoletin(){
+  const c=$("boletin-body");if(!c)return;c.innerHTML="";
+  PHASES.forEach(ph=>{
+    const grades=ph.modules.map(m=>getGrade(m.id)).filter(g=>g?.final!=null);
+    const avg=grades.length?Math.round(grades.reduce((a,g)=>a+g.final,0)/grades.length):null;
+    const div=document.createElement("div");div.className="bol-phase";
+    div.innerHTML=`
+      <div class="bol-ph-hdr">
+        <div style="width:34px;height:34px;border-radius:9px;background:${ph.color}12;color:${ph.color};display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:12px">F${ph.id}</div>
+        <div class="bol-ph-name" style="color:${ph.color}">${ph.title}</div>
+        <div class="bol-ph-avg" style="color:${avg!=null?gradeColor(avg):"var(--txm)"}">${avg!=null?avg+"%":"—"}</div>
+        ${avg!=null?`<div style="font-size:12px;font-weight:700;color:${gradeColor(avg)};margin-left:6px">${letter(avg)}</div>`:""}
+      </div>
+      ${ph.modules.map(m=>{const g=getGrade(m.id);return`
+        <div class="bol-row">
+          <div class="bol-mod-name">${m.id} — ${m.name}</div>
+          <div class="bol-col" style="color:${gradeColor(g?.quiz??null)}">${g?.quiz!=null?g.quiz+"%":"—"}</div>
+          <div class="bol-col" style="color:${gradeColor(g?.work??null)}">${g?.work!=null?g.work+"%":"—"}</div>
+          <div class="bol-final" style="color:${gradeColor(g?.final??null)}">${g?.final!=null?g.final+"%":"—"}</div>
+          <div class="bol-col">${D.grades[m.id]?.approved?`<span style="color:var(--ac);font-size:10px">✓ Aprobado</span>`:g?.final!=null?`<span style="color:var(--ac3);font-size:10px">✗ Reprueba</span>`:`<span style="color:var(--txm);font-size:10px">—</span>`}</div>
+        </div>`}).join("")}`;
+    c.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════
+//  AULA
+// ═══════════════════════════════════════
+let CUR_MOD=null,QUIZ_DATA=null,QUIZ_ANS={},FILE_TXT="";
+
+function openModule(id){
+  CUR_MOD=id;QUIZ_DATA=null;QUIZ_ANS={};FILE_TXT="";
+  const mod=PHASES.flatMap(p=>p.modules).find(m=>m.id===id);
+  const ph=PHASES.find(p=>p.modules.some(m=>m.id===id));
+  if(!mod)return;
+  $("aula-title").textContent=`${mod.id} — ${mod.name}`;
+  $("aula-meta").textContent=`${mod.detail} · ${ph.title}`;
+  $("mod-topics").innerHTML=mod.topics.map(t=>`<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1)"><span style="color:var(--ac);flex-shrink:0">▸</span><span style="font-size:12px">${t}</span></div>`).join("")
+    +`<div style="margin-top:16px;padding:14px;background:rgba(255,240,250,.7);border:1px solid var(--b2);border-radius:9px"><div style="font-size:10px;color:var(--txd);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase">📋 Entregable</div><div style="font-size:12px;color:var(--tx);line-height:1.7">${mod.work}</div></div>`;
+  $("work-assignment").innerHTML=`<strong style="color:var(--ac);font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:8px">Trabajo asignado</strong>${mod.work}<br><br><span style="color:var(--txd);font-size:10px">Mínimo 300 palabras. Rúbrica: contenido teórico, aplicación colombiana, estructura académica y coherencia argumentativa.</span>`;
+  const g=D.grades[id];
+  $("work-prev-msg").style.display=g?.workScore!=null?"block":"none";
+  $("grade-result").innerHTML=g?.workScore!=null?buildGradeHTML(g.workScore,g.workFeedback,g.workCriteria):"";
+  // Quiz state
+  $("quiz-body").innerHTML="";$("quiz-result-area").innerHTML="";
+  $("quiz-submit").style.display="none";$("quiz-retry").style.display="none";
+  $("quiz-gen").style.display=g?.quizScore!=null?"none":"";
+  if(g?.quizScore!=null)showQuizResult(g.quizScore,g.quizAnswers||{},null,true);
+  renderModGrades(id);
+  // Guide
+  $("mod-guide").innerHTML=`<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Generando guía...</span></div>`;
+  nav("aula",null);
+  document.querySelectorAll(".tab").forEach((t,i)=>{t.classList.toggle("on",i===0);});
+  document.querySelectorAll(".tab-panel").forEach((p,i)=>{p.classList.toggle("on",i===0);});
+  loadModGuide(mod,ph);
+}
+
+function aulaTab(panel,el){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  $(`tp-${panel}`)?.classList.add("on");
+  if(el)el.classList.add("on");
+}
+function workTab(tab,el){
+  $("wt-text").style.display=tab==="text"?"block":"none";
+  $("wt-file").style.display=tab==="file"?"block":"none";
+  document.querySelectorAll(".subtab").forEach(t=>t.classList.remove("on"));
+  if(el)el.classList.add("on");
+}
+function handleFile(e){
+  const f=e.target.files[0];if(!f)return;
+  $("file-name").textContent="📄 "+f.name;
+  const r=new FileReader();r.onload=ev=>{FILE_TXT=ev.target.result;};r.readAsText(f);
+}
+
+// ═══════════════════════════════════════
+//  WORK GRADING
+// ═══════════════════════════════════════
+async function submitWork(){
+  const mod=PHASES.flatMap(p=>p.modules).find(m=>m.id===CUR_MOD);if(!mod)return;
+  const text=($("work-text")?.value?.trim()||"")+(FILE_TXT?.trim()||"");
+  if(text.length<80){notify("Trabajo vacío","Escribe al menos un párrafo antes de entregar.","fail");return;}
+  const btn=$("submit-btn");btn.textContent="Calificando...";btn.disabled=true;
+  $("grade-result").innerHTML=`<div style="padding:20px;text-align:center"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Analizando tu trabajo con IA...</span></div></div>`;
+  const prompt=`Eres un evaluador académico experto en Psicología Jurídica y Forense colombiana. Debes calificar este trabajo universitario con rigor y objetividad.
+
+MÓDULO: ${mod.id} — ${mod.name}
+ENTREGABLE SOLICITADO: ${mod.work}
+
+TRABAJO DEL ESTUDIANTE:
+---
+${text.slice(0,5000)}
+---
+
+Califica con esta rúbrica (cada criterio de 0 a 25 puntos):
+1. CONTENIDO TEÓRICO (0-25): dominio conceptual, precisión técnica, profundidad del análisis
+2. APLICACIÓN COLOMBIANA (0-25): uso de normativa colombiana, contexto jurídico nacional, pertinencia
+3. ESTRUCTURA ACADÉMICA (0-25): organización, coherencia, uso correcto del lenguaje técnico
+4. CALIDAD ARGUMENTATIVA (0-25): solidez del argumento, pensamiento crítico, conclusiones fundamentadas
+
+Responde SOLO en JSON sin texto adicional ni markdown:
+{"scores":{"contenido":0,"aplicacion":0,"estructura":0,"argumentacion":0},"total":0,"letter":"","feedback":"Retroalimentación profesional de 4-6 párrafos: fortalezas específicas, debilidades concretas con ejemplos del texto, y recomendaciones accionables para mejorar.","approved":true}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    let txt=d.content?.[0]?.text||"{}";
+    txt=txt.replace(/```json|```/g,"").trim();
+    const res=JSON.parse(txt);
+    const total=res.total||Math.round(Object.values(res.scores||{}).reduce((a,b)=>a+b,0));
+    if(!D.grades[CUR_MOD])D.grades[CUR_MOD]={};
+    D.grades[CUR_MOD].workScore=total;
+    D.grades[CUR_MOD].workFeedback=res.feedback;
+    D.grades[CUR_MOD].workCriteria=res.scores;
+    checkApproval(CUR_MOD);
+    await saveD();renderAll();
+    $("grade-result").innerHTML=buildGradeHTML(total,res.feedback,res.scores);
+    $("work-prev-msg").style.display="block";
+    renderModGrades(CUR_MOD);
+    notify(total>=60?"Trabajo calificado ✓":"Trabajo calificado",`Nota: ${total}/100 — ${letter(total)}`,total>=60?"done":"fail");
+    await logMins(25);
+  }catch(e){
+    $("grade-result").innerHTML=`<div style="color:var(--ac3);font-size:12px;padding:12px">Error al calificar. Verifica tu conexión e intenta de nuevo.</div>`;
+  }
+  btn.textContent="Entregar y calificar con IA →";btn.disabled=false;
+}
+
+function buildGradeHTML(total,feedback,criteria){
+  const c=gradeColor(total);
+  return`<div class="grade-card">
+    <div style="display:flex;align-items:baseline;gap:6px">
+      <div class="grade-big" style="color:${c}">${total}</div>
+      <div style="font-size:15px;color:${c}">/100</div>
+      <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:${c};margin-left:4px">${letter(total)}</div>
+      <div style="flex:1"></div>
+      <div style="font-size:11px;padding:5px 14px;border-radius:8px;background:${total>=60?"var(--ac-d)":"var(--ac3-d)"};color:${total>=60?"var(--ac)":"var(--ac3)"};border:1px solid ${total>=60?"rgba(255,110,180,.15)":"rgba(255,61,127,.15)"}">${total>=60?"✓ Aprobado":"✗ Reprueba"}</div>
+    </div>
+    ${criteria?`<div class="grade-criteria">
+      <div class="crit-item"><div class="crit-label">Contenido teórico</div><div class="crit-score" style="color:${gradeColor((criteria.contenido||0)*4)}">${criteria.contenido||0}/25</div></div>
+      <div class="crit-item"><div class="crit-label">Aplicación colombiana</div><div class="crit-score" style="color:${gradeColor((criteria.aplicacion||0)*4)}">${criteria.aplicacion||0}/25</div></div>
+      <div class="crit-item"><div class="crit-label">Estructura académica</div><div class="crit-score" style="color:${gradeColor((criteria.estructura||0)*4)}">${criteria.estructura||0}/25</div></div>
+      <div class="crit-item"><div class="crit-label">Calidad argumentativa</div><div class="crit-score" style="color:${gradeColor((criteria.argumentacion||0)*4)}">${criteria.argumentacion||0}/25</div></div>
+    </div>`:""}
+    <div class="grade-fb">${feedback||""}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════
+async function loadQuiz(){
+  const mod=PHASES.flatMap(p=>p.modules).find(m=>m.id===CUR_MOD);if(!mod)return;
+  QUIZ_ANS={};
+  $("quiz-body").innerHTML=`<div class="dots" style="margin:20px 0"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Generando examen...</span></div>`;
+  $("quiz-submit").style.display="none";$("quiz-result-area").innerHTML="";$("quiz-gen").style.display="none";$("quiz-retry").style.display="none";
+  const prompt=`Eres un profesor de Psicología Jurídica y Forense en Colombia. Genera un examen riguroso de 5 preguntas de selección múltiple.
+
+Módulo: "${mod.id} — ${mod.name}"
+Temas: ${mod.topics.join("; ")}
+
+Reglas:
+- Nivel universitario de posgrado
+- 4 opciones por pregunta, 1 sola correcta
+- Evalúa comprensión profunda y aplicación, no memorización
+- Al menos 2 preguntas sobre aplicación al contexto colombiano
+- Distractores plausibles y técnicamente incorrectos
+
+Responde SOLO en JSON sin texto adicional:
+{"questions":[{"q":"","opts":["","","",""],"correct":0,"explanation":""}]}`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    let txt=d.content?.[0]?.text||"{}";
+    txt=txt.replace(/```json|```/g,"").trim();
+    QUIZ_DATA=JSON.parse(txt);
+    renderQuiz();
+  }catch{$("quiz-body").innerHTML=`<div style="color:var(--ac3);font-size:12px">Error al generar. Intenta de nuevo.</div>`;$("quiz-gen").style.display="";}
+}
+
+function renderQuiz(){
+  if(!QUIZ_DATA?.questions)return;
+  const c=$("quiz-body");c.innerHTML="";
+  QUIZ_DATA.questions.forEach((q,qi)=>{
+    const div=document.createElement("div");div.className="quiz-q";
+    div.innerHTML=`<div class="quiz-qnum">Pregunta ${qi+1} de ${QUIZ_DATA.questions.length}</div>
+      <div class="quiz-qtext">${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((o,oi)=>`<div class="quiz-opt" id="qo${qi}_${oi}" onclick="selectOpt(${qi},${oi})"><div class="quiz-radio" id="qr${qi}_${oi}"></div>${o}</div>`).join("")}
+      </div>`;
+    c.appendChild(div);
+  });
+  $("quiz-submit").style.display="";
+}
+
+function selectOpt(qi,oi){
+  QUIZ_ANS[qi]=oi;
+  for(let i=0;i<4;i++){
+    const el=$(`qo${qi}_${i}`);
+    if(el){el.classList.remove("sel");$(`qr${qi}_${i}`)&&($(`qr${qi}_${i}`).style.background="");}
+  }
+  $(`qo${qi}_${oi}`)?.classList.add("sel");
+}
+
+async function submitQuiz(){
+  if(!QUIZ_DATA)return;
+  const total=QUIZ_DATA.questions.length;
+  if(Object.keys(QUIZ_ANS).length<total){notify("Faltan respuestas",`Contesta las ${total-Object.keys(QUIZ_ANS).length} preguntas restantes.`,"fail");return;}
+  let correct=0;
+  QUIZ_DATA.questions.forEach((q,qi)=>{if(QUIZ_ANS[qi]===q.correct)correct++;});
+  const score=Math.round(correct/total*100);
+  QUIZ_DATA.questions.forEach((q,qi)=>{
+    for(let i=0;i<q.opts.length;i++){
+      const el=$(`qo${qi}_${i}`);if(!el)continue;
+      el.classList.remove("sel");
+      if(i===q.correct)el.classList.add("correct");
+      else if(i===QUIZ_ANS[qi]&&QUIZ_ANS[qi]!==q.correct)el.classList.add("wrong");
+    }
+  });
+  $("quiz-submit").style.display="none";
+  showQuizResult(score,QUIZ_ANS,QUIZ_DATA,false);
+  if(!D.grades[CUR_MOD])D.grades[CUR_MOD]={};
+  const prev=D.grades[CUR_MOD].quizScore;
+  if(prev===undefined||score>prev){D.grades[CUR_MOD].quizScore=score;D.grades[CUR_MOD].quizAnswers={...QUIZ_ANS};}
+  checkApproval(CUR_MOD);await saveD();renderAll();renderModGrades(CUR_MOD);
+  notify(score>=70?"Examen aprobado 🎉":"Examen reprobado",`${correct}/${total} correctas — ${score}%`,score>=70?"done":"fail");
+  if(score<70)$("quiz-retry").style.display="";
+  await logMins(15);
+}
+
+function showQuizResult(score,ans,data,readonly){
+  const el=$("quiz-result-area");const c=gradeColor(score);const passed=score>=70;
+  el.innerHTML=`<div class="quiz-result-box">
+    <div class="quiz-big-score" style="color:${c}">${score}%</div>
+    <div class="quiz-result-msg">${passed?"✓ Aprobado":"✗ Reprobado — necesitas ≥70%"}</div>
+    ${data?`<div style="margin-top:14px;text-align:left">${data.questions.map((q,qi)=>`
+      <div style="padding:10px 0;border-bottom:1px solid var(--b1);font-size:11px">
+        <div style="color:var(--txd);margin-bottom:4px">P${qi+1}. ${q.q}</div>
+        <div style="color:var(--grn)">✓ ${q.opts[q.correct]}</div>
+        ${ans[qi]!==q.correct?`<div style="color:var(--ac3)">✗ Tu respuesta: ${q.opts[ans[qi]]||"—"}</div>`:""}
+        <div style="color:var(--txm);font-size:10px;margin-top:3px">${q.explanation||""}</div>
+      </div>`).join("")}</div>`:""}
+  </div>`;
+}
+
+function renderModGrades(id){
+  const el=$("mod-grades-body");if(!el)return;
+  const g=getGrade(id);
+  if(!g||g.quiz===null&&g.work===null){el.innerHTML=`<div style="font-size:12px;color:var(--txd)">Sin calificaciones aún. Completa el examen y el trabajo.</div>`;return;}
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(255,240,250,.7);border-radius:9px">
+      <div style="font-size:12px;color:var(--txd)">🎯 Examen (40%)</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${gradeColor(g.quiz)}">${g.quiz!=null?g.quiz+"%":"Pendiente"}</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(255,240,250,.7);border-radius:9px">
+      <div style="font-size:12px;color:var(--txd)">📝 Trabajo (60%)</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${gradeColor(g.work)}">${g.work!=null?g.work+"%":"Pendiente"}</div>
+    </div>
+    ${g.final!=null?`<div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:${D.grades[id]?.approved?"var(--ac-d)":"var(--ac3-d)"};border-radius:9px;border:1px solid ${D.grades[id]?.approved?"rgba(255,110,180,.15)":"rgba(255,61,127,.15)"}">
+      <div style="font-size:13px;font-weight:700">Nota final</div>
+      <div style="display:flex;align-items:baseline;gap:6px"><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:${gradeColor(g.final)}">${g.final}%</div><div style="font-size:16px;color:${gradeColor(g.final)}">${letter(g.final)}</div></div>
+    </div>`:""}
+    <div style="padding:11px;background:${D.grades[id]?.approved?"var(--ac-d)":"var(--b1)"};border-radius:8px;font-size:11px;color:${D.grades[id]?.approved?"var(--ac)":"var(--txd)"};text-align:center">
+      ${D.grades[id]?.approved?"✓ Módulo aprobado — siguiente módulo desbloqueado":"Necesitas ≥70% en el examen y ≥60% en el trabajo para aprobar"}
+    </div>
+    ${D.grades[id]?.workFeedback?`<div style="padding:16px;background:rgba(255,240,250,.7);border-radius:9px;font-size:12px;color:var(--tx);line-height:1.8;white-space:pre-wrap">${D.grades[id].workFeedback}</div>`:""}
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  AI
+// ═══════════════════════════════════════
+async function loadAI(force=false){
+  const el=$("ai-text");if(!el)return;
+  const t=today();
+  if(!force&&D.lastAI?.date===t){el.innerHTML=D.lastAI.html;return;}
+  el.innerHTML=`<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Analizando...</span></div>`;
+  const done=countDone();
+  const next=PHASES.flatMap(p=>p.modules).find(m=>!D.grades[m.id]?.approved);
+  const prompt=`Eres el asistente académico de ForenseU, LMS en Psicología Jurídica para Colombia.
+Estudiante: ${CU?.name||"Estudiante"} | Módulos aprobados: ${done}/23 | Racha: ${D.streak||0} días | Fecha: ${t}
+Próximo módulo: ${next?`${next.id} — ${next.name}`:"todos completados"}
+
+Escribe una sugerencia académica breve (máx. 3 párrafos):
+1. Qué estudiar hoy y por qué es prioritario
+2. Una microtarea concreta de 25 minutos para avanzar hoy
+3. Una motivación genuina y específica para esta estudiante
+
+Sin asteriscos. Sin listas. Prosa corrida. Tono profesional, cálido y directo.`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.[0]?.text||"Sin conexión.";
+    const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
+    el.innerHTML=html;
+    D.lastAI={date:t,html};await saveD();
+  }catch{el.innerHTML=`<span style="color:var(--txd)">Sin conexión. Intenta de nuevo.</span>`;}
+}
+
+async function loadModGuide(mod,ph){
+  const el=$("mod-guide");if(!el)return;
+  const prompt=`Eres un profesor experto en Psicología Jurídica y Forense colombiana.
+El estudiante estudia: "${mod.id} — ${mod.name}" (${ph.title}).
+Temas: ${mod.topics.join("; ")}.
+Entregable: ${mod.work}
+
+Escribe una guía de estudio práctica (máx. 4 párrafos cortos):
+1. Por qué este módulo es crucial para el psicólogo jurídico en Colombia
+2. Los 2-3 conceptos centrales a dominar
+3. Estrategia paso a paso para completar el entregable
+4. Un recurso gratuito y accesible para empezar hoy
+
+Tono profesional y directo. Sin asteriscos ni markdown.`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.[0]?.text||"Error.";
+    el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
+  }catch{el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;}
+}
+
+// ═══════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════
+const WORK=25*60,SHORT=5*60,LONG=15*60;
+let tSec=WORK,tRun=false,tBreak=false,pomoC=0,tInt=null;
+
+function fmtT(s){return`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;}
+function updTimer(){
+  const t=fmtT(tSec);
+  ["ring-time","topbar-timer","focus-time"].forEach(id=>{const e=$(id);if(e)e.textContent=t;});
+  const total=tBreak?(pomoC%4===0&&pomoC>0?LONG:SHORT):WORK;
+  const frac=tSec/total;
+  const rp=$("ring-prog");
+  if(rp){rp.style.strokeDashoffset=408*(1-frac);rp.style.stroke=tBreak?"var(--ac2)":"var(--ac)";}
+}
+function timerToggle(){
+  if(tRun){clearInterval(tInt);tRun=false;$("timer-btn").textContent="Reanudar";}
+  else{tRun=true;$("timer-btn").textContent="Pausar";tInt=setInterval(()=>{tSec--;updTimer();if(tSec<=0){clearInterval(tInt);tRun=false;onEnd();}},1000);}
+}
+async function onEnd(){
+  $("timer-btn").textContent="Iniciar";
+  if(!tBreak){
+    pomoC++;updDots();
+    const isLong=pomoC%4===0;
+    tBreak=true;tSec=isLong?LONG:SHORT;
+    $("ring-mode").textContent=isLong?"Descanso largo":"Descanso";
+    $("focus-phase").textContent=`Modo: ${isLong?"Descanso largo":"Descanso corto"}`;
+    $("break-banner")?.classList.add("show");
+    notify("¡Pomodoro completado! 🎉",`Descansa ${isLong?15:5} min.`,"brk");
+    await logMins(25);
+  }else{
+    tBreak=false;tSec=WORK;
+    $("ring-mode").textContent="Foco";$("focus-phase").textContent="Modo: Foco";
+    $("break-banner")?.classList.remove("show");
+    notify("¡A estudiar!","Descanso terminado.","ok");
+  }
+  updTimer();
+}
+function timerReset(){
+  clearInterval(tInt);tRun=false;tBreak=false;tSec=WORK;
+  $("ring-mode").textContent="Foco";$("focus-phase").textContent="Modo: Foco";
+  $("timer-btn").textContent="Iniciar";
+  $("break-banner")?.classList.remove("show");updTimer();
+}
+function updDots(){
+  for(let i=0;i<4;i++){const e=$(`pd${i}`);if(e)e.classList.toggle("done",i<(pomoC%4||4)&&pomoC>0&&(i<pomoC%4||pomoC%4===0));}
+  $("pomo-count").textContent=pomoC;
+  $("mins-count").textContent=D.studyDays[today()]||0;
+}
+
+// ═══════════════════════════════════════
+//  TASKS
+// ═══════════════════════════════════════
+function renderTasks(){
+  const list=$("task-list");const empty=$("task-empty");if(!list)return;
+  const today_tasks=D.tasks.filter(t=>t.date===today()||!t.date);
+  list.innerHTML=today_tasks.map((t,i)=>`
+    <div class="task-item${t.done?" done-t":""}">
+      <div class="task-cb${t.done?" chk":""}" onclick="toggleTask('${t.id}')">${t.done?"✓":""}</div>
+      <div class="task-name" style="${t.done?"text-decoration:line-through;color:var(--txd)":""}">${t.text}</div>
+      <button class="task-del" onclick="deleteTask('${t.id}')">✕</button>
+    </div>`).join("");
+  empty.style.display=today_tasks.length===0?"block":"none";
+}
+async function addTask(){
+  const input=$("task-in");const text=input?.value?.trim();if(!text)return;
+  if(!D.tasks)D.tasks=[];
+  D.tasks.push({id:Date.now().toString(),text,done:false,date:today()});
+  input.value="";renderTasks();await saveD();
+}
+async function toggleTask(id){
+  const t=D.tasks.find(t=>t.id===id);if(t){t.done=!t.done;renderTasks();await saveD();}
+}
+async function deleteTask(id){
+  D.tasks=D.tasks.filter(t=>t.id!==id);renderTasks();await saveD();
+}
+
+// ═══════════════════════════════════════
+//  REFLECTION
+// ═══════════════════════════════════════
+function renderRefl(){
+  const el=$("refl-hist");if(!el)return;
+  const hist=(D.reflections||[]).slice(-3).reverse();
+  if(!hist.length){el.innerHTML=`<div style="font-size:12px;color:var(--txm)">Sin reflexiones guardadas aún.</div>`;return;}
+  el.innerHTML=hist.map(r=>`
+    <div class="refl-hist">
+      <div class="refl-hist-date">${r.date}</div>
+      ${r.q1?`<div class="refl-hist-item"><strong style="color:var(--txd)">Avancé:</strong> ${r.q1}</div>`:""}
+      ${r.q2?`<div class="refl-hist-item"><strong style="color:var(--txd)">Dificultades:</strong> ${r.q2}</div>`:""}
+      ${r.q3?`<div class="refl-hist-item"><strong style="color:var(--txd)">Próxima semana:</strong> ${r.q3}</div>`:""}
+    </div>`).join("");
+}
+async function saveRefl(){
+  const q1=$("r1")?.value?.trim(),q2=$("r2")?.value?.trim(),q3=$("r3")?.value?.trim();
+  if(!q1&&!q2&&!q3){notify("Reflexión vacía","Escribe al menos una respuesta.","fail");return;}
+  if(!D.reflections)D.reflections=[];
+  D.reflections.push({date:today(),q1,q2,q3,ts:Date.now()});
+  $("r1").value="";$("r2").value="";$("r3").value="";
+  renderRefl();await saveD();await logMins(10);
+  notify("Reflexión guardada ✓","¡Sigue así!","done");
+}
+
+// ═══════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════
+const PAGE_META={
+  dashboard:["Dashboard",()=>new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})],
+  curriculum:["Programa","6 fases · 23 módulos · Psicología Jurídica Colombia"],
+  aula:["Aula","Módulo en curso"],
+  boletin:["Boletín de Notas","Tu historial académico oficial"],
+  timer:["Temporizador","Técnica Pomodoro · Gestión del tiempo"],
+  tareas:["Tareas del día","Lista de pendientes"],
+  reflexion:["Reflexión semanal","Metacognición y aprendizaje"],
+};
+
+function nav(id,el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".sb-item").forEach(n=>n.classList.remove("on"));
+  $(`page-${id}`)?.classList.add("on");
+  if(el)el.classList.add("on");
+  const m=PAGE_META[id]||["",""];
+  $("page-title").textContent=m[0];
+  $("page-sub").textContent=typeof m[1]==="function"?m[1]():m[1];
+}
+
+// ═══════════════════════════════════════
+//  FOCUS
+// ═══════════════════════════════════════
+function openFocus(){$("focus-ov").classList.add("on");}
+function closeFocus(){$("focus-ov").classList.remove("on");}
+
+// ═══════════════════════════════════════
+//  NOTIF
+// ═══════════════════════════════════════
+let _nT;
+function notify(title,body,type="ok"){
+  const e=$("notif");e.className=`notif ${type}`;
+  $("notif-title").textContent=title;$("notif-body").textContent=body;
+  e.classList.add("show");clearTimeout(_nT);_nT=setTimeout(()=>e.classList.remove("show"),4500);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+async function showApp(){
+  $("auth-sc").style.display="none";$("ls").style.display="flex";
+  await loadD();
+  $("ls").style.display="none";
+  updTimer();
+  renderAll();
+  loadAI(false);
+  nav("dashboard",document.querySelector(".sb-item"));
+}
+
+async function init(){
+  const uid=localStorage.getItem("fu_uid"),t=localStorage.getItem("fu_tok"),exp=localStorage.getItem("fu_exp"),name=localStorage.getItem("fu_name");
+  if(uid&&t&&exp&&Date.now()<parseInt(exp)){TOK=t;CU={uid,name:name||"Estudiante"};await showApp();}
+  else{$("ls").style.display="none";$("auth-sc").style.display="flex";}
+}
+init();
+</script>
+</body>
+</html>
