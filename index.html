@@ -943,8 +943,10 @@ async function geminiText(prompt,maxTokens=1000){
   const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}};
   const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||"";
+  if(d.error){console.error("Gemini error:",d.error);throw new Error(d.error.message||"Gemini API error");}
+  const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"";
+  if(!txt)console.warn("Gemini respuesta vacía:",d);
+  return txt;
 }
 
 // Para el simulador: incluye system prompt y historial de mensajes
@@ -1557,26 +1559,36 @@ function renderModGrades(id){
 async function loadAI(force=false){
   const el=$("ai-text");if(!el)return;
   const t=today();
-  if(!force&&D.lastAI?.date===t){el.innerHTML=D.lastAI.html;return;}
-  el.innerHTML=`<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Analizando...</span></div>`;
+  // Solo usar caché si la sugerencia guardada no es un error
+  if(!force&&D.lastAI?.date===t&&D.lastAI?.html&&!D.lastAI.html.includes("Sin conexión")){
+    el.innerHTML=D.lastAI.html;return;
+  }
+  el.innerHTML=`<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Analizando tu progreso...</span></div>`;
   const done=countDone();
   const next=PHASES.flatMap(p=>p.modules).find(m=>!D.grades[m.id]?.approved);
-  const prompt=`Eres el asistente académico de ForenseU, LMS en Psicología Jurídica para Colombia.
-Estudiante: ${CU?.name||"Estudiante"} | Módulos aprobados: ${done}/23 | Racha: ${D.streak||0} días | Fecha: ${t}
-Próximo módulo: ${next?`${next.id} — ${next.name}`:"todos completados"}
+  const semActivo=SEMESTRES.find(s=>getSemStatus(s)==="activo");
+  const prompt=`Eres el asistente académico de ForenseU, universidad autodidacta de Psicología Jurídica para Colombia.
+Estudiante: ${CU?.name||"Luisa"} | Módulos aprobados: ${done}/23 | Racha: ${D.streak||0} días | Fecha: ${t}
+Semestre activo: ${semActivo?semActivo.title+" — "+semActivo.subtitle:"Sin semestre activo aún"}
+Próximo módulo: ${next?`${next.id} — ${next.name}`:"¡Todos completados!"}
 
-Escribe una sugerencia académica breve (máx. 3 párrafos):
-1. Qué estudiar hoy y por qué es prioritario
-2. Una microtarea concreta de 25 minutos para avanzar hoy
-3. Una motivación genuina y específica para esta estudiante
+Escribe una sugerencia académica breve y motivadora en máximo 3 párrafos cortos:
+1. Qué estudiar específicamente hoy y por qué es prioritario para su formación en psicología jurídica colombiana
+2. Una microtarea concreta de exactamente 25 minutos para avanzar hoy mismo
+3. Una motivación genuina, específica y cálida para Luisa
 
-Sin asteriscos. Sin listas. Prosa corrida. Tono profesional, cálido y directo.`;
+Escribe en segunda persona (tú). Sin asteriscos. Sin listas con números. Prosa corrida. Tono profesional y cercano.`;
   try{
-    const txt=await geminiText(prompt,600);
+    const txt=await geminiText(prompt,700);
+    if(!txt||txt.trim().length<10)throw new Error("Respuesta vacía");
     const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
     el.innerHTML=html;
-    D.lastAI={date:t,html};await saveD();
-  }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión. Intenta de nuevo.</span>`;console.error(e);}
+    D.lastAI={date:t,html};
+    await saveD();
+  }catch(e){
+    console.error("loadAI error:",e);
+    el.innerHTML=`<span style="color:var(--txd)">No se pudo cargar la sugerencia. <span style="color:var(--ac);cursor:pointer" onclick="loadAI(true)">Intentar de nuevo →</span></span>`;
+  }
 }
 
 async function loadModGuide(mod,ph){
