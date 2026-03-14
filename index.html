@@ -913,6 +913,38 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 
 <script>
 // ═══════════════════════════════════════
+//  GEMINI API
+// ═══════════════════════════════════════
+const GEMINI_KEY="AIzaSyBRygwioA7lRM4HIavz02z7Ir8nUQpKdnY";
+const GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+
+async function geminiCall(prompt,maxTokens=1000){
+  const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}};
+  const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json();
+  // Adaptar respuesta al formato que espera el código (igual que Anthropic)
+  const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"";
+  return{ok:r.ok,json:()=>Promise.resolve({content:[{text:txt}]})};
+}
+
+async function geminiCallWithSystem(systemPrompt,msgs,maxTokens=500){
+  // Gemini no tiene system prompt separado — lo integramos como primer mensaje de usuario
+  const contents=[];
+  // Agregar system como primer turno
+  contents.push({role:"user",parts:[{text:systemPrompt+"\n\n---\nAhora comienza la simulación."}]});
+  contents.push({role:"model",parts:[{text:"Entendido. Estoy listo para comenzar la simulación en el rol asignado."}]});
+  // Agregar historial de mensajes
+  msgs.forEach(m=>{
+    contents.push({role:m.role==="user"?"user":"model",parts:[{text:m.content}]});
+  });
+  const body={contents,generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}};
+  const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json();
+  const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"...";
+  return{ok:r.ok,json:()=>Promise.resolve({content:[{text:txt}]})};
+}
+
+// ═══════════════════════════════════════
 //  FIREBASE CONFIG
 // ═══════════════════════════════════════
 const FBB="https://plania-f7102-default-rtdb.firebaseio.com";
@@ -1339,7 +1371,7 @@ Califica con esta rúbrica (cada criterio de 0 a 25 puntos):
 Responde SOLO en JSON sin texto adicional ni markdown:
 {"scores":{"contenido":0,"aplicacion":0,"estructura":0,"argumentacion":0},"total":0,"letter":"","feedback":"Retroalimentación profesional de 4-6 párrafos: fortalezas específicas, debilidades concretas con ejemplos del texto, y recomendaciones accionables para mejorar.","approved":true}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,messages:[{role:"user",content:prompt}]})});
+    const r=await geminiCall(prompt,1500);
     const d=await r.json();
     let txt=d.content?.[0]?.text||"{}";
     txt=txt.replace(/```json|```/g,"").trim();
@@ -1405,7 +1437,7 @@ Reglas:
 Responde SOLO en JSON sin texto adicional:
 {"questions":[{"q":"","opts":["","","",""],"correct":0,"explanation":""}]}`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,messages:[{role:"user",content:prompt}]})});
+    const r=await geminiCall(prompt,2000);
     const d=await r.json();
     let txt=d.content?.[0]?.text||"{}";
     txt=txt.replace(/```json|```/g,"").trim();
@@ -1524,7 +1556,7 @@ Escribe una sugerencia académica breve (máx. 3 párrafos):
 
 Sin asteriscos. Sin listas. Prosa corrida. Tono profesional, cálido y directo.`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:prompt}]})});
+    const r=await geminiCall(prompt,600);
     const d=await r.json();
     const txt=d.content?.[0]?.text||"Sin conexión.";
     const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
@@ -1548,7 +1580,7 @@ Escribe una guía de estudio práctica (máx. 4 párrafos cortos):
 
 Tono profesional y directo. Sin asteriscos ni markdown.`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:prompt}]})});
+    const r=await geminiCall(prompt,900);
     const d=await r.json();
     const txt=d.content?.[0]?.text||"Error.";
     el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
@@ -1955,7 +1987,7 @@ async function simGetAI(override){
   const typing=addSimTyping();
   const msgs=override?[{role:'user',content:override}]:[...SIM.msgs];
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,system:SIM.sys,messages:msgs})});
+    const r=await geminiCallWithSystem(SIM.sys,msgs,500);
     const d=await r.json();
     const txt=d.content?.[0]?.text||'...';
     typing.remove();
@@ -1996,7 +2028,7 @@ async function terminarSim(){
   const transcript=SIM.msgs.map(m=>`${m.role==='user'?'PSICÓLOGA':'PERSONAJE'}: ${m.content}`).join('\n\n');
   const prompt=`${sc.eval}\n\nPERFIL: ${SIM.profile}\nDIFICULTAD: ${SIM.diff}\nDURACIÓN: ${Math.floor(SIM.sec/60)} min\nTURNOS: ${SIM.turns}\nFOCO: ${SIM.focus||"general"}\n\nTRANSCRIPCIÓN:\n---\n${transcript}\n---\n\nRúbrica (cada criterio 0-25):\n1. TÉCNICA: uso de protocolo, preguntas, estructura\n2. RAPPORT: confianza, manejo emocional, lenguaje\n3. PROFUNDIDAD CLÍNICA: exploración, hipótesis, análisis\n4. ÉTICA Y PROFESIONALISMO: neutralidad, límites, respeto\n\nResponde SOLO en JSON:\n{"scores":{"tecnica":0,"rapport":0,"profundidad":0,"etica":0},"total":0,"nivel":"","fortalezas":["","",""],"mejoras":["","",""],"momentos_clave":["",""],"recomendacion":"","proxima_practica":""}`;
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const r=await geminiCall(prompt,1200);
     const d=await r.json();
     let txt=d.content?.[0]?.text||'{}';txt=txt.replace(/```json|```/g,'').trim();
     renderSimFb(JSON.parse(txt));
