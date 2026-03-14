@@ -327,7 +327,21 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 .cierre-gpa{font-family:'Syne',sans-serif;font-size:64px;font-weight:800;color:var(--ac);line-height:1;margin:16px 0 8px;}
 .cierre-msg{font-size:12px;color:var(--txd);line-height:1.7;margin-bottom:22px;}
 
-/* ── BANCO LECTURAS ── */
+/* ── LECTURAS EN MÓDULO ── */
+.mod-lec-card{background:linear-gradient(135deg,rgba(106,184,232,.06),rgba(240,192,48,.04));border:1px solid rgba(106,184,232,.2);border-radius:13px;padding:20px;margin-bottom:16px;}
+.mod-lec-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--ac2);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.mod-lec-item{display:flex;align-items:flex-start;gap:12px;padding:11px 13px;background:rgba(255,248,252,.9);border:1px solid var(--b1);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.mod-lec-item:hover{border-color:var(--b2);background:rgba(255,240,250,.9);}
+.mod-lec-num{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:10px;font-weight:800;flex-shrink:0;}
+.mod-lec-info{flex:1;}
+.mod-lec-name{font-size:12px;color:var(--tx);font-weight:600;margin-bottom:2px;line-height:1.3;}
+.mod-lec-autor{font-size:10px;color:var(--txd);}
+.mod-lec-why{font-size:11px;color:var(--txd);margin-top:4px;font-style:italic;line-height:1.5;}
+.mod-lec-badge{font-size:9px;padding:2px 8px;border-radius:8px;background:var(--ac2-d);color:var(--ac2);border:1px solid rgba(106,184,232,.2);flex-shrink:0;margin-top:2px;}
+.guia-lectura-box{background:rgba(255,248,252,.97);border:1px solid var(--b1);border-radius:13px;padding:20px;margin-bottom:16px;}
+.guia-step{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--b1);font-size:12px;line-height:1.7;}
+.guia-step:last-child{border-bottom:none;}
+.guia-step-n{width:24px;height:24px;border-radius:50%;background:var(--ac-d);border:1px solid rgba(224,90,154,.2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:10px;font-weight:800;color:var(--ac);flex-shrink:0;margin-top:1px;}
 .lec-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
 .lec-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
 .lec-filter-pill{padding:5px 14px;border-radius:20px;font-size:10px;border:1px solid var(--b1);background:rgba(255,240,250,.7);color:var(--txd);cursor:pointer;transition:all .2s;}
@@ -635,8 +649,14 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
           <div class="card-title">📖 Temas del módulo</div>
           <div id="mod-topics"></div>
         </div>
-        <div class="ai-box">
-          <div class="ai-hdr"><div class="ai-icon">✦</div><div><div class="ai-title">Guía de estudio — IA</div><div class="ai-sub">Estrategia y explicación personalizadas</div></div></div>
+        <!-- LECTURAS RECOMENDADAS -->
+        <div class="mod-lec-card" id="mod-lecturas-box">
+          <div class="mod-lec-title">📚 Lecturas base para este módulo</div>
+          <div id="mod-lecturas-list"></div>
+        </div>
+        <!-- GUÍA DE LECTURA IA -->
+        <div class="ai-box" style="margin-bottom:16px">
+          <div class="ai-hdr"><div class="ai-icon">✦</div><div><div class="ai-title">Guía de estudio — IA</div><div class="ai-sub">Cómo estudiar las lecturas y completar el trabajo</div></div></div>
           <div class="ai-body" id="mod-guide"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Generando...</span></div></div>
         </div>
         <div style="display:flex;gap:10px">
@@ -1317,6 +1337,7 @@ function openModule(id){
   renderModGrades(id);
   // Guide
   $("mod-guide").innerHTML=`<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span style="font-size:11px;color:var(--txd);margin-left:8px">Generando guía...</span></div>`;
+  renderModLecturas(id);
   nav("aula",null);
   document.querySelectorAll(".tab").forEach((t,i)=>{t.classList.toggle("on",i===0);});
   document.querySelectorAll(".tab-panel").forEach((p,i)=>{p.classList.toggle("on",i===0);});
@@ -1560,22 +1581,37 @@ Sin asteriscos. Sin listas. Prosa corrida. Tono profesional, cálido y directo.`
 
 async function loadModGuide(mod,ph){
   const el=$("mod-guide");if(!el)return;
+  // Obtener lecturas del módulo para incluirlas en el prompt
+  const modLecs=(MOD_LECTURAS[mod.id]||[]).map(ml=>{
+    const lec=LECTURAS.find(l=>l.id===ml.id);
+    return lec?`- "${lec.titulo}" (${lec.autor}): ${ml.why}`:"";
+  }).filter(Boolean).join("\n");
+
   const prompt=`Eres un profesor experto en Psicología Jurídica y Forense colombiana.
-El estudiante estudia: "${mod.id} — ${mod.name}" (${ph.title}).
+El estudiante va a estudiar: "${mod.id} — ${mod.name}" (${ph.title}).
 Temas: ${mod.topics.join("; ")}.
 Entregable: ${mod.work}
 
-Escribe una guía de estudio práctica (máx. 4 párrafos cortos):
-1. Por qué este módulo es crucial para el psicólogo jurídico en Colombia
-2. Los 2-3 conceptos centrales a dominar
-3. Estrategia paso a paso para completar el entregable
-4. Un recurso gratuito y accesible para empezar hoy
+Lecturas asignadas para este módulo:
+${modLecs}
 
-Tono profesional y directo. Sin asteriscos ni markdown.`;
+Escribe una guía de estudio práctica en 4 partes (sin asteriscos, sin listas con guiones, prosa directa):
+
+PARTE 1 — POR QUÉ IMPORTA (2-3 oraciones): Por qué este módulo es crucial para el psicólogo jurídico en Colombia.
+
+PARTE 2 — CÓMO LEER (2-3 oraciones por lectura): Para cada lectura asignada, explica exactamente qué sección o capítulo leer primero, qué concepto buscar específicamente y cómo conectarlo con el entregable.
+
+PARTE 3 — CÓMO HACER EL TRABAJO (3-4 oraciones): Estrategia paso a paso para completar el entregable usando las lecturas como base.
+
+PARTE 4 — CONSEJO FINAL (1-2 oraciones): Un consejo específico para que el trabajo quede excelente.
+
+Tono profesional, cálido y directo. Sin asteriscos ni markdown.`;
+
   try{
-    const txt=await geminiText(prompt,900);
-    el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
+    const txt=await geminiText(prompt,1200);
+    el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ").replace(/PARTE \d — [^:]+:/g,m=>`<strong style="color:var(--ac);display:block;margin-top:12px;font-size:11px;letter-spacing:1px;text-transform:uppercase">${m}</strong>`)}</span>`;
   }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;console.error(e);}
+}
 }
 
 // ═══════════════════════════════════════
@@ -2051,8 +2087,124 @@ function cerrarSimFb(){$('sim-fb-modal').classList.remove('on');}
 function toggleSimTranscript(){const a=$('sim-transcript-area');a.style.display=a.style.display==='none'?'block':'none';}
 
 // ═══════════════════════════════════════
-//  BANCO DE LECTURAS
+//  LECTURAS POR MÓDULO
 // ═══════════════════════════════════════
+// Cada módulo tiene sus lecturas recomendadas con justificación específica
+const MOD_LECTURAS={
+  "1.1":[
+    {id:"r1",why:"Base epistemológica del campo — Arce y Fariña definen exactamente qué es y qué no es la psicología jurídica"},
+    {id:"r2",why:"Contextualiza tu rol profesional en Colombia — indispensable para entender el mercado y los errores a evitar"},
+  ],
+  "1.2":[
+    {id:"r3",why:"Lectura directa obligatoria — los Arts. 405-441 son tu marco normativo como perito. Léelos completos"},
+    {id:"r1",why:"Capítulo sobre el rol del psicólogo en el sistema judicial — base para entender el sistema acusatorio"},
+  ],
+  "1.3":[
+    {id:"r3",why:"El Código de Infancia y las normas de familia están dentro de este marco normativo general"},
+    {id:"r2",why:"Describe específicamente el rol del psicólogo en Comisarías de Familia e ICBF en Colombia"},
+  ],
+  "1.4":[
+    {id:"r1",why:"Arce y Fariña tienen un capítulo completo sobre ética forense vs. ética clínica — la distinción clave"},
+    {id:"r2",why:"Describe los dilemas éticos específicos del psicólogo jurídico colombiano con casos reales del contexto nacional"},
+  ],
+  "2.1":[
+    {id:"r7",why:"DSM-5 es tu referencia diagnóstica directa — enfócate en los trastornos de personalidad y psicóticos"},
+    {id:"r6",why:"Esbec y Gómez-Jarabo conectan exactamente cada diagnóstico con su relevancia forense e imputabilidad"},
+  ],
+  "2.2":[
+    {id:"r1",why:"Arce y Fariña describen el proceso completo de evaluación forense y sus diferencias con la evaluación clínica"},
+    {id:"r4",why:"Loinaz describe los instrumentos clave (HCR-20, PCL-R, SARA) que usarás en toda evaluación de riesgo"},
+    {id:"r6",why:"Complementa la evaluación con el marco psicopatológico forense — cómo leer los resultados en contexto jurídico"},
+  ],
+  "2.3":[
+    {id:"r5",why:"Manzanero es LA referencia del CBCA-SVA — este artículo es el núcleo del módulo"},
+    {id:"r8",why:"La psicología del testimonio explica por qué ocurre la simulación y cómo detectarla"},
+    {id:"r1",why:"Capítulo sobre escalas de validez del MMPI-2 para detección de simulación"},
+  ],
+  "2.4":[
+    {id:"r4",why:"Loinaz es la referencia central de este módulo — describe HCR-20, SVR-20, SARA y SAVRY en detalle"},
+    {id:"r1",why:"Complementa con el marco teórico de evaluación de riesgo y sus limitaciones"},
+  ],
+  "3.1":[
+    {id:"r8",why:"Manzanero es el referente central de la psicología del testimonio — este libro ES el módulo"},
+    {id:"r1",why:"Complementa con el capítulo sobre memoria y testimonio de Arce y Fariña"},
+  ],
+  "3.2":[
+    {id:"r9",why:"El protocolo NICHD es el entregable del módulo — debes conocerlo en detalle para transcribir la entrevista"},
+    {id:"r8",why:"La base teórica de por qué el NICHD funciona está en la psicología del testimonio de Manzanero"},
+  ],
+  "3.3":[
+    {id:"r5",why:"Este artículo de Manzanero describe exactamente los 19 criterios CBCA y el marco SVA — lectura central"},
+    {id:"r8",why:"El contexto teórico de la credibilidad del testimonio es imprescindible para aplicar bien el CBCA"},
+  ],
+  "4.1":[
+    {id:"r10",why:"Landrove sistematiza las teorías victimológicas clásicas y contemporáneas — base del módulo"},
+    {id:"r11",why:"Echeburúa define el daño psicológico y el nexo causal — herramientas para el análisis comparativo"},
+  ],
+  "4.2":[
+    {id:"r11",why:"Echeburúa describe instrumentos (PCL-C, IES-R) y el marco de evaluación del daño en VIF y abuso"},
+    {id:"r10",why:"El concepto de victimización secundaria de Landrove es esencial para el protocolo de evaluación"},
+    {id:"r4",why:"El SARA de Loinaz es el instrumento central para evaluar riesgo de feminicidio — lectura obligatoria"},
+  ],
+  "4.3":[
+    {id:"r11",why:"Este artículo de Echeburúa ES la base directa del borrador de informe de daño psicológico"},
+    {id:"r7",why:"El DSM-5 para los diagnósticos y especificadores que fundamentan el daño documentado"},
+  ],
+  "5.1":[
+    {id:"r12",why:"Soria Verde es la referencia directa para la estructura y redacción del informe pericial — lectura obligatoria"},
+    {id:"r13",why:"Hernández Esquivel contextualiza el informe pericial en el sistema colombiano con jurisprudencia real"},
+  ],
+  "5.2":[
+    {id:"r13",why:"Describe exactamente cómo actúa el perito en audiencia oral colombiana y los errores más comunes"},
+    {id:"r3",why:"Los Arts. 405-441 de la Ley 906/2004 regulan el interrogatorio y contrainterrogatorio del perito"},
+    {id:"r12",why:"Soria Verde tiene un capítulo específico sobre la defensa oral del informe — prepárate con él"},
+  ],
+  "6.1":[
+    {id:"r14",why:"Garrido, Stangeland y Redondo es la referencia central de criminología — base del análisis de caso"},
+    {id:"r1",why:"Complementa con los capítulos sobre conducta antisocial y factores de riesgo de Arce y Fariña"},
+  ],
+  "6.2":[
+    {id:"r14",why:"Los capítulos sobre psicología penitenciaria y programas de tratamiento son base del módulo"},
+    {id:"r4",why:"La evaluación de riesgo de reincidencia (HCR-20) es central en el diseño del programa de intervención"},
+  ],
+  "6.3":[
+    {id:"r15",why:"Bolivar describe el marco de justicia restaurativa en Colombia — lectura central del módulo"},
+    {id:"r10",why:"El concepto de reparación a víctimas de Landrove complementa el enfoque restaurativo"},
+  ],
+};
+
+function renderModLecturas(modId){
+  const box=$("mod-lecturas-box");
+  const list=$("mod-lecturas-list");
+  if(!box||!list)return;
+  const modLecs=MOD_LECTURAS[modId]||[];
+  if(!modLecs.length){box.style.display="none";return;}
+  box.style.display="block";
+  list.innerHTML=modLecs.map((ml,i)=>{
+    const lec=LECTURAS.find(l=>l.id===ml.id);
+    if(!lec)return"";
+    const sc=LEC_SEM_COLOR[lec.sem]||"var(--ac)";
+    const isRead=LEC_STATE[lec.id];
+    return`<div class="mod-lec-item" onclick="nav('lecturas',document.querySelector('[data-page=lecturas]'));setTimeout(()=>{lecToggle('${lec.id}')},300)">
+      <div class="mod-lec-num" style="background:${sc}15;color:${sc}">${i+1}</div>
+      <div class="mod-lec-info">
+        <div class="mod-lec-name">${lec.titulo}</div>
+        <div class="mod-lec-autor">${lec.autor}</div>
+        <div class="mod-lec-why">→ ${ml.why}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+        <div class="mod-lec-badge">${LEC_SEM_LABEL[lec.sem]}</div>
+        ${isRead?`<div style="font-size:9px;color:var(--grn);background:var(--grn-d);border:1px solid rgba(80,200,160,.2);padding:2px 8px;border-radius:8px">✓ Leída</div>`:`<div style="font-size:9px;color:var(--txm)">Pendiente</div>`}
+      </div>
+    </div>`;
+  }).join("");
+  // Agregar tip al final
+  const pendientes=modLecs.filter(ml=>!LEC_STATE[ml.id]).length;
+  list.innerHTML+=`<div style="padding:10px 13px;background:var(--gold-d);border:1px solid rgba(240,192,48,.2);border-radius:9px;font-size:11px;color:var(--txd);margin-top:4px;line-height:1.6">
+    💡 ${pendientes>0?`Tienes <strong style="color:var(--gold)">${pendientes} lectura${pendientes>1?"s":""} pendiente${pendientes>1?"s":""}</strong> de este módulo. Léelas antes de empezar el trabajo.`:`✅ <strong style="color:var(--grn)">¡Leíste todas las lecturas de este módulo!</strong> Estás lista para el trabajo.`}
+    <span style="color:var(--ac);cursor:pointer;margin-left:6px" onclick="nav('lecturas',document.querySelector('[data-page=lecturas]'))">Ver banco de lecturas →</span>
+  </div>`;
+}
 const LECTURAS=[
 {id:'r1',sem:'sem1',temas:['fundamentos'],tipo:'Libro',titulo:'Manual de Psicología Jurídica',autor:'Ramón Arce & Francisca Fariña (2005)',
  acceso:[{tipo:'Academia.edu',url:'https://www.academia.edu/search?q=manual+psicologia+juridica+arce+farina',nota:'Busca: "Manual Psicología Jurídica Arce Fariña"'},{tipo:'UNAD Biblioteca',url:'https://biblioteca.unad.edu.co',nota:'Disponible en bases de datos académicas'}],
