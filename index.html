@@ -1036,7 +1036,10 @@ async function loadD(){
     if(!D.studyDays)D.studyDays={};
     if(!D.tasks)D.tasks=[];
     if(!D.reflections)D.reflections=[];
+    if(!D.lecturas)D.lecturas={};
   }
+  // Sincronizar estado de lecturas desde Firebase
+  LEC_STATE=D.lecturas||{};
   calcStreak();
 }
 async function saveD(){if(CU)await fbS(`/users/${CU.uid}/lms`,D);}
@@ -2309,7 +2312,7 @@ const LECTURAS=[
  reflexion:`¿Cómo evaluarías si un proceso restaurativo genera reparación real para las víctimas? ¿Cuáles serían tus indicadores psicológicos?`},
 ];
 
-let LEC_STATE=JSON.parse(localStorage.getItem('fu_lecturas')||'{}');
+let LEC_STATE={}; // Se carga desde Firebase en loadD()
 let LEC_FILTER='all';
 let LEC_TEMA='';
 let LEC_SEARCH='';
@@ -2410,8 +2413,10 @@ function lecTab(id,tab,el){
 function lecToggleRead(id,e){
   e.stopPropagation();
   LEC_STATE[id]=!LEC_STATE[id];
-  localStorage.setItem('fu_lecturas',JSON.stringify(LEC_STATE));
+  D.lecturas=LEC_STATE;
+  saveD();
   lecRender();
+  renderModLecturas(CUR_MOD);
 }
 
 // ═══════════════════════════════════════
