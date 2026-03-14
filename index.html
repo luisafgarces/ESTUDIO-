@@ -1612,7 +1612,6 @@ Tono profesional, cálido y directo. Sin asteriscos ni markdown.`;
     el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ").replace(/PARTE \d — [^:]+:/g,m=>`<strong style="color:var(--ac);display:block;margin-top:12px;font-size:11px;letter-spacing:1px;text-transform:uppercase">${m}</strong>`)}</span>`;
   }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;console.error(e);}
 }
-}
 
 // ═══════════════════════════════════════
 //  TIMER
