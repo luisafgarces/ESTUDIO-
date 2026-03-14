@@ -327,7 +327,53 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 .cierre-gpa{font-family:'Syne',sans-serif;font-size:64px;font-weight:800;color:var(--ac);line-height:1;margin:16px 0 8px;}
 .cierre-msg{font-size:12px;color:var(--txd);line-height:1.7;margin-bottom:22px;}
 
-/* ── SIMULADOR ── */
+/* ── BANCO LECTURAS ── */
+.lec-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.lec-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.lec-filter-pill{padding:5px 14px;border-radius:20px;font-size:10px;border:1px solid var(--b1);background:rgba(255,240,250,.7);color:var(--txd);cursor:pointer;transition:all .2s;}
+.lec-filter-pill:hover{border-color:var(--b2);color:var(--tx);}
+.lec-filter-pill.on{background:var(--ac-d);border-color:rgba(224,90,154,.3);color:var(--ac);}
+.lec-search{width:100%;background:rgba(255,240,250,.7);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;margin-bottom:18px;}
+.lec-search:focus{border-color:rgba(224,90,154,.4);}
+.lec-search::placeholder{color:var(--txm);}
+.lec-prog-bar{height:5px;background:var(--b1);border-radius:3px;overflow:hidden;margin-top:6px;}
+.lec-prog-fill{height:100%;background:var(--ac);border-radius:3px;transition:width .6s ease;}
+.rc{background:rgba(255,248,252,.97);border:1px solid var(--b1);border-radius:14px;overflow:hidden;transition:all .2s;box-shadow:0 2px 8px rgba(224,90,154,.05);margin-bottom:14px;}
+.rc:hover{box-shadow:0 5px 20px rgba(224,90,154,.1);border-color:var(--b2);}
+.rc.leida .rc-hdr{opacity:.65;}
+.rc-hdr{display:flex;align-items:flex-start;gap:13px;padding:18px 20px;cursor:pointer;}
+.rc-sem{flex-shrink:0;width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;margin-top:2px;}
+.rc-main{flex:1;}
+.rc-tipo{font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.rc-titulo{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--tx);margin-bottom:3px;line-height:1.3;}
+.rc-autor{font-size:10px;color:var(--txd);margin-bottom:7px;}
+.rc-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.rc-tag{font-size:9px;padding:2px 8px;border-radius:8px;}
+.rc-acts{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.rc-read-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--b2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s;color:var(--txm);}
+.rc-read-btn.done{background:var(--grn-d);border-color:rgba(80,200,160,.4);color:var(--grn);}
+.rc-read-btn:hover{border-color:var(--ac);color:var(--ac);}
+.rc-arr{font-size:14px;color:var(--txm);cursor:pointer;transition:transform .25s;padding:4px;}
+.rc-arr.open{transform:rotate(180deg);}
+.rc-body{display:none;border-top:1px solid var(--b1);}
+.rc-body.open{display:block;}
+.rc-tabs-row{display:flex;gap:2px;padding:12px 20px 0;border-bottom:1px solid var(--b1);}
+.rc-tab{padding:6px 12px;font-size:10px;color:var(--txd);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.rc-tab.on{color:var(--ac);border-bottom-color:var(--ac);}
+.rc-tab-p{display:none;padding:16px 20px 18px;font-size:12px;color:var(--tx);line-height:1.85;}
+.rc-tab-p.on{display:block;}
+.rc-ideas{display:flex;flex-direction:column;gap:7px;}
+.rc-idea{display:flex;gap:9px;padding:9px 13px;background:rgba(255,240,250,.6);border:1px solid var(--b1);border-radius:8px;font-size:11px;line-height:1.6;}
+.rc-idea-n{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--ac);flex-shrink:0;width:16px;}
+.rc-col{padding:13px;background:var(--ac2-d);border:1px solid rgba(106,184,232,.2);border-radius:9px;font-size:12px;line-height:1.8;}
+.rc-reflex{padding:13px;background:var(--gold-d);border:1px solid rgba(240,192,48,.2);border-radius:9px;font-size:12px;line-height:1.8;font-style:italic;}
+.rc-acceso{display:flex;flex-direction:column;gap:9px;}
+.rc-acc-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:rgba(255,240,250,.6);border:1px solid var(--b1);border-radius:9px;}
+.rc-acc-info{flex:1;}
+.rc-acc-label{font-size:11px;font-weight:600;color:var(--tx);margin-bottom:2px;}
+.rc-acc-det{font-size:10px;color:var(--txd);}
+.rc-acc-link{font-size:10px;padding:4px 11px;background:var(--ac-d);border:1px solid rgba(224,90,154,.2);border-radius:6px;color:var(--ac);text-decoration:none;white-space:nowrap;transition:all .2s;}
+.rc-acc-link:hover{background:rgba(224,90,154,.18);}
 .sim-scenarios{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
 .sim-sc-card{background:rgba(255,248,252,.95);border:1px solid var(--b1);border-radius:14px;padding:22px 18px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
 .sim-sc-card:hover:not(.locked){transform:translateY(-2px);box-shadow:0 10px 30px rgba(224,90,154,.13);border-color:var(--b2);}
@@ -456,6 +502,7 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
     <div class="sb-item on" data-page="dashboard" onclick="nav('dashboard',this)"><span class="sb-ico">◉</span>Dashboard</div>
     <div class="sb-item" data-page="semestres" onclick="nav('semestres',this)"><span class="sb-ico">🎓</span>Mis Semestres</div>
     <div class="sb-item" data-page="simulador" onclick="nav('simulador',this)"><span class="sb-ico">🎭</span>Simulador</div>
+    <div class="sb-item" data-page="lecturas" onclick="nav('lecturas',this)"><span class="sb-ico">📚</span>Banco de Lecturas</div>
     <div class="sb-item" data-page="boletin" onclick="nav('boletin',this)"><span class="sb-ico">◈</span>Boletín de Notas</div>
     <div class="sb-section" style="margin-top:8px">Herramientas</div>
     <div class="sb-item" data-page="timer" onclick="nav('timer',this)"><span class="sb-ico">⏱</span>Temporizador</div>
@@ -521,7 +568,38 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
       </div>
     </div>
 
-    <!-- ═══════ SIMULADOR ═══════ -->
+    <!-- ═══════ LECTURAS ═══════ -->
+    <div class="page" id="page-lecturas">
+      <div class="welcome" style="margin-bottom:22px">
+        <h2>Banco de <em>Lecturas</em> 📚</h2>
+        <p>Las lecturas esenciales seleccionadas por rigor académico y aplicabilidad al contexto colombiano.</p>
+      </div>
+      <div class="lec-stats">
+        <div class="stat"><div class="stat-label">Total lecturas</div><div class="stat-value" id="lec-total">15 <span></span></div></div>
+        <div class="stat"><div class="stat-label">Leídas</div><div class="stat-value" id="lec-read">0 <span></span></div></div>
+        <div class="stat"><div class="stat-label">Progreso</div><div class="stat-value" id="lec-pct">0 <span>%</span></div><div class="lec-prog-bar"><div class="lec-prog-fill" id="lec-prog-fill" style="width:0%"></div></div></div>
+        <div class="stat"><div class="stat-label">Pendientes</div><div class="stat-value" id="lec-pend">15 <span></span></div></div>
+      </div>
+      <input class="lec-search" id="lec-search" placeholder="🔍 Buscar por autor, título o tema..." oninput="lecFilter()">
+      <div class="lec-filter-row" id="lec-sem-filters">
+        <div class="lec-filter-pill on" onclick="lecSetFilter('all',this)">📚 Todas</div>
+        <div class="lec-filter-pill" onclick="lecSetFilter('sem1',this)">🌸 Semestre I</div>
+        <div class="lec-filter-pill" onclick="lecSetFilter('sem2',this)">💙 Semestre II</div>
+        <div class="lec-filter-pill" onclick="lecSetFilter('sem3',this)">💛 Semestre III</div>
+        <div class="lec-filter-pill" onclick="lecSetFilter('sem4',this)">💜 Semestre IV</div>
+      </div>
+      <div class="lec-filter-row" id="lec-tema-filters" style="margin-bottom:18px">
+        <div class="lec-filter-pill" onclick="lecSetTema('',this)">Todos los temas</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('fundamentos',this)">⚖️ Fundamentos</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('evaluacion',this)">🔬 Evaluación</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('testimonio',this)">💬 Testimonio</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('victimologia',this)">🫂 Victimología</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('peritaje',this)">📋 Peritaje</div>
+        <div class="lec-filter-pill" onclick="lecSetTema('criminologia',this)">🔍 Criminología</div>
+      </div>
+      <div id="lec-grid"></div>
+      <div id="lec-empty" style="display:none;text-align:center;padding:40px;color:var(--txm);font-size:12px">🔍 Sin resultados — intenta otro filtro</div>
+    </div>
     <div class="page" id="page-simulador">
       <div class="welcome" style="margin-bottom:22px">
         <h2>Simulador de <em>Prácticas</em> 🎭</h2>
@@ -1953,12 +2031,214 @@ function cerrarSimFb(){$('sim-fb-modal').classList.remove('on');}
 function toggleSimTranscript(){const a=$('sim-transcript-area');a.style.display=a.style.display==='none'?'block':'none';}
 
 // ═══════════════════════════════════════
+//  BANCO DE LECTURAS
+// ═══════════════════════════════════════
+const LECTURAS=[
+{id:'r1',sem:'sem1',temas:['fundamentos'],tipo:'Libro',titulo:'Manual de Psicología Jurídica',autor:'Ramón Arce & Francisca Fariña (2005)',
+ acceso:[{tipo:'Academia.edu',url:'https://www.academia.edu/search?q=manual+psicologia+juridica+arce+farina',nota:'Busca: "Manual Psicología Jurídica Arce Fariña"'},{tipo:'UNAD Biblioteca',url:'https://biblioteca.unad.edu.co',nota:'Disponible en bases de datos académicas'}],
+ resumen:`El texto más citado en psicología jurídica hispanohablante. Arce y Fariña sistematizan el campo desde sus fundamentos epistemológicos hasta las aplicaciones prácticas: testimonio, credibilidad, peritaje y rol del psicólogo. Su énfasis en evidencia empírica lo hace imprescindible.`,
+ ideas:['La psicología jurídica tiene epistemología propia — no es psicología clínica aplicada','El psicólogo cumple roles distintos (evaluador, perito, asesor) y nunca simultáneamente','La objetividad del peritaje depende del método, no de las convicciones del evaluador','El estándar Daubert: metodología válida, revisada por pares, tasa de error conocida','La memoria es reconstructiva, no reproductiva — base de toda la psicología del testimonio'],
+ colombia:`Base teórica de las especializaciones de Santo Tomás y Uninorte. La Ley 906/2004 exige que el perito sustente su metodología — este libro te da el lenguaje para hacerlo.`,
+ reflexion:`Si la memoria es reconstructiva, ¿cómo debería cambiar la forma en que los fiscales colombianos valoran el testimonio como prueba reina?`},
+{id:'r2',sem:'sem1',temas:['fundamentos'],tipo:'Artículo',titulo:'El Psicólogo Jurídico-Forense en Colombia: Retos y Perspectivas',autor:'Gutiérrez de Piñeres Botero, C. (2010)',
+ acceso:[{tipo:'Redalyc (libre)',url:'https://www.redalyc.org/articulo.oa?id=80115648008',nota:'Acceso completo y gratuito'},{tipo:'Scielo Colombia',url:'https://www.scielo.org.co',nota:'Busca: "Gutiérrez de Piñeres psicólogo jurídico Colombia"'}],
+ resumen:`Diagnóstico del estado de la psicología jurídica en Colombia. Analiza los principales escenarios de actuación (Fiscalía, ICBF, Medicina Legal, Comisarías, INPEC) y señala que la mayoría de psicólogos colombianos ejercen sin formación especializada — una oportunidad real para quienes sí se forman.`,
+ ideas:['En Colombia la psicología jurídica se ejerce mayoritariamente sin formación especializada','Principales empleadores: Fiscalía, ICBF, Medicina Legal, Comisarías, INPEC','La confusión entre rol clínico y forense es el error más frecuente y más grave','El sistema judicial colombiano necesita psicólogos formados en el sistema acusatorio','La credibilidad del perito depende de formación, metodología y comunicación técnica'],
+ colombia:`Este artículo es el diagnóstico más honesto del mercado laboral. Te dice exactamente qué errores evitar y qué habilidades desarrollar para ser competitiva en Colombia.`,
+ reflexion:`Si la mayoría de psicólogos colombianos ejercen sin formación especializada, ¿qué responsabilidad ética tiene el sistema universitario —incluyendo la UNAD— frente a esto?`},
+{id:'r3',sem:'sem1',temas:['fundamentos'],tipo:'Normativa',titulo:'Ley 906 de 2004 — Código de Procedimiento Penal',autor:'Congreso de Colombia',
+ acceso:[{tipo:'Texto oficial',url:'http://www.secretariasenado.gov.co/senado/basedoc/ley_0906_2004.html',nota:'Texto completo y gratuito'},{tipo:'Fiscalía General',url:'https://www.fiscalia.gov.co/colombia/legislacion/',nota:'Versión comentada disponible'}],
+ resumen:`El texto normativo más importante para tu práctica. El sistema acusatorio transformó radicalmente el rol del perito: ya no basta un informe escrito, hay que defenderlo en audiencia bajo contrainterrogatorio. Artículos 405-441 regulan específicamente la prueba pericial.`,
+ ideas:['El perito es testigo experto — no auxiliar del juez','Arts. 405-441 regulan la prueba pericial: memorízalos','La cadena de custodia (Arts. 254-266) es responsabilidad compartida con el psicólogo','El perito puede ser de parte u oficial — con las mismas obligaciones de objetividad','El juez no está obligado a aceptar el dictamen pericial'],
+ colombia:`Esta ley ES tu campo de trabajo. No conocerla es como ser médico sin conocer el juramento hipocrático.`,
+ reflexion:`El sistema acusatorio exige defender el peritaje bajo contrainterrogatorio. ¿Qué habilidades adicionales a las psicológicas necesitas para cumplir ese rol con excelencia?`},
+{id:'r4',sem:'sem2',temas:['evaluacion'],tipo:'Manual',titulo:'Manual de Evaluación del Riesgo de Violencia',autor:'Loinaz, I. (2017)',
+ acceso:[{tipo:'Ediciones Pirámide',url:'https://www.edicionespiramide.es',nota:'Versión física y digital'},{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=loinaz+evaluacion+riesgo+violencia',nota:'Busca: "Loinaz evaluación riesgo violencia"'}],
+ resumen:`El manual más completo en español sobre evaluación de riesgo. Sistematiza los tres enfoques (actuarial, clínico-estructurado, clínico no estructurado) y describe HCR-20 v3, SVR-20, SARA, SAVRY y PCL-R con estudios de validación en población hispanohablante.`,
+ ideas:['Los instrumentos actuariales solos son insuficientes — combinar con juicio clínico estructurado','HCR-20 v3: factores Históricos, Clínicos y de Manejo del Riesgo (20 ítems)','La violencia no es rasgo estable — interacción entre factores de riesgo y contexto','SVR-20 es específico para violencia sexual — no uses HCR-20 para todo','El riesgo bajo/moderado/alto debe acompañarse de recomendaciones de gestión'],
+ colombia:`Medicina Legal usa el HCR-20 como referencia. Conocerlo te posiciona por encima del 90% de psicólogos que dicen "evaluación de riesgo" sin saber qué instrumento usaron.`,
+ reflexion:`Si los instrumentos actuariales tienen tasas de error conocidas, ¿cómo debe comunicar el psicólogo la incertidumbre de su evaluación a un juez que necesita una respuesta clara?`},
+{id:'r5',sem:'sem2',temas:['evaluacion'],tipo:'Artículo',titulo:'Evaluación Psicológica Forense de la Credibilidad del Testimonio',autor:'Manzanero, A. L. (2010)',
+ acceso:[{tipo:'ResearchGate',url:'https://www.researchgate.net/search?q=manzanero+credibilidad+testimonio',nota:'Busca: "Manzanero evaluación credibilidad testimonio"'},{tipo:'UCM Madrid',url:'https://www.ucm.es',nota:'Perfil académico con artículos de libre acceso'}],
+ resumen:`Sintetiza el estado del arte del método CBCA-SVA: los 19 criterios de Steller y Köhnken, sus fundamentos, limitaciones y cómo redactar el informe de credibilidad. Manzanero advierte explícitamente sobre los abusos del CBCA sin rigor — algo frecuente en Colombia.`,
+ ideas:['El CBCA solo aplica cuando el testimonio es extenso y no ha sido contaminado','Los 19 criterios de Steller-Köhnken: generales, específicos, peculiaridades y motivacionales','Puntuación alta = consistente con testimonio genuino — no prueba que el hecho ocurrió','El SVA incluye el CBCA más análisis de validez (factores que podrían explicar falsedad)','Ningún instrumento de credibilidad es prueba única suficiente'],
+ colombia:`En Colombia se usa CBCA-SVA en casos de abuso sexual infantil. Muchos lo aplican mal. Este artículo te enseña a hacerlo correctamente y a cuestionar peritajes de baja calidad.`,
+ reflexion:`Si el CBCA-SVA puede dar falsos positivos, ¿es éticamente correcto que un juez condene basándose principalmente en este peritaje?`},
+{id:'r6',sem:'sem2',temas:['evaluacion'],tipo:'Manual',titulo:'Psicopatología Clínica, Legal y Forense',autor:'Esbec, E. & Gómez-Jarabo, G. (2000)',
+ acceso:[{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=esbec+psicopatologia+forense',nota:'Busca: "Esbec Gómez-Jarabo psicopatología forense"'},{tipo:'SINAB UNAL',url:'https://sinab.unal.edu.co',nota:'Disponible en biblioteca Universidad Nacional'}],
+ resumen:`El puente entre la psicopatología clínica y sus implicaciones forenses. Analiza los principales trastornos desde la perspectiva de imputabilidad, capacidad para el proceso, peligrosidad y daño psicológico. Especialmente valioso en trastornos de personalidad y psicosis en contextos judiciales.`,
+ ideas:['Imputabilidad e inimputabilidad son dimensiones, no categorías absolutas','Los trastornos de personalidad rara vez generan inimputabilidad plena','La psicosis activa puede eliminar la capacidad de comprender y controlar la conducta','La dependencia a sustancias puede generar inimputabilidad si elimina la voluntad','El diagnóstico clínico NO equivale automáticamente a inimputabilidad'],
+ colombia:`Los Arts. 33-36 del Código Penal colombiano sobre inimputabilidad son homólogos a los marcos de este libro. Es la referencia teórica más sólida para opinar sobre capacidad mental en procesos penales colombianos.`,
+ reflexion:`¿Qué dilemas éticos enfrenta el psicólogo cuando su evaluación determina si alguien va a prisión o a tratamiento psiquiátrico?`},
+{id:'r7',sem:'sem2',temas:['evaluacion'],tipo:'Manual',titulo:'DSM-5: Manual Diagnóstico y Estadístico de los Trastornos Mentales',autor:'American Psychiatric Association (2013)',
+ acceso:[{tipo:'Editorial Médica Panamericana',url:'https://www.medicapanamericana.com',nota:'Versión física y digital'},{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=DSM-5+español',nota:'Busca: "DSM-5 español"'}],
+ resumen:`Manual diagnóstico de referencia internacional. En contexto forense no se usa para etiquetar sino para fundamentar opiniones sobre imputabilidad, capacidad para el proceso y daño psicológico en un lenguaje común con otros profesionales.`,
+ ideas:['El diagnóstico DSM-5 sirve para comunicación — no determina automáticamente consecuencias jurídicas','Trastorno antisocial de personalidad NO equivale a inimputabilidad — confusión gravísima en Colombia','TEPT requiere criterios B+C+D+E presentes — todos','Los especificadores de gravedad son relevantes para evaluación de daño psicológico','DSM-5 incluye factores culturales — crítico para Colombia con su diversidad'],
+ colombia:`El lenguaje DSM-5 es estándar en informes periciales de Medicina Legal. No usarlo o usarlo mal reduce inmediatamente la credibilidad del peritaje.`,
+ reflexion:`El DSM-5 fue desarrollado principalmente en EE.UU. ¿Cómo afecta esto a las evaluaciones forenses con poblaciones colombianas indígenas, afrodescendientes o rurales?`},
+{id:'r8',sem:'sem3',temas:['testimonio'],tipo:'Libro',titulo:'Psicología del Testimonio',autor:'Manzanero, A. L. (2008)',
+ acceso:[{tipo:'Ediciones Pirámide',url:'https://www.edicionespiramide.es',nota:'Versión física y digital'},{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=manzanero+psicologia+testimonio',nota:'Busca: "Manzanero psicología del testimonio"'}],
+ resumen:`Referencia en español sobre psicología del testimonio. Integra décadas de investigación sobre formación, almacenamiento y recuperación de recuerdos; por qué los testigos se equivocan sinceramente; cómo las preguntas contaminan la memoria; y procedimientos más fiables para obtener información testimonial.`,
+ ideas:['La memoria no es grabación — cada vez que recordamos, reconstruimos y modificamos','El efecto de desinformación de Loftus: información post-evento altera el recuerdo original','Niños menores de 6 años son especialmente vulnerables a la sugestión','La confianza del testigo en su recuerdo no correlaciona con su precisión','Procedimientos de identificación de sospechosos tienen tasas de error de hasta 30%'],
+ colombia:`El testimonio sigue siendo la "reina de las pruebas" en procesos colombianos de abuso sexual. Este libro te da argumentos científicos para cuestionar testimonios obtenidos con procedimientos inadecuados.`,
+ reflexion:`¿Por qué los procedimientos de interrogatorio policial que deterioran la calidad del testimonio siguen usándose en la Fiscalía colombiana?`},
+{id:'r9',sem:'sem3',temas:['testimonio'],tipo:'Manual técnico',titulo:'Protocolo NICHD para la Entrevista Investigativa',autor:'Lamb, Hershkowitz, Orbach & Esplin (2008)',
+ acceso:[{tipo:'Academia.edu (español)',url:'https://www.academia.edu/search?q=protocolo+NICHD+entrevista+investigativa+español',nota:'Busca: "Protocolo NICHD español entrevista forense"'},{tipo:'ICBF Colombia',url:'https://www.icbf.gov.co',nota:'El ICBF tiene materiales de formación sobre entrevista forense'}],
+ resumen:`El protocolo de entrevista forense con menores más validado científicamente en el mundo. Adoptado en más de 20 países. Estructura la entrevista en fases: rapport, transición episódica, práctica narrativa, introducción al tema, preguntas abiertas, sondas específicas y cierre.`,
+ ideas:['Preguntas abiertas generan más información precisa que preguntas directas','La fase de rapport activa la memoria episódica — no es opcional','Preguntas sugestivas contaminan el testimonio y pueden invalidar la prueba','El protocolo completo dura 45-90 min — no puede comprimirse','El silencio es una herramienta — esperar es más eficaz que reformular'],
+ colombia:`El ICBF y la Policía Judicial han adoptado versiones del NICHD en Colombia. Conocerlo te permite aplicarlo correctamente y evaluar si fue usado bien en entrevistas previas.`,
+ reflexion:`¿Cómo mantener neutralidad cuando un niño relata hechos muy graves, sin que el menor lo interprete como indiferencia o incredulidad?`},
+{id:'r10',sem:'sem3',temas:['victimologia'],tipo:'Libro',titulo:'Victimología: Conceptos Fundamentales',autor:'Landrove Díaz, G. (2010)',
+ acceso:[{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=landrove+victimologia',nota:'Busca: "Landrove victimología"'},{tipo:'Redalyc Colombia',url:'https://www.redalyc.org/busquedaArticuloFiltros.oa?q=victimologia+colombia',nota:'Artículos sobre victimología en contexto colombiano'}],
+ resumen:`Referencia en victimología hispanohablante. Sistematiza las teorías clásicas (Von Hentig, Mendelsohn, Fattah) hasta los desarrollos contemporáneos, con especial atención a la victimización secundaria — el daño adicional que causan el sistema judicial y los propios operadores.`,
+ ideas:['La victimización secundaria puede ser más dañina que la victimización primaria','Vulnerabilidad victimológica no implica culpabilidad — es factor de riesgo, no de responsabilidad','El psicólogo forense puede ser fuente de victimización secundaria si no aplica protocolos','La denuncia es solo el inicio del proceso de revictimización institucional','La victimización terciaria ocurre cuando la víctima internaliza la culpa'],
+ colombia:`La Ley 1448/2011 y la JEP pusieron la victimología en el centro del debate. Las víctimas del conflicto armado son la mayor población de victimización secundaria institucional en Colombia.`,
+ reflexion:`¿De qué manera el sistema judicial colombiano — con sus largas esperas y múltiples declaraciones — produce victimización secundaria? ¿Qué cambio tendría mayor impacto?`},
+{id:'r11',sem:'sem3',temas:['victimologia'],tipo:'Artículo',titulo:'Evaluación del Daño Psicológico en Víctimas de Delitos Violentos',autor:'Echeburúa, Corral & Amor (2004)',
+ acceso:[{tipo:'ResearchGate',url:'https://www.researchgate.net/search?q=echeburua+daño+psicologico+victimas+delitos',nota:'Busca: "Echeburúa evaluación daño psicológico víctimas"'},{tipo:'Psicothema',url:'https://www.psicothema.com',nota:'Busca: "Echeburúa daño psicológico"'}],
+ resumen:`El artículo más citado en español sobre evaluación del daño psicológico. Define con precisión daño psicológico, daño moral y daño a la vida de relación. Describe los instrumentos más válidos (PCL-C, IES-R, BDI-II) y los criterios para establecer el nexo causal — el punto más complejo del peritaje de víctimas.`,
+ ideas:['Daño psicológico ≠ trastorno mental — puede haber daño sin diagnóstico formal','Nexo causal: existencia del daño + existencia del hecho + relación temporal y lógica','Los instrumentos de autoinforme deben complementarse con observación y heteroinformes','La cronicidad del daño es factor agravante en la valoración jurídica','TEPT no es el único diagnóstico posible tras un trauma — depresión y ansiedad también son daño documentable'],
+ colombia:`El daño psicológico puede fundamentar acción penal y demandas civiles de reparación. La Ley 1448 reconoce explícitamente el daño psicológico como componente de la reparación integral.`,
+ reflexion:`En contextos de violencia sistémica como el conflicto armado, ¿pueden los instrumentos individuales como el PCL-C capturar la complejidad real del daño colectivo?`},
+{id:'r12',sem:'sem4',temas:['peritaje'],tipo:'Manual',titulo:'El Informe Pericial Psicológico',autor:'Soria Verde, M.A. (2005)',
+ acceso:[{tipo:'Editorial Paidós',url:'https://www.paidos.com',nota:'Versión física disponible'},{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=soria+verde+informe+pericial+psicologico',nota:'Busca: "Soria Verde informe pericial"'}],
+ resumen:`Manual de referencia para la redacción del informe pericial. Describe la estructura obligatoria, el lenguaje técnico-jurídico apropiado, y cómo redactar conclusiones útiles para el juez sin usurpar su función. Incluye ejemplos comentados de buenos y malos informes.`,
+ ideas:['El informe pericial no decide — informa. Las conclusiones deben ser probabilísticas','La metodología debe ser explícita y replicable','El lenguaje debe ser técnico pero comprensible para el juez','Las limitaciones del informe deben declararse explícitamente','Las conclusiones deben responder exactamente la pregunta formulada'],
+ colombia:`El Art. 415 del C.P.P. exige que el perito explique su metodología de forma comprensible. Los informes son públicos en el expediente — un mal informe puede ser cuestionado. Este manual enseña a escribir informes que resistan el escrutinio.`,
+ reflexion:`¿Cuál es la responsabilidad del psicólogo al redactar conclusiones para que el juez pueda valorar críticamente sin convertirse en "cautivo" del perito?`},
+{id:'r13',sem:'sem4',temas:['peritaje'],tipo:'Artículo',titulo:'El Psicólogo como Perito en el Proceso Penal Colombiano',autor:'Hernández Esquivel, J.A. (2010)',
+ acceso:[{tipo:'Diversitas — USTA',url:'https://revistas.usantotomas.edu.co/index.php/diversitas',nota:'Revista colombiana de libre acceso'},{tipo:'Redalyc',url:'https://www.redalyc.org/busquedaArticuloFiltros.oa?q=psicologo+perito+proceso+penal+colombiano',nota:'Busca: "psicólogo perito proceso penal colombiano"'}],
+ resumen:`El artículo más directamente aplicable a tu práctica. Contextualizado específicamente en el sistema colombiano. Analiza el rol del perito en la Ley 906/2004, los errores más frecuentes de psicólogos colombianos como peritos, y jurisprudencia de la Corte Suprema sobre prueba pericial psicológica.`,
+ ideas:['El perito de parte tiene las mismas obligaciones de objetividad que el oficial','La Corte Suprema ha excluido peritajes por falta de fundamentación metodológica','El contrainterrogatorio es el momento de mayor exigencia — prepárate específicamente','El perito que exagera sus conclusiones pierde credibilidad ante los tribunales','La parcialidad del perito es falta ética grave independientemente de quién lo contrató'],
+ colombia:`Escrito para psicólogos colombianos, sobre el sistema colombiano, con jurisprudencia colombiana. Es el artículo que debes leer antes de tu primer peritaje real.`,
+ reflexion:`¿Cuál es la brecha entre la formación que reciben los psicólogos colombianos y lo que los tribunales exigen? ¿Cómo la estás cerrando tú?`},
+{id:'r14',sem:'sem4',temas:['criminologia'],tipo:'Libro',titulo:'Psicología Criminal',autor:'Garrido, Stangeland & Redondo (2006)',
+ acceso:[{tipo:'Tirant lo Blanch',url:'https://www.tirantonline.com',nota:'Versión física y digital'},{tipo:"Anna's Archive",url:'https://annas-archive.org/search?q=garrido+stangeland+redondo+psicologia+criminal',nota:'Busca: "Garrido Stangeland Redondo psicología criminal"'}],
+ resumen:`La obra más completa de psicología criminal en español. Integra teorías criminológicas con investigación empírica: psicopatía (Hare), factores de riesgo y protección, violencia instrumental vs. reactiva, y programas de intervención basados en evidencia. Manual de referencia en maestrías de criminología en Colombia.`,
+ ideas:['No existe "el criminal" — la conducta delictiva resulta de múltiples factores','La psicopatía (Hare) es factor de riesgo potente pero no determina inevitablemente la reincidencia','Los programas "qué funciona" de Andrews y Bonta son los únicos con evidencia de reducción de reincidencia','Violencia instrumental y reactiva difieren neuropsicológicamente','La edad de inicio de conducta antisocial es el mejor predictor de carrera delictiva'],
+ colombia:`El conflicto armado colombiano ha generado formas específicas de violencia que no encajan perfectamente en las teorías clásicas. Este libro da el marco; la aplicación al contexto colombiano requiere lecturas complementarias sobre violencia política.`,
+ reflexion:`Las teorías criminológicas identifican causas fundamentalmente sociales para la delincuencia, pero el sistema penal responde con prisión — que es factor de riesgo adicional. ¿Qué papel puede jugar el psicólogo forense para romper este ciclo?`},
+{id:'r15',sem:'sem4',temas:['criminologia'],tipo:'Artículo',titulo:'Justicia Restaurativa: Marco Conceptual y Aplicaciones en Colombia',autor:'Bolivar, D. (2012)',
+ acceso:[{tipo:'Redalyc',url:'https://www.redalyc.org/busquedaArticuloFiltros.oa?q=justicia+restaurativa+colombia',nota:'Busca: "justicia restaurativa Colombia"'},{tipo:'Revista Criminalidad',url:'https://www.policia.gov.co/revista-criminalidad',nota:'Revista colombiana de libre acceso'}],
+ resumen:`Marco conceptual de la justicia restaurativa y sus aplicaciones en Colombia, especialmente a través de la JEP. Describe diferencias con la justicia retributiva, mecanismos alternativos de resolución de conflictos y el modelo de justicia transicional del proceso de paz. El psicólogo tiene rol central como facilitador y evaluador.`,
+ ideas:['La justicia restaurativa busca reparar el daño y restaurar relaciones — no solo castigar','Los acuerdos restaurativos son más efectivos que prisión para delitos no violentos','El psicólogo en mediación debe ser neutral — no es terapeuta de ninguna parte','JEP: verdad, justicia, reparación y no repetición','Las víctimas en procesos restaurativos reportan mayor satisfacción que en el proceso ordinario'],
+ colombia:`La JEP es el experimento de justicia transicional más ambicioso de América Latina. Los psicólogos forenses tienen demanda creciente para evaluaciones, acompañamiento a víctimas y trabajo en la cadena de verdad y reparación.`,
+ reflexion:`¿Cómo evaluarías si un proceso restaurativo genera reparación real para las víctimas? ¿Cuáles serían tus indicadores psicológicos?`},
+];
+
+let LEC_STATE=JSON.parse(localStorage.getItem('fu_lecturas')||'{}');
+let LEC_FILTER='all';
+let LEC_TEMA='';
+let LEC_SEARCH='';
+
+const LEC_SEM_COLOR={sem1:'var(--ac)',sem2:'var(--ac2)',sem3:'var(--gold)',sem4:'var(--pur)'};
+const LEC_SEM_LABEL={sem1:'Sem. I',sem2:'Sem. II',sem3:'Sem. III',sem4:'Sem. IV'};
+
+function lecUpdateStats(){
+  const total=LECTURAS.length;
+  const read=Object.values(LEC_STATE).filter(Boolean).length;
+  const pct=Math.round(read/total*100);
+  $('lec-total').innerHTML=`${total} <span></span>`;
+  $('lec-read').innerHTML=`${read} <span></span>`;
+  $('lec-pct').innerHTML=`${pct} <span>%</span>`;
+  $('lec-pend').innerHTML=`${total-read} <span></span>`;
+  const pf=$('lec-prog-fill');if(pf)pf.style.width=pct+'%';
+}
+
+function lecSetFilter(f,el){
+  LEC_FILTER=f;
+  document.querySelectorAll('#lec-sem-filters .lec-filter-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');lecRender();
+}
+function lecSetTema(t,el){
+  LEC_TEMA=t;
+  document.querySelectorAll('#lec-tema-filters .lec-filter-pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');lecRender();
+}
+function lecFilter(){LEC_SEARCH=$('lec-search').value.toLowerCase();lecRender();}
+
+function lecGetFiltered(){
+  return LECTURAS.filter(r=>{
+    const mF=LEC_FILTER==='all'||r.sem===LEC_FILTER;
+    const mT=!LEC_TEMA||r.temas.includes(LEC_TEMA);
+    const mS=!LEC_SEARCH||r.titulo.toLowerCase().includes(LEC_SEARCH)||r.autor.toLowerCase().includes(LEC_SEARCH)||r.resumen.toLowerCase().includes(LEC_SEARCH);
+    return mF&&mT&&mS;
+  });
+}
+
+function lecRender(){
+  lecUpdateStats();
+  const grid=$('lec-grid');const empty=$('lec-empty');
+  const filtered=lecGetFiltered();
+  if(!filtered.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=filtered.map(r=>lecBuildCard(r)).join('');
+}
+
+function lecBuildCard(r){
+  const isRead=LEC_STATE[r.id];
+  const sc=LEC_SEM_COLOR[r.sem]||'var(--ac)';
+  const tags=r.temas.map(t=>`<div class="rc-tag" style="background:${sc}12;color:${sc};border:1px solid ${sc}22">${t}</div>`).join('');
+  return`<div class="rc${isRead?' leida':''}" id="lc-${r.id}">
+    <div class="rc-hdr" onclick="lecToggle('${r.id}')">
+      <div class="rc-sem" style="background:${sc}15;color:${sc}">${LEC_SEM_LABEL[r.sem]}</div>
+      <div class="rc-main">
+        <div class="rc-tipo" style="color:${sc}">${r.tipo}</div>
+        <div class="rc-titulo">${r.titulo}</div>
+        <div class="rc-autor">${r.autor}</div>
+        <div class="rc-tags">${tags}</div>
+      </div>
+      <div class="rc-acts">
+        <button class="rc-read-btn${isRead?' done':''}" onclick="lecToggleRead('${r.id}',event)" title="${isRead?'Marcar no leída':'Marcar leída'}">${isRead?'✓':'○'}</button>
+        <div class="rc-arr" id="la-${r.id}">▾</div>
+      </div>
+    </div>
+    <div class="rc-body" id="lb-${r.id}">
+      <div class="rc-tabs-row">
+        <div class="rc-tab on" onclick="lecTab('${r.id}','resumen',this)">📄 Resumen</div>
+        <div class="rc-tab" onclick="lecTab('${r.id}','ideas',this)">💡 Ideas clave</div>
+        <div class="rc-tab" onclick="lecTab('${r.id}','colombia',this)">🇨🇴 Colombia</div>
+        <div class="rc-tab" onclick="lecTab('${r.id}','reflexion',this)">❓ Reflexión</div>
+        <div class="rc-tab" onclick="lecTab('${r.id}','acceso',this)">🔗 Acceso</div>
+      </div>
+      <div class="rc-tab-p on" id="lt-${r.id}-resumen">${r.resumen}</div>
+      <div class="rc-tab-p" id="lt-${r.id}-ideas"><div class="rc-ideas">${r.ideas.map((idea,i)=>`<div class="rc-idea"><div class="rc-idea-n">${i+1}</div><div>${idea}</div></div>`).join('')}</div></div>
+      <div class="rc-tab-p" id="lt-${r.id}-colombia"><div class="rc-col">🇨🇴 <strong>¿Por qué importa en Colombia?</strong><br><br>${r.colombia}</div></div>
+      <div class="rc-tab-p" id="lt-${r.id}-reflexion"><div class="rc-reflex">❓ <strong>Pregunta de reflexión:</strong><br><br>${r.reflexion}</div></div>
+      <div class="rc-tab-p" id="lt-${r.id}-acceso"><div class="rc-acceso">
+        ${r.acceso.map(a=>`<div class="rc-acc-item"><div style="font-size:18px">📖</div><div class="rc-acc-info"><div class="rc-acc-label">${a.tipo}</div><div class="rc-acc-det">${a.nota}</div></div><a class="rc-acc-link" href="${a.url}" target="_blank" rel="noopener">Abrir →</a></div>`).join('')}
+        <div style="padding:10px 13px;background:var(--gold-d);border:1px solid rgba(240,192,48,.2);border-radius:9px;font-size:11px;color:var(--txd);line-height:1.6">💡 Si el link no abre, busca el título en <a href="https://annas-archive.org" target="_blank" style="color:var(--ac)">Anna's Archive</a> o <a href="https://sci-hub.se" target="_blank" style="color:var(--ac)">Sci-Hub</a> para acceso gratuito.</div>
+      </div></div>
+    </div>
+  </div>`;
+}
+
+function lecToggle(id){
+  const body=$(`lb-${id}`);const arr=$(`la-${id}`);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);arr.classList.toggle('open',!open);
+}
+function lecTab(id,tab,el){
+  const body=$(`lb-${id}`);
+  body.querySelectorAll('.rc-tab-p').forEach(p=>p.classList.remove('on'));
+  body.querySelectorAll('.rc-tab').forEach(t=>t.classList.remove('on'));
+  $(`lt-${id}-${tab}`)?.classList.add('on');el.classList.add('on');
+}
+function lecToggleRead(id,e){
+  e.stopPropagation();
+  LEC_STATE[id]=!LEC_STATE[id];
+  localStorage.setItem('fu_lecturas',JSON.stringify(LEC_STATE));
+  lecRender();
+}
+
+// ═══════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════
 const PAGE_META={
   dashboard:["Dashboard",()=>new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})],
   semestres:["Mis Semestres","Programa por semestres · Psicología Jurídica Colombia"],
   simulador:["Simulador de Prácticas","Practica casos reales con IA"],
+  lecturas:["Banco de Lecturas","15 lecturas esenciales · Psicología Jurídica Colombia"],
   aula:["Aula","Módulo en curso"],
   boletin:["Boletín de Notas","Tu historial académico oficial"],
   timer:["Temporizador","Técnica Pomodoro · Gestión del tiempo"],
@@ -1976,6 +2256,7 @@ function nav(id,el){
   $("page-sub").textContent=typeof m[1]==="function"?m[1]():m[1];
   if(id==="semestres")buildSemestres();
   if(id==="simulador")buildSimScenarios();
+  if(id==="lecturas")lecRender();
 }
 
 // ═══════════════════════════════════════
