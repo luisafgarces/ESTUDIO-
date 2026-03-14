@@ -326,6 +326,84 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 .cierre-title{font-family:'Fraunces',serif;font-size:24px;color:var(--tx);margin-bottom:8px;}
 .cierre-gpa{font-family:'Syne',sans-serif;font-size:64px;font-weight:800;color:var(--ac);line-height:1;margin:16px 0 8px;}
 .cierre-msg{font-size:12px;color:var(--txd);line-height:1.7;margin-bottom:22px;}
+
+/* ── SIMULADOR ── */
+.sim-scenarios{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
+.sim-sc-card{background:rgba(255,248,252,.95);border:1px solid var(--b1);border-radius:14px;padding:22px 18px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.sim-sc-card:hover:not(.locked){transform:translateY(-2px);box-shadow:0 10px 30px rgba(224,90,154,.13);border-color:var(--b2);}
+.sim-sc-card.locked{opacity:.45;cursor:not-allowed;}
+.sim-sc-card.locked::after{content:'🔒';position:absolute;top:12px;right:12px;font-size:14px;}
+.sim-sc-emoji{font-size:28px;margin-bottom:10px;display:block;}
+.sim-sc-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:5px;}
+.sim-sc-desc{font-size:11px;color:var(--txd);line-height:1.5;}
+.sim-sc-sem{font-size:9px;margin-top:10px;padding:3px 9px;border-radius:10px;display:inline-block;letter-spacing:.5px;text-transform:uppercase;}
+.sim-overlay{position:fixed;inset:0;z-index:600;background:rgba(253,232,242,.97);backdrop-filter:blur(16px);display:none;flex-direction:column;}
+.sim-overlay.on{display:flex;}
+.sim-overlay-header{display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(255,248,252,.92);border-bottom:1px solid var(--b1);flex-shrink:0;}
+.sim-back-btn{background:none;border:1px solid var(--b1);border-radius:8px;padding:6px 12px;font-family:'DM Mono',monospace;font-size:10px;color:var(--txd);cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.sim-back-btn:hover{color:var(--ac);border-color:var(--ac);}
+.sim-hdr-info{flex:1;}
+.sim-hdr-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.sim-hdr-sub{font-size:10px;color:var(--txm);margin-top:2px;}
+.sim-chips{display:flex;gap:8px;align-items:center;}
+.sim-chip{font-size:10px;padding:4px 12px;border-radius:12px;border:1px solid;}
+.chip-t{color:var(--ac2);border-color:rgba(106,184,232,.3);background:var(--ac2-d);}
+.chip-n{color:var(--gold);border-color:rgba(240,192,48,.3);background:var(--gold-d);}
+.chip-d{color:var(--ac);border-color:rgba(224,90,154,.3);background:var(--ac-d);}
+.sim-end-btn{background:var(--ac3-d);border:1px solid rgba(224,58,106,.25);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--ac3);cursor:pointer;}
+.chat-area{flex:1;overflow-y:auto;padding:22px 28px;display:flex;flex-direction:column;gap:14px;}
+.cmsg{display:flex;gap:11px;max-width:80%;animation:fuA .3s ease;}
+.cmsg.user{margin-left:auto;flex-direction:row-reverse;}
+@keyframes fuA{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.cmsg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
+.cmsg.ai .cmsg-av{background:var(--ac-d);border:1.5px solid rgba(224,90,154,.25);}
+.cmsg.user .cmsg-av{background:var(--ac2-d);border:1.5px solid rgba(106,184,232,.25);}
+.cmsg-bbl{padding:12px 16px;border-radius:13px;font-size:12px;line-height:1.75;}
+.cmsg.ai .cmsg-bbl{background:rgba(255,248,252,.97);border:1px solid var(--b1);border-top-left-radius:4px;color:var(--tx);}
+.cmsg.user .cmsg-bbl{background:linear-gradient(135deg,var(--ac),#d04490);color:#fff;border-top-right-radius:4px;}
+.cmsg-name{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.cmsg.ai .cmsg-name{color:var(--ac);}
+.cmsg.user .cmsg-name{color:rgba(255,255,255,.7);text-align:right;}
+.ctyping{display:flex;gap:5px;align-items:center;padding:13px 16px;background:rgba(255,248,252,.97);border:1px solid var(--b1);border-radius:13px;border-top-left-radius:4px;width:fit-content;}
+.ctyping span{width:6px;height:6px;border-radius:50%;background:var(--ac);opacity:.25;animation:cty 1.2s infinite;}
+.ctyping span:nth-child(2){animation-delay:.2s;}.ctyping span:nth-child(3){animation-delay:.4s;}
+@keyframes cty{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.csys-msg{text-align:center;font-size:10px;color:var(--txm);padding:5px 12px;background:rgba(255,240,250,.5);border:1px solid var(--b1);border-radius:20px;margin:3px auto;width:fit-content;}
+.chat-input-bar{padding:14px 28px;background:rgba(255,248,252,.92);border-top:1px solid var(--b1);flex-shrink:0;}
+.chat-hints{display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap;}
+.hint-pill{font-size:10px;padding:4px 11px;background:rgba(255,240,250,.7);border:1px solid var(--b1);border-radius:14px;color:var(--txd);cursor:pointer;transition:all .2s;font-family:'DM Mono',monospace;}
+.hint-pill:hover{border-color:var(--b2);color:var(--tx);}
+.chat-input-row{display:flex;gap:9px;align-items:flex-end;}
+.chat-ta-in{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:11px;padding:11px 15px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;resize:none;min-height:44px;max-height:130px;outline:none;transition:border-color .2s;line-height:1.6;}
+.chat-ta-in:focus{border-color:rgba(224,90,154,.4);}
+.chat-ta-in::placeholder{color:var(--txm);}
+.chat-send-btn{width:44px;height:44px;background:var(--ac);border:none;border-radius:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;flex-shrink:0;color:#fff;}
+.chat-send-btn:hover{filter:brightness(1.1);}
+.chat-send-btn:disabled{opacity:.5;cursor:not-allowed;}
+/* SETUP MODAL */
+.sim-setup-modal{position:fixed;inset:0;z-index:700;background:rgba(253,232,242,.96);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;}
+.sim-setup-modal.on{display:flex;}
+.sim-setup-box{background:linear-gradient(160deg,#fff5f9,#fffbf0);border:1px solid var(--b1);border-radius:18px;padding:36px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(224,90,154,.12);max-height:90vh;overflow-y:auto;}
+.setup-sel{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:10px 14px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;outline:none;margin-bottom:14px;cursor:pointer;}
+.setup-small-ta{width:100%;background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:11px 14px;color:var(--tx);font-family:'DM Mono',monospace;font-size:12px;resize:none;height:80px;outline:none;line-height:1.6;margin-bottom:14px;}
+.setup-small-ta::placeholder{color:var(--txm);}
+.setup-small-ta:focus,.setup-sel:focus{border-color:rgba(224,90,154,.4);}
+.diff-row{display:flex;gap:7px;margin-bottom:14px;}
+.diff-pill{flex:1;padding:8px;background:transparent;border:1px solid var(--b2);border-radius:9px;font-family:'DM Mono',monospace;font-size:10px;color:var(--txd);cursor:pointer;transition:all .2s;}
+.diff-pill.on{border-color:var(--ac);background:var(--ac-d);color:var(--ac);}
+/* FEEDBACK MODAL */
+.sim-fb-modal{position:fixed;inset:0;z-index:700;background:rgba(253,232,242,.96);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;overflow-y:auto;padding:30px 20px;}
+.sim-fb-modal.on{display:flex;}
+.sim-fb-box{background:rgba(255,248,252,.97);border:1px solid var(--b1);border-radius:20px;padding:38px;width:100%;max-width:660px;box-shadow:0 8px 40px rgba(224,90,154,.1);}
+.fb-crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:20px 0;}
+.fb-crit-c{background:var(--s2);border:1px solid var(--b1);border-radius:11px;padding:14px;}
+.fb-crit-lbl{font-size:10px;color:var(--txd);margin-bottom:5px;}
+.fb-crit-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.fb-crit-bar{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:5px;}
+.fb-crit-fill{height:100%;border-radius:2px;}
+.fb-list-item{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--b1);font-size:12px;line-height:1.65;color:var(--tx);}
+.fb-list-item:last-child{border-bottom:none;}
+.transcript-scroll{background:var(--s2);border:1px solid var(--b1);border-radius:9px;padding:14px;max-height:200px;overflow-y:auto;font-size:11px;color:var(--txd);line-height:1.8;margin-top:8px;}
 </style>
 </head>
 <body>
@@ -377,6 +455,7 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
     <div class="sb-section">Principal</div>
     <div class="sb-item on" data-page="dashboard" onclick="nav('dashboard',this)"><span class="sb-ico">◉</span>Dashboard</div>
     <div class="sb-item" data-page="semestres" onclick="nav('semestres',this)"><span class="sb-ico">🎓</span>Mis Semestres</div>
+    <div class="sb-item" data-page="simulador" onclick="nav('simulador',this)"><span class="sb-ico">🎭</span>Simulador</div>
     <div class="sb-item" data-page="boletin" onclick="nav('boletin',this)"><span class="sb-ico">◈</span>Boletín de Notas</div>
     <div class="sb-section" style="margin-top:8px">Herramientas</div>
     <div class="sb-item" data-page="timer" onclick="nav('timer',this)"><span class="sb-ico">⏱</span>Temporizador</div>
@@ -442,7 +521,15 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
       </div>
     </div>
 
-    <!-- ═══════ SEMESTRES ═══════ -->
+    <!-- ═══════ SIMULADOR ═══════ -->
+    <div class="page" id="page-simulador">
+      <div class="welcome" style="margin-bottom:22px">
+        <h2>Simulador de <em>Prácticas</em> 🎭</h2>
+        <p>Practica como si fuera el caso real. Los escenarios se desbloquean al avanzar en tus semestres.</p>
+      </div>
+      <div class="sim-scenarios" id="sim-scenarios-list"></div>
+      <div style="font-size:11px;color:var(--txm);text-align:center">Todos los casos son ficticios. Creados con fines pedagógicos. 🌸</div>
+    </div>
     <div class="page" id="page-semestres">
       <div class="welcome" style="margin-bottom:22px">
         <h2>Mis <em>Semestres</em> 🎓</h2>
@@ -653,6 +740,80 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
     <div style="font-size:12px;color:var(--txd);margin-bottom:4px">Promedio del semestre</div>
     <div class="cierre-msg" id="cierre-msg">Has completado todas las materias. El siguiente semestre ya está disponible para matrícula.</div>
     <button class="mat-btn" onclick="cerrarCierre()">Ir al siguiente semestre →</button>
+  </div>
+</div>
+
+<!-- SIMULADOR: SETUP MODAL -->
+<div class="sim-setup-modal" id="sim-setup-modal">
+  <div class="sim-setup-box">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+      <div style="font-size:28px" id="sims-icon">🧒</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700" id="sims-title">Entrevista Forense</div>
+        <div style="font-size:11px;color:var(--txd)" id="sims-desc">Configura tu simulación</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Dificultad</div>
+    <div class="diff-row">
+      <button class="diff-pill on" onclick="simSetDiff('basico',this)">Básico</button>
+      <button class="diff-pill" onclick="simSetDiff('intermedio',this)">Intermedio</button>
+      <button class="diff-pill" onclick="simSetDiff('avanzado',this)">Avanzado</button>
+    </div>
+    <div style="font-size:10px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Perfil del caso</div>
+    <select class="setup-sel" id="sims-profile"></select>
+    <div id="sims-extra"></div>
+    <div style="font-size:10px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">¿Qué quieres practicar especialmente?</div>
+    <textarea class="setup-small-ta" id="sims-focus" placeholder="Ej: preguntas abiertas, manejo del silencio, contrainterrogatorio..."></textarea>
+    <button class="btn btn-p" style="width:100%;padding:13px;font-size:13px" onclick="iniciarSimulacion()">Iniciar simulación →</button>
+    <button class="btn btn-s" style="width:100%;margin-top:8px" onclick="cerrarSimSetup()">Cancelar</button>
+  </div>
+</div>
+
+<!-- SIMULADOR: CHAT OVERLAY -->
+<div class="sim-overlay" id="sim-overlay">
+  <div class="sim-overlay-header">
+    <button class="sim-back-btn" onclick="confirmarSalirSim()">← Salir</button>
+    <div class="sim-hdr-info">
+      <div class="sim-hdr-title" id="sim-hdr-title">Simulación</div>
+      <div class="sim-hdr-sub" id="sim-hdr-sub">Caso en curso</div>
+    </div>
+    <div class="sim-chips">
+      <div class="sim-chip chip-t">⏱ <span id="sim-time">00:00</span></div>
+      <div class="sim-chip chip-n">💬 <span id="sim-turns">0</span></div>
+      <div class="sim-chip chip-d" id="sim-diff-lbl">Básico</div>
+    </div>
+    <button class="sim-end-btn" onclick="terminarSim()">Finalizar y calificar →</button>
+  </div>
+  <div class="chat-area" id="sim-chat"></div>
+  <div class="chat-input-bar">
+    <div class="chat-hints" id="sim-hints"></div>
+    <div class="chat-input-row">
+      <textarea class="chat-ta-in" id="sim-input" placeholder="Escribe tu intervención como psicóloga forense..." rows="1" onkeydown="simKey(event)" oninput="simResize(this)"></textarea>
+      <button class="chat-send-btn" id="sim-send" onclick="simSend()">→</button>
+    </div>
+    <div style="font-size:10px;color:var(--txm);margin-top:7px;text-align:center">Enter para enviar · Shift+Enter nueva línea</div>
+  </div>
+</div>
+
+<!-- SIMULADOR: FEEDBACK MODAL -->
+<div class="sim-fb-modal" id="sim-fb-modal">
+  <div class="sim-fb-box">
+    <div style="text-align:center;margin-bottom:26px">
+      <div style="font-size:48px;margin-bottom:12px" id="sim-fb-trophy">🌟</div>
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:8px" id="sim-fb-title">Simulación completada</div>
+      <div style="font-family:'Syne',sans-serif;font-size:64px;font-weight:800;line-height:1;margin:10px 0 4px" id="sim-fb-score">—</div>
+      <div style="font-size:11px;color:var(--txd)">Calificación general / 100</div>
+    </div>
+    <div class="fb-crit-grid" id="sim-fb-criteria"></div>
+    <div id="sim-fb-content"></div>
+    <div style="display:flex;gap:10px;margin-top:24px">
+      <button class="btn btn-p" style="flex:1;padding:12px;font-size:12px" onclick="cerrarSimFb()">Nueva simulación →</button>
+      <button class="btn btn-s" style="flex:1;padding:12px" onclick="toggleSimTranscript()">Ver transcripción</button>
+    </div>
+    <div id="sim-transcript-area" style="display:none">
+      <div style="font-size:10px;color:var(--txm);letter-spacing:1.5px;text-transform:uppercase;margin:18px 0 8px">Transcripción</div>
+      <div class="transcript-scroll" id="sim-transcript"></div>
+    </div>
   </div>
 </div>
 
@@ -881,7 +1042,7 @@ function checkApproval(id){
 //  RENDER
 // ═══════════════════════════════════════
 function renderAll(){
-  updateSidebar();updateStats();buildHeatmap();buildSemestres();buildBoletin();updateCurrentMod();updateSemStatusBody();renderTasks();renderRefl();
+  updateSidebar();updateStats();buildHeatmap();buildSemestres();buildSimScenarios();buildBoletin();updateCurrentMod();updateSemStatusBody();renderTasks();renderRefl();
 }
 
 function updateSidebar(){
@@ -1607,11 +1768,197 @@ function updateSemStatusBody(){
 }
 
 // ═══════════════════════════════════════
+//  SIMULADOR DATA
+// ═══════════════════════════════════════
+const SIM_SCENARIOS={
+  clinico:{icon:'📋',title:'Evaluación Clínica Forense',desc:'Primera entrevista de evaluación psicológica forense. Construye rapport y formula tu hipótesis.',semReq:1,semLabel:'Disponible desde Sem. 1',
+    profiles:['Adulta 34 años — derivada por Comisaría para evaluación de daño psicológico','Adolescente 15 años — derivado por Fiscalía, posible trastorno de conducta','Hombre 50 años — evaluación de capacidad para el proceso penal','Mujer 29 años — evaluación de estado mental al momento del hecho'],
+    hints:['Explica el propósito y límites','Pregunta abierta: ¿Qué te trae hoy?','Explora historia familiar','Evalúa estado mental actual','Formula hipótesis al cierre'],
+    sys:(p,d,f)=>`Eres un actor interpretando a: ${p}. La psicóloga realiza una primera entrevista forense. Nivel: ${d}. Foco del estudiante: ${f||"general"}. Actúa de forma realista y consistente. Nivel básico: colaborador. Intermedio: reservado. Avanzado: ambivalente. Máx 3 oraciones por respuesta. Nunca rompas el personaje.`,
+    eval:'Evalúa esta primera entrevista de evaluación psicológica forense según estándares colombianos (Medicina Legal).'},
+  victima:{icon:'🧒',title:'Entrevista Forense NICHD',desc:'Entrevista a una víctima usando el Protocolo NICHD. Rapport, preguntas abiertas, sin sugestión.',semReq:2,semLabel:'Disponible desde Sem. 2',
+    profiles:['Niña de 9 años — posible abuso sexual intrafamiliar','Adolescente 14 años — víctima de violencia escolar grave','Mujer adulta — víctima de violencia de pareja reciente','Niño 7 años — testigo de violencia doméstica','Adolescente 16 años — posible explotación sexual'],
+    hints:['Inicia con rapport neutral','Cuéntame sobre un día normal','Evita preguntas sugestivas','¿Qué pasó después?','Sé paciente con silencios'],
+    sys:(p,d,f)=>`Eres un actor interpretando a: ${p}. La psicóloga usa Protocolo NICHD. Nivel: ${d}. Foco: ${f||"entrevista forense NICHD"}. Responde según la edad/trauma. Si hacen preguntas sugestivas, responde mostrando la contaminación. Básico: cooperativo. Intermedio: reticente. Avanzado: desconfiado, emociones intensas. Máx 3 oraciones.`,
+    eval:'Evalúa esta entrevista forense según el Protocolo NICHD y estándares forenses colombianos.'},
+  imputado:{icon:'🔍',title:'Interrogatorio Forense',desc:'Evaluación psicológica a un imputado. Imputabilidad, simulación, hipótesis diagnóstica.',semReq:2,semLabel:'Disponible desde Sem. 2',
+    profiles:['Hombre 32 años — imputado por homicidio, alega no recordar','Mujer 28 años — imputada por lesiones, historial de trastorno límite','Hombre 45 años — imputado por abuso sexual, niega hechos','Joven 19 años — imputado por hurto, posible consumo SPA'],
+    hints:['Rapport inicial neutro','Explora historia personal','Evalúa orientación temporo-espacial','Busca inconsistencias','Pregunta por antecedentes psiquiátricos'],
+    sys:(p,d,f)=>`Eres un actor interpretando a un imputado: ${p}. La psicóloga te evalúa para determinar imputabilidad. Nivel: ${d}. Foco: ${f||"evaluación forense"}. Básico: colaborador. Intermedio: defensivo. Avanzado: posible simulación, contradicciones sutiles. Historia coherente y consistente. Máx 3 oraciones.`,
+    eval:'Evalúa esta evaluación psicológica forense de imputado según estándares de Medicina Legal Colombia.'},
+  audiencia:{icon:'⚖️',title:'Audiencia Oral — Contrainterrogatorio',desc:'Defiende tu peritaje ante el fiscal. Mantén posición técnica bajo presión.',semReq:4,semLabel:'Disponible desde Sem. 4',
+    profiles:['Peritaje de daño psicológico — violencia de pareja','Peritaje de credibilidad — abuso infantil','Peritaje de imputabilidad — trastorno mental','Peritaje de riesgo de reincidencia — violencia sexual'],
+    hints:['Habla en primera persona técnica','Cita el instrumento usado','No cedas: "Mi evaluación indica..."','Pide reformular preguntas confusas','Distingue certeza de probabilidad clínica'],
+    sys:(p,d,f)=>`Eres un fiscal colombiano experimentado haciendo contrainterrogatorio al perito sobre: ${p}. Sistema acusatorio Ley 906/2004. Nivel: ${d}. Foco: ${f||"defensa del peritaje"}. Básico: preguntas metodológicas. Intermedio: cuestionas sesgos y validez. Avanzado: ataques a credibilidad, preguntas capciosas. Inicia: "Buenos días, doctora."`,
+    eval:'Evalúa el desempeño del perito psicólogo en esta audiencia oral bajo sistema acusatorio colombiano.'},
+};
+
+let SIM={type:null,profile:null,diff:'basico',focus:'',msgs:[],turns:0,sec:0,tInt:null,sys:''};
+
+function getSemActivo(){
+  if(!D.semestres)return 0;
+  let max=0;
+  Object.entries(D.semestres).forEach(([id,s])=>{if(s?.activo||s?.completado)max=Math.max(max,parseInt(id));});
+  return max;
+}
+
+function buildSimScenarios(){
+  const c=$('sim-scenarios-list');if(!c)return;
+  const semActivo=getSemActivo();
+  c.innerHTML=Object.entries(SIM_SCENARIOS).map(([key,sc])=>{
+    const locked=semActivo<sc.semReq;
+    const color=key==='clinico'?'var(--gold)':key==='victima'?'var(--grn)':key==='imputado'?'var(--ac3)':'var(--ac2)';
+    return`<div class="sim-sc-card${locked?' locked':''}" onclick="${!locked?`abrirSimSetup('${key}')`:''}" title="${locked?`Disponible al completar Semestre ${sc.semReq}`:''}">
+      <span class="sim-sc-emoji">${sc.icon}</span>
+      <div class="sim-sc-title">${sc.title}</div>
+      <div class="sim-sc-desc">${sc.desc}</div>
+      <div class="sim-sc-sem" style="background:${color}18;color:${color};border:1px solid ${color}30">${locked?`🔒 ${sc.semLabel}`:sc.semLabel}</div>
+    </div>`;
+  }).join('');
+}
+
+function abrirSimSetup(type){
+  const sc=SIM_SCENARIOS[type];SIM.type=type;SIM.diff='basico';
+  $('sims-icon').textContent=sc.icon;
+  $('sims-title').textContent=sc.title;
+  $('sims-desc').textContent=sc.desc;
+  $('sims-profile').innerHTML=sc.profiles.map((p,i)=>`<option value="${i}">${p}</option>`).join('');
+  $('sims-extra').innerHTML=type==='audiencia'?`<div style="font-size:10px;color:var(--txm);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Contexto de tu peritaje (opcional)</div><textarea class="setup-small-ta" id="sims-ctx" placeholder="Describe tu peritaje: qué evaluaste, qué instrumentos usaste, cuáles fueron tus conclusiones..."></textarea>`:'';
+  $('sims-focus').value='';
+  document.querySelectorAll('.diff-pill').forEach((b,i)=>{b.classList.toggle('on',i===0);});
+  $('sim-setup-modal').classList.add('on');
+}
+function cerrarSimSetup(){$('sim-setup-modal').classList.remove('on');}
+function simSetDiff(d,btn){SIM.diff=d;document.querySelectorAll('.diff-pill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+
+async function iniciarSimulacion(){
+  const sc=SIM_SCENARIOS[SIM.type];
+  const profIdx=parseInt($('sims-profile').value);
+  SIM.profile=sc.profiles[profIdx];
+  SIM.focus=$('sims-focus').value.trim();
+  const ctx=$('sims-ctx')?.value?.trim()||'';
+  SIM.sys=sc.sys(SIM.profile,SIM.diff,SIM.focus)+(ctx?`\n\nCONTEXTO DEL PERITAJE: ${ctx}`:'');
+  SIM.msgs=[];SIM.turns=0;SIM.sec=0;
+  $('sim-hdr-title').textContent=sc.title;
+  $('sim-hdr-sub').textContent=SIM.profile;
+  $('sim-diff-lbl').textContent=SIM.diff.charAt(0).toUpperCase()+SIM.diff.slice(1);
+  $('sim-chat').innerHTML='';$('sim-turns').textContent='0';
+  // hints
+  $('sim-hints').innerHTML=sc.hints.map(h=>`<button class="hint-pill" onclick="simUseHint('${h}')">${h}</button>`).join('');
+  cerrarSimSetup();
+  $('sim-overlay').classList.add('on');
+  startSimTimer();
+  addSimSysMsgEl(`${sc.title} · ${SIM.diff} · ${SIM.profile}`);
+  await simGetAI('Inicia la simulación. El estudiante acaba de entrar. Preséntate brevemente en tu rol.');
+}
+
+function startSimTimer(){
+  clearInterval(SIM.tInt);
+  SIM.tInt=setInterval(()=>{SIM.sec++;const m=String(Math.floor(SIM.sec/60)).padStart(2,'0'),s=String(SIM.sec%60).padStart(2,'0');$('sim-time').textContent=`${m}:${s}`;},1000);
+}
+
+function simUseHint(h){$('sim-input').value=h;$('sim-input').focus();}
+function simKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();simSend();}}
+function simResize(ta){ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,130)+'px';}
+
+async function simSend(){
+  const ta=$('sim-input');const text=ta.value.trim();if(!text)return;
+  ta.value='';ta.style.height='auto';
+  addSimMsg('user',text,'Tú (Psicóloga)');
+  SIM.msgs.push({role:'user',content:text});
+  SIM.turns++;$('sim-turns').textContent=SIM.turns;
+  $('sim-send').disabled=true;
+  await simGetAI();
+  $('sim-send').disabled=false;
+  $('sim-input').focus();
+}
+
+async function simGetAI(override){
+  const typing=addSimTyping();
+  const msgs=override?[{role:'user',content:override}]:[...SIM.msgs];
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,system:SIM.sys,messages:msgs})});
+    const d=await r.json();
+    const txt=d.content?.[0]?.text||'...';
+    typing.remove();
+    const roleName={clinico:'Consultante',victima:'Entrevistado/a',imputado:'Evaluado/a',audiencia:'Fiscal'}[SIM.type]||'IA';
+    addSimMsg('ai',txt,roleName);
+    if(!override)SIM.msgs.push({role:'assistant',content:txt});
+  }catch{typing.remove();addSimMsg('ai','[Sin conexión]','IA');}
+}
+
+function addSimMsg(role,text,name){
+  const area=$('sim-chat');
+  const div=document.createElement('div');div.className=`cmsg ${role}`;
+  const av=role==='ai'?SIM_SCENARIOS[SIM.type]?.icon||'🤖':'👩‍⚖️';
+  div.innerHTML=`<div class="cmsg-av">${av}</div><div><div class="cmsg-name">${name}</div><div class="cmsg-bbl">${text.replace(/\n/g,'<br>')}</div></div>`;
+  area.appendChild(div);area.scrollTop=area.scrollHeight;return div;
+}
+function addSimTyping(){
+  const area=$('sim-chat');const w=document.createElement('div');w.className='cmsg ai';
+  w.innerHTML=`<div class="cmsg-av">${SIM_SCENARIOS[SIM.type]?.icon||'🤖'}</div><div><div class="cmsg-name">...</div><div class="ctyping"><span></span><span></span><span></span></div></div>`;
+  area.appendChild(w);area.scrollTop=area.scrollHeight;return w;
+}
+function addSimSysMsgEl(text){
+  const area=$('sim-chat');const div=document.createElement('div');div.className='csys-msg';div.textContent=text;area.appendChild(div);area.scrollTop=area.scrollHeight;
+}
+
+function confirmarSalirSim(){if(SIM.turns<2||confirm('¿Salir sin calificación?')){clearInterval(SIM.tInt);$('sim-overlay').classList.remove('on');}}
+async function terminarSim(){
+  if(SIM.turns<2){notify('Muy corto','Necesitas al menos 3 intervenciones.','fail');return;}
+  clearInterval(SIM.tInt);
+  $('sim-overlay').classList.remove('on');
+  $('sim-fb-modal').classList.add('on');
+  $('sim-fb-trophy').textContent='⏳';
+  $('sim-fb-title').textContent='Analizando tu desempeño...';
+  $('sim-fb-score').textContent='—';
+  $('sim-fb-criteria').innerHTML='';
+  $('sim-fb-content').innerHTML=`<div style="text-align:center;padding:20px;color:var(--txd);font-size:12px">La IA está evaluando tu simulación...</div>`;
+  const sc=SIM_SCENARIOS[SIM.type];
+  const transcript=SIM.msgs.map(m=>`${m.role==='user'?'PSICÓLOGA':'PERSONAJE'}: ${m.content}`).join('\n\n');
+  const prompt=`${sc.eval}\n\nPERFIL: ${SIM.profile}\nDIFICULTAD: ${SIM.diff}\nDURACIÓN: ${Math.floor(SIM.sec/60)} min\nTURNOS: ${SIM.turns}\nFOCO: ${SIM.focus||"general"}\n\nTRANSCRIPCIÓN:\n---\n${transcript}\n---\n\nRúbrica (cada criterio 0-25):\n1. TÉCNICA: uso de protocolo, preguntas, estructura\n2. RAPPORT: confianza, manejo emocional, lenguaje\n3. PROFUNDIDAD CLÍNICA: exploración, hipótesis, análisis\n4. ÉTICA Y PROFESIONALISMO: neutralidad, límites, respeto\n\nResponde SOLO en JSON:\n{"scores":{"tecnica":0,"rapport":0,"profundidad":0,"etica":0},"total":0,"nivel":"","fortalezas":["","",""],"mejoras":["","",""],"momentos_clave":["",""],"recomendacion":"","proxima_practica":""}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    let txt=d.content?.[0]?.text||'{}';txt=txt.replace(/```json|```/g,'').trim();
+    renderSimFb(JSON.parse(txt));
+  }catch{$('sim-fb-title').textContent='Error al calificar';$('sim-fb-content').innerHTML=`<div style="color:var(--ac3);font-size:12px;text-align:center">Sin conexión. Intenta de nuevo.</div>`;}
+}
+
+function renderSimFb(res){
+  const total=res.total||Math.round(Object.values(res.scores||{}).reduce((a,b)=>a+b,0));
+  const color=total>=80?'var(--grn)':total>=60?'var(--gold)':total>=40?'var(--ac)':'var(--ac3)';
+  const trophy=total>=80?'🏆':total>=60?'🌟':total>=40?'💪':'📚';
+  $('sim-fb-trophy').textContent=trophy;
+  $('sim-fb-title').textContent=`${res.nivel||'Simulación'} — ${SIM_SCENARIOS[SIM.type].title}`;
+  $('sim-fb-score').textContent=total;$('sim-fb-score').style.color=color;
+  const sc=s=>s>=20?'var(--grn)':s>=15?'var(--gold)':s>=10?'var(--ac)':'var(--ac3)';
+  const lbls={tecnica:'Técnica',rapport:'Rapport',profundidad:'Profundidad clínica',etica:'Ética'};
+  $('sim-fb-criteria').innerHTML=Object.entries(res.scores||{}).map(([k,v])=>`
+    <div class="fb-crit-c"><div class="fb-crit-lbl">${lbls[k]||k}</div>
+    <div class="fb-crit-val" style="color:${sc(v)}">${v}<span style="font-size:13px;color:var(--txm)">/25</span></div>
+    <div class="fb-crit-bar"><div class="fb-crit-fill" style="width:${v/25*100}%;background:${sc(v)}"></div></div></div>`).join('');
+  $('sim-fb-content').innerHTML=`
+    ${res.fortalezas?.length?`<div style="margin-bottom:18px"><div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--txd);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px">✅ Fortalezas</div>${res.fortalezas.map(f=>`<div class="fb-list-item"><span>✅</span><span>${f}</span></div>`).join('')}</div>`:``}
+    ${res.mejoras?.length?`<div style="margin-bottom:18px"><div style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--txd);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px">🎯 Áreas de mejora</div>${res.mejoras.map(m=>`<div class="fb-list-item"><span>🎯</span><span>${m}</span></div>`).join('')}</div>`:``}
+    ${res.recomendacion?`<div style="padding:14px;background:var(--ac-d);border:1px solid rgba(224,90,154,.2);border-radius:10px;font-size:12px;color:var(--tx);line-height:1.8;margin-bottom:12px"><strong>📌 Recomendación:</strong> ${res.recomendacion}</div>`:``}
+    ${res.proxima_practica?`<div style="display:flex;gap:9px;padding:12px;background:var(--s2);border-radius:10px;font-size:12px;color:var(--tx);line-height:1.7"><span>🌸</span><div><strong>Próxima práctica:</strong> ${res.proxima_practica}</div></div>`:``}`;
+  // Guardar en Firebase
+  if(!D.simulaciones)D.simulaciones=[];
+  D.simulaciones.push({tipo:SIM.type,perfil:SIM.profile,diff:SIM.diff,score:total,fecha:today(),nivel:res.nivel||''});
+  saveD();
+  $('sim-transcript').innerHTML=SIM.msgs.map(m=>`<div style="margin-bottom:9px"><strong style="color:${m.role==='user'?'var(--ac)':'var(--txd)'}">${m.role==='user'?'Psicóloga':'Personaje'}:</strong><br>${m.content}</div>`).join('');
+}
+function cerrarSimFb(){$('sim-fb-modal').classList.remove('on');}
+function toggleSimTranscript(){const a=$('sim-transcript-area');a.style.display=a.style.display==='none'?'block':'none';}
+
+// ═══════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════
 const PAGE_META={
   dashboard:["Dashboard",()=>new Date().toLocaleDateString("es-CO",{weekday:"long",day:"numeric",month:"long"})],
   semestres:["Mis Semestres","Programa por semestres · Psicología Jurídica Colombia"],
+  simulador:["Simulador de Prácticas","Practica casos reales con IA"],
   aula:["Aula","Módulo en curso"],
   boletin:["Boletín de Notas","Tu historial académico oficial"],
   timer:["Temporizador","Técnica Pomodoro · Gestión del tiempo"],
@@ -1628,6 +1975,7 @@ function nav(id,el){
   $("page-title").textContent=m[0];
   $("page-sub").textContent=typeof m[1]==="function"?m[1]():m[1];
   if(id==="semestres")buildSemestres();
+  if(id==="simulador")buildSimScenarios();
 }
 
 // ═══════════════════════════════════════
