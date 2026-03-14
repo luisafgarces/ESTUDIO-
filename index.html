@@ -918,30 +918,28 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 const GEMINI_KEY="AIzaSyBRygwioA7lRM4HIavz02z7Ir8nUQpKdnY";
 const GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
 
-async function geminiCall(prompt,maxTokens=1000){
+// Retorna directamente el texto de la respuesta
+async function geminiText(prompt,maxTokens=1000){
   const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}};
   const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
-  // Adaptar respuesta al formato que espera el código (igual que Anthropic)
-  const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"";
-  return{ok:r.ok,json:()=>Promise.resolve({content:[{text:txt}]})};
+  if(d.error)throw new Error(d.error.message);
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||"";
 }
 
-async function geminiCallWithSystem(systemPrompt,msgs,maxTokens=500){
-  // Gemini no tiene system prompt separado — lo integramos como primer mensaje de usuario
+// Para el simulador: incluye system prompt y historial de mensajes
+async function geminiSimCall(systemPrompt,msgs,maxTokens=500){
   const contents=[];
-  // Agregar system como primer turno
-  contents.push({role:"user",parts:[{text:systemPrompt+"\n\n---\nAhora comienza la simulación."}]});
-  contents.push({role:"model",parts:[{text:"Entendido. Estoy listo para comenzar la simulación en el rol asignado."}]});
-  // Agregar historial de mensajes
+  contents.push({role:"user",parts:[{text:systemPrompt+"\n\n---\nComienza la simulación ahora."}]});
+  contents.push({role:"model",parts:[{text:"Entendido. Estoy en el rol asignado y listo para comenzar."}]});
   msgs.forEach(m=>{
     contents.push({role:m.role==="user"?"user":"model",parts:[{text:m.content}]});
   });
   const body={contents,generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}};
   const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
-  const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||"...";
-  return{ok:r.ok,json:()=>Promise.resolve({content:[{text:txt}]})};
+  if(d.error)throw new Error(d.error.message);
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||"...";
 }
 
 // ═══════════════════════════════════════
@@ -1371,11 +1369,9 @@ Califica con esta rúbrica (cada criterio de 0 a 25 puntos):
 Responde SOLO en JSON sin texto adicional ni markdown:
 {"scores":{"contenido":0,"aplicacion":0,"estructura":0,"argumentacion":0},"total":0,"letter":"","feedback":"Retroalimentación profesional de 4-6 párrafos: fortalezas específicas, debilidades concretas con ejemplos del texto, y recomendaciones accionables para mejorar.","approved":true}`;
   try{
-    const r=await geminiCall(prompt,1500);
-    const d=await r.json();
-    let txt=d.content?.[0]?.text||"{}";
-    txt=txt.replace(/```json|```/g,"").trim();
-    const res=JSON.parse(txt);
+    const txt=await geminiText(prompt,1500);
+    const clean=txt.replace(/```json|```/g,"").trim();
+    const res=JSON.parse(clean);
     const total=res.total||Math.round(Object.values(res.scores||{}).reduce((a,b)=>a+b,0));
     if(!D.grades[CUR_MOD])D.grades[CUR_MOD]={};
     D.grades[CUR_MOD].workScore=total;
@@ -1390,6 +1386,7 @@ Responde SOLO en JSON sin texto adicional ni markdown:
     await logMins(25);
   }catch(e){
     $("grade-result").innerHTML=`<div style="color:var(--ac3);font-size:12px;padding:12px">Error al calificar. Verifica tu conexión e intenta de nuevo.</div>`;
+    console.error(e);
   }
   btn.textContent="Entregar y calificar con IA →";btn.disabled=false;
 }
@@ -1437,13 +1434,11 @@ Reglas:
 Responde SOLO en JSON sin texto adicional:
 {"questions":[{"q":"","opts":["","","",""],"correct":0,"explanation":""}]}`;
   try{
-    const r=await geminiCall(prompt,2000);
-    const d=await r.json();
-    let txt=d.content?.[0]?.text||"{}";
-    txt=txt.replace(/```json|```/g,"").trim();
-    QUIZ_DATA=JSON.parse(txt);
+    const txt=await geminiText(prompt,2000);
+    const clean=txt.replace(/```json|```/g,"").trim();
+    QUIZ_DATA=JSON.parse(clean);
     renderQuiz();
-  }catch{$("quiz-body").innerHTML=`<div style="color:var(--ac3);font-size:12px">Error al generar. Intenta de nuevo.</div>`;$("quiz-gen").style.display="";}
+  }catch(e){$("quiz-body").innerHTML=`<div style="color:var(--ac3);font-size:12px">Error al generar. Intenta de nuevo.</div>`;$("quiz-gen").style.display="";console.error(e);}
 }
 
 function renderQuiz(){
@@ -1556,13 +1551,11 @@ Escribe una sugerencia académica breve (máx. 3 párrafos):
 
 Sin asteriscos. Sin listas. Prosa corrida. Tono profesional, cálido y directo.`;
   try{
-    const r=await geminiCall(prompt,600);
-    const d=await r.json();
-    const txt=d.content?.[0]?.text||"Sin conexión.";
+    const txt=await geminiText(prompt,600);
     const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
     el.innerHTML=html;
     D.lastAI={date:t,html};await saveD();
-  }catch{el.innerHTML=`<span style="color:var(--txd)">Sin conexión. Intenta de nuevo.</span>`;}
+  }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión. Intenta de nuevo.</span>`;console.error(e);}
 }
 
 async function loadModGuide(mod,ph){
@@ -1580,11 +1573,9 @@ Escribe una guía de estudio práctica (máx. 4 párrafos cortos):
 
 Tono profesional y directo. Sin asteriscos ni markdown.`;
   try{
-    const r=await geminiCall(prompt,900);
-    const d=await r.json();
-    const txt=d.content?.[0]?.text||"Error.";
+    const txt=await geminiText(prompt,900);
     el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
-  }catch{el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;}
+  }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;console.error(e);}
 }
 
 // ═══════════════════════════════════════
@@ -1987,14 +1978,12 @@ async function simGetAI(override){
   const typing=addSimTyping();
   const msgs=override?[{role:'user',content:override}]:[...SIM.msgs];
   try{
-    const r=await geminiCallWithSystem(SIM.sys,msgs,500);
-    const d=await r.json();
-    const txt=d.content?.[0]?.text||'...';
+    const txt=await geminiSimCall(SIM.sys,msgs,500);
     typing.remove();
     const roleName={clinico:'Consultante',victima:'Entrevistado/a',imputado:'Evaluado/a',audiencia:'Fiscal'}[SIM.type]||'IA';
     addSimMsg('ai',txt,roleName);
     if(!override)SIM.msgs.push({role:'assistant',content:txt});
-  }catch{typing.remove();addSimMsg('ai','[Sin conexión]','IA');}
+  }catch(e){typing.remove();addSimMsg('ai','[Sin conexión — verifica tu internet]','IA');console.error(e);}
 }
 
 function addSimMsg(role,text,name){
@@ -2028,11 +2017,10 @@ async function terminarSim(){
   const transcript=SIM.msgs.map(m=>`${m.role==='user'?'PSICÓLOGA':'PERSONAJE'}: ${m.content}`).join('\n\n');
   const prompt=`${sc.eval}\n\nPERFIL: ${SIM.profile}\nDIFICULTAD: ${SIM.diff}\nDURACIÓN: ${Math.floor(SIM.sec/60)} min\nTURNOS: ${SIM.turns}\nFOCO: ${SIM.focus||"general"}\n\nTRANSCRIPCIÓN:\n---\n${transcript}\n---\n\nRúbrica (cada criterio 0-25):\n1. TÉCNICA: uso de protocolo, preguntas, estructura\n2. RAPPORT: confianza, manejo emocional, lenguaje\n3. PROFUNDIDAD CLÍNICA: exploración, hipótesis, análisis\n4. ÉTICA Y PROFESIONALISMO: neutralidad, límites, respeto\n\nResponde SOLO en JSON:\n{"scores":{"tecnica":0,"rapport":0,"profundidad":0,"etica":0},"total":0,"nivel":"","fortalezas":["","",""],"mejoras":["","",""],"momentos_clave":["",""],"recomendacion":"","proxima_practica":""}`;
   try{
-    const r=await geminiCall(prompt,1200);
-    const d=await r.json();
-    let txt=d.content?.[0]?.text||'{}';txt=txt.replace(/```json|```/g,'').trim();
-    renderSimFb(JSON.parse(txt));
-  }catch{$('sim-fb-title').textContent='Error al calificar';$('sim-fb-content').innerHTML=`<div style="color:var(--ac3);font-size:12px;text-align:center">Sin conexión. Intenta de nuevo.</div>`;}
+    const txt=await geminiText(prompt,1200);
+    const clean=txt.replace(/```json|```/g,'').trim();
+    renderSimFb(JSON.parse(clean));
+  }catch(e){$('sim-fb-title').textContent='Error al calificar';$('sim-fb-content').innerHTML=`<div style="color:var(--ac3);font-size:12px;text-align:center">Sin conexión. Intenta de nuevo.</div>`;console.error(e);}
 }
 
 function renderSimFb(res){
