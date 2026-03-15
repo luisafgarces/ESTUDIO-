@@ -1395,7 +1395,7 @@ Califica con esta rúbrica (cada criterio de 0 a 25 puntos):
 Responde SOLO en JSON sin texto adicional ni markdown:
 {"scores":{"contenido":0,"aplicacion":0,"estructura":0,"argumentacion":0},"total":0,"letter":"","feedback":"Retroalimentación profesional de 4-6 párrafos: fortalezas específicas, debilidades concretas con ejemplos del texto, y recomendaciones accionables para mejorar.","approved":true}`;
   try{
-    const txt=await geminiText(prompt,1500);
+    const txt=await geminiText(prompt,2500);
     const clean=txt.replace(/```json|```/g,"").trim();
     const res=JSON.parse(clean);
     const total=res.total||Math.round(Object.values(res.scores||{}).reduce((a,b)=>a+b,0));
@@ -1460,7 +1460,7 @@ Reglas:
 Responde SOLO en JSON sin texto adicional:
 {"questions":[{"q":"","opts":["","","",""],"correct":0,"explanation":""}]}`;
   try{
-    const txt=await geminiText(prompt,2000);
+    const txt=await geminiText(prompt,3000);
     const clean=txt.replace(/```json|```/g,"").trim();
     QUIZ_DATA=JSON.parse(clean);
     renderQuiz();
@@ -1582,7 +1582,7 @@ Escribe una sugerencia académica breve y motivadora en máximo 3 párrafos cort
 
 Escribe en segunda persona (tú). Sin asteriscos. Sin listas con números. Prosa corrida. Tono profesional y cercano.`;
   try{
-    const txt=await geminiText(prompt,700);
+    const txt=await geminiText(prompt,2500);
     if(!txt||txt.trim().length<10)throw new Error("Respuesta vacía");
     const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
     el.innerHTML=html;
@@ -1623,7 +1623,7 @@ PARTE 4 — CONSEJO FINAL (1-2 oraciones): Un consejo específico para que el tr
 Tono profesional, cálido y directo. Sin asteriscos ni markdown.`;
 
   try{
-    const txt=await geminiText(prompt,1200);
+    const txt=await geminiText(prompt,3000);
     el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ").replace(/PARTE \d — [^:]+:/g,m=>`<strong style="color:var(--ac);display:block;margin-top:12px;font-size:11px;letter-spacing:1px;text-transform:uppercase">${m}</strong>`)}</span>`;
   }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;console.error(e);}
 }
@@ -2028,7 +2028,7 @@ async function simGetAI(override){
   const typing=addSimTyping();
   const msgs=override?[{role:'user',content:override}]:[...SIM.msgs];
   try{
-    const txt=await geminiSimCall(SIM.sys,msgs,500);
+    const txt=await geminiSimCall(SIM.sys,msgs,800);
     typing.remove();
     const roleName={clinico:'Consultante',victima:'Entrevistado/a',imputado:'Evaluado/a',audiencia:'Fiscal'}[SIM.type]||'IA';
     addSimMsg('ai',txt,roleName);
@@ -2067,7 +2067,7 @@ async function terminarSim(){
   const transcript=SIM.msgs.map(m=>`${m.role==='user'?'PSICÓLOGA':'PERSONAJE'}: ${m.content}`).join('\n\n');
   const prompt=`${sc.eval}\n\nPERFIL: ${SIM.profile}\nDIFICULTAD: ${SIM.diff}\nDURACIÓN: ${Math.floor(SIM.sec/60)} min\nTURNOS: ${SIM.turns}\nFOCO: ${SIM.focus||"general"}\n\nTRANSCRIPCIÓN:\n---\n${transcript}\n---\n\nRúbrica (cada criterio 0-25):\n1. TÉCNICA: uso de protocolo, preguntas, estructura\n2. RAPPORT: confianza, manejo emocional, lenguaje\n3. PROFUNDIDAD CLÍNICA: exploración, hipótesis, análisis\n4. ÉTICA Y PROFESIONALISMO: neutralidad, límites, respeto\n\nResponde SOLO en JSON:\n{"scores":{"tecnica":0,"rapport":0,"profundidad":0,"etica":0},"total":0,"nivel":"","fortalezas":["","",""],"mejoras":["","",""],"momentos_clave":["",""],"recomendacion":"","proxima_practica":""}`;
   try{
-    const txt=await geminiText(prompt,1200);
+    const txt=await geminiText(prompt,3000);
     const clean=txt.replace(/```json|```/g,'').trim();
     renderSimFb(JSON.parse(clean));
   }catch(e){$('sim-fb-title').textContent='Error al calificar';$('sim-fb-content').innerHTML=`<div style="color:var(--ac3);font-size:12px;text-align:center">Sin conexión. Intenta de nuevo.</div>`;console.error(e);}
