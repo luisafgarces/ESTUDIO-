@@ -935,12 +935,12 @@ body{font-family:'DM Mono',monospace;background:linear-gradient(160deg,#fde8f2 0
 // ═══════════════════════════════════════
 //  GEMINI API
 // ═══════════════════════════════════════
-const GEMINI_KEY="AIzaSyDFnHOKGDG3241cD_ne7-Pr9eOQDnk_eoY";
-const GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+const GEMINI_KEY=""; // Key guardada de forma segura en Cloudflare
+const GEMINI_URL="https://mis-matas-proxy.luisa-vida2026.workers.dev";
 
 // Retorna directamente el texto de la respuesta
 async function geminiText(prompt,maxTokens=1000){
-  const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}};
+  const body={model:"gemini-2.0-flash",contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}};
   const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
   if(d.error){console.error("Gemini error:",d.error);throw new Error(d.error.message||"Gemini API error");}
@@ -957,10 +957,10 @@ async function geminiSimCall(systemPrompt,msgs,maxTokens=500){
   msgs.forEach(m=>{
     contents.push({role:m.role==="user"?"user":"model",parts:[{text:m.content}]});
   });
-  const body={contents,generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}};
+  const body={model:"gemini-2.0-flash",contents,generationConfig:{maxOutputTokens:maxTokens,temperature:0.85}};
   const r=await fetch(GEMINI_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
+  if(d.error){console.error("Gemini error:",d.error);throw new Error(d.error.message||"Gemini API error");}
   return d.candidates?.[0]?.content?.parts?.[0]?.text||"...";
 }
 
