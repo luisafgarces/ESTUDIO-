@@ -1037,8 +1037,14 @@ async function loadD(){
     if(!D.tasks)D.tasks=[];
     if(!D.reflections)D.reflections=[];
     if(!D.lecturas)D.lecturas={};
+    if(!D.semestres)D.semestres={};
+    if(!D.simulaciones)D.simulaciones=[];
+  }else{
+    // Primera vez — inicializar todo
+    D.grades={};D.studyDays={};D.tasks=[];D.reflections=[];
+    D.lecturas={};D.semestres={};D.simulaciones=[];
+    D.totalMinutes=0;D.streak=0;
   }
-  // Sincronizar estado de lecturas desde Firebase
   LEC_STATE=D.lecturas||{};
   calcStreak();
 }
@@ -1395,7 +1401,7 @@ Califica con esta rúbrica (cada criterio de 0 a 25 puntos):
 Responde SOLO en JSON sin texto adicional ni markdown:
 {"scores":{"contenido":0,"aplicacion":0,"estructura":0,"argumentacion":0},"total":0,"letter":"","feedback":"Retroalimentación profesional de 4-6 párrafos: fortalezas específicas, debilidades concretas con ejemplos del texto, y recomendaciones accionables para mejorar.","approved":true}`;
   try{
-    const txt=await geminiText(prompt,2500);
+    const txt=await geminiText(prompt,800);
     const clean=txt.replace(/```json|```/g,"").trim();
     const res=JSON.parse(clean);
     const total=res.total||Math.round(Object.values(res.scores||{}).reduce((a,b)=>a+b,0));
@@ -1460,7 +1466,7 @@ Reglas:
 Responde SOLO en JSON sin texto adicional:
 {"questions":[{"q":"","opts":["","","",""],"correct":0,"explanation":""}]}`;
   try{
-    const txt=await geminiText(prompt,3000);
+    const txt=await geminiText(prompt,1000);
     const clean=txt.replace(/```json|```/g,"").trim();
     QUIZ_DATA=JSON.parse(clean);
     renderQuiz();
@@ -1570,19 +1576,18 @@ async function loadAI(force=false){
   const done=countDone();
   const next=PHASES.flatMap(p=>p.modules).find(m=>!D.grades[m.id]?.approved);
   const semActivo=SEMESTRES.find(s=>getSemStatus(s)==="activo");
-  const prompt=`Eres el asistente académico de ForenseU, universidad autodidacta de Psicología Jurídica para Colombia.
-Estudiante: ${CU?.name||"Luisa"} | Módulos aprobados: ${done}/23 | Racha: ${D.streak||0} días | Fecha: ${t}
-Semestre activo: ${semActivo?semActivo.title+" — "+semActivo.subtitle:"Sin semestre activo aún"}
+  const prompt=`Asistente académico de ForenseU — Psicología Jurídica Colombia.
+Estudiante: ${CU?.name||"Luisa"} | Módulos: ${done}/23 | Racha: ${D.streak||0} días
 Próximo módulo: ${next?`${next.id} — ${next.name}`:"¡Todos completados!"}
 
-Escribe una sugerencia académica breve y motivadora en máximo 3 párrafos cortos:
-1. Qué estudiar específicamente hoy y por qué es prioritario para su formación en psicología jurídica colombiana
-2. Una microtarea concreta de exactamente 25 minutos para avanzar hoy mismo
-3. Una motivación genuina, específica y cálida para Luisa
+En exactamente 3 párrafos cortos (máx 3 oraciones cada uno):
+1. Qué estudiar hoy y por qué
+2. Una microtarea de 25 minutos concreta
+3. Motivación breve y genuina
 
-Escribe en segunda persona (tú). Sin asteriscos. Sin listas con números. Prosa corrida. Tono profesional y cercano.`;
+Segunda persona. Sin saludos. Sin asteriscos. Directo al punto.`;
   try{
-    const txt=await geminiText(prompt,2500);
+    const txt=await geminiText(prompt,800);
     if(!txt||txt.trim().length<10)throw new Error("Respuesta vacía");
     const html=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ")}</span>`;
     el.innerHTML=html;
@@ -1602,28 +1607,18 @@ async function loadModGuide(mod,ph){
     return lec?`- "${lec.titulo}" (${lec.autor}): ${ml.why}`:"";
   }).filter(Boolean).join("\n");
 
-  const prompt=`Eres un profesor experto en Psicología Jurídica y Forense colombiana.
-El estudiante va a estudiar: "${mod.id} — ${mod.name}" (${ph.title}).
-Temas: ${mod.topics.join("; ")}.
+  const prompt=`Profesor de Psicología Jurídica Colombia. Módulo: "${mod.id} — ${mod.name}".
 Entregable: ${mod.work}
+Lecturas: ${modLecs}
 
-Lecturas asignadas para este módulo:
-${modLecs}
-
-Escribe una guía de estudio práctica en 4 partes (sin asteriscos, sin listas con guiones, prosa directa):
-
-PARTE 1 — POR QUÉ IMPORTA (2-3 oraciones): Por qué este módulo es crucial para el psicólogo jurídico en Colombia.
-
-PARTE 2 — CÓMO LEER (2-3 oraciones por lectura): Para cada lectura asignada, explica exactamente qué sección o capítulo leer primero, qué concepto buscar específicamente y cómo conectarlo con el entregable.
-
-PARTE 3 — CÓMO HACER EL TRABAJO (3-4 oraciones): Estrategia paso a paso para completar el entregable usando las lecturas como base.
-
-PARTE 4 — CONSEJO FINAL (1-2 oraciones): Un consejo específico para que el trabajo quede excelente.
-
-Tono profesional, cálido y directo. Sin asteriscos ni markdown.`;
+Guía en 4 partes MUY BREVES (2-3 oraciones cada una, sin asteriscos):
+PARTE 1 — POR QUÉ IMPORTA: relevancia para psicólogo jurídico colombiano.
+PARTE 2 — CÓMO LEER: qué buscar en cada lectura y cómo conectarla al entregable.
+PARTE 3 — CÓMO HACER EL TRABAJO: pasos concretos para completar el entregable.
+PARTE 4 — CONSEJO FINAL: un consejo para que quede excelente.`;
 
   try{
-    const txt=await geminiText(prompt,3000);
+    const txt=await geminiText(prompt,1000);
     el.innerHTML=`<span style="line-height:1.9">${txt.replace(/\n\n/g,"<br><br>").replace(/\n/g," ").replace(/PARTE \d — [^:]+:/g,m=>`<strong style="color:var(--ac);display:block;margin-top:12px;font-size:11px;letter-spacing:1px;text-transform:uppercase">${m}</strong>`)}</span>`;
   }catch(e){el.innerHTML=`<span style="color:var(--txd)">Sin conexión.</span>`;console.error(e);}
 }
@@ -1844,14 +1839,21 @@ function abrirMatricula(semId){
 
 async function confirmarMatricula(){
   if(!pendingMatSem)return;
+  const btn=$("mat-btn");
+  if(btn){btn.disabled=true;btn.textContent="Guardando...";}
   if(!D.semestres)D.semestres={};
   D.semestres[pendingMatSem]={activo:true,fechaInicio:today(),completado:false};
-  await saveD();
-  cerrarMatricula();
-  buildSemestres();
-  updateSemStatusBody();
-  notify("¡Matrícula confirmada! 🎓",`Semestre ${pendingMatSem} activo. ¡A estudiar!`,"done");
-  nav("semestres",document.querySelector('[data-page=semestres]'));
+  try{
+    await fbS(`/users/${CU.uid}/lms`,D);
+    cerrarMatricula();
+    buildSemestres();
+    updateSemStatusBody();
+    notify("¡Matrícula confirmada! 🎓",`Semestre ${pendingMatSem} activo. ¡A estudiar!`,"done");
+    nav("semestres",document.querySelector('[data-page=semestres]'));
+  }catch(e){
+    notify("Error","No se pudo guardar la matrícula. Intenta de nuevo.","fail");
+    if(btn){btn.disabled=false;btn.textContent="✓ Confirmar matrícula";}
+  }
 }
 
 function cerrarMatricula(){$("mat-sc").classList.remove("on");pendingMatSem=null;}
@@ -2067,7 +2069,7 @@ async function terminarSim(){
   const transcript=SIM.msgs.map(m=>`${m.role==='user'?'PSICÓLOGA':'PERSONAJE'}: ${m.content}`).join('\n\n');
   const prompt=`${sc.eval}\n\nPERFIL: ${SIM.profile}\nDIFICULTAD: ${SIM.diff}\nDURACIÓN: ${Math.floor(SIM.sec/60)} min\nTURNOS: ${SIM.turns}\nFOCO: ${SIM.focus||"general"}\n\nTRANSCRIPCIÓN:\n---\n${transcript}\n---\n\nRúbrica (cada criterio 0-25):\n1. TÉCNICA: uso de protocolo, preguntas, estructura\n2. RAPPORT: confianza, manejo emocional, lenguaje\n3. PROFUNDIDAD CLÍNICA: exploración, hipótesis, análisis\n4. ÉTICA Y PROFESIONALISMO: neutralidad, límites, respeto\n\nResponde SOLO en JSON:\n{"scores":{"tecnica":0,"rapport":0,"profundidad":0,"etica":0},"total":0,"nivel":"","fortalezas":["","",""],"mejoras":["","",""],"momentos_clave":["",""],"recomendacion":"","proxima_practica":""}`;
   try{
-    const txt=await geminiText(prompt,3000);
+    const txt=await geminiText(prompt,1000);
     const clean=txt.replace(/```json|```/g,'').trim();
     renderSimFb(JSON.parse(clean));
   }catch(e){$('sim-fb-title').textContent='Error al calificar';$('sim-fb-content').innerHTML=`<div style="color:var(--ac3);font-size:12px;text-align:center">Sin conexión. Intenta de nuevo.</div>`;console.error(e);}
