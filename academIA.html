@@ -405,10 +405,9 @@ Analiza los siguientes documentos del curso "${cn}" ${cc?`(código ${cc})`:''}.
 DOCUMENTOS:
 ${docsText}
 
-Responde SOLO con JSON válido sin texto antes ni después, sin backticks:
-{"curso":"","codigo":"","fase":"Fase N — nombre","fechaInicio":"DD mes YYYY","fechaLimite":"DD mes YYYY","puntajeTotal":0,"alertas":[{"tipo":"danger|warning|info|success","texto":"mensaje corto"}],"entregas":[{"numero":1,"titulo":"","descripcion":"qué hay que hacer exactamente","tipo":"individual|grupal|foro","puntos":0,"formatoEntrega":"PDF","nombreArchivo":""}],"semanas":[{"semana":"Semana 1","fechas":"DD–DD mes","estado":"urgente|activa|pendiente|cierre","tareas":"descripción concreta"}],"checklist":[{"grupo":"nombre del bloque","items":["1 acción concreta por ítem"]}],"lecturas":[{"prioridad":"alta|media","titulo":"","autores":"Apellido, año","paginas":"pp. X-Y","porQueImportante":"1 oración","comoLeerla":"objetivo concreto","palabrasClave":["t1","t2"],"tiempoEstimado":"X min"}],"rubrica":[{"criterio":"","puntos":0,"paraNivelAlto":"qué necesitas hacer exactamente en segunda persona"}]}
+INSTRUCCIÓN CRÍTICA: Responde ÚNICAMENTE con el objeto JSON. Sin texto antes, sin texto después, sin backticks, sin markdown, sin explicaciones. Solo el JSON puro empezando con { y terminando con }.
 
-Reglas: 1 sola acción por ítem del checklist; incluir TODAS las referencias bibliográficas de la guía en lecturas; paraNivelAlto en segunda persona directa; alerta danger si fecha límite en menos de 7 días; fechas concretas basadas en los documentos.`;
+{"curso":"nombre del curso","codigo":"código","fase":"Fase N — nombre","fechaInicio":"DD mes YYYY","fechaLimite":"DD mes YYYY","puntajeTotal":0,"alertas":[{"tipo":"danger","texto":"mensaje"}],"entregas":[{"numero":1,"titulo":"nombre","descripcion":"descripción detallada","tipo":"individual","puntos":0,"formatoEntrega":"PDF","nombreArchivo":""}],"semanas":[{"semana":"Semana 1","fechas":"DD-DD mes","estado":"activa","tareas":"descripción"}],"checklist":[{"grupo":"nombre","items":["acción 1","acción 2"]}],"lecturas":[{"prioridad":"alta","titulo":"título","autores":"Apellido, año","paginas":"pp. X-Y","porQueImportante":"razón","comoLeerla":"objetivo","palabrasClave":["término"],"tiempoEstimado":"30 min"}],"rubrica":[{"criterio":"nombre","puntos":0,"paraNivelAlto":"descripción en segunda persona"}]}`;
 
     const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gemini-2.5-flash',contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:8192}})});
     if(!res.ok){const err=await res.text();throw new Error(`HTTP ${res.status}: ${err.slice(0,200)}`);}
@@ -416,7 +415,14 @@ Reglas: 1 sola acción por ítem del checklist; incluir TODAS las referencias bi
     if(d.error)throw new Error(d.error.message||'Error de Gemini');
     const raw=d?.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(!raw)throw new Error('Respuesta vacía de la IA');
-    const p=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    // Robust JSON extraction
+    let jsonStr=raw.replace(/```json|```/g,'').trim();
+    // Find the JSON object boundaries
+    const start=jsonStr.indexOf('{');
+    const end=jsonStr.lastIndexOf('}');
+    if(start===-1||end===-1)throw new Error('La IA no devolvió JSON válido');
+    jsonStr=jsonStr.slice(start,end+1);
+    const p=JSON.parse(jsonStr);
     clearInterval(intv);plan=p;clSt={};render(p);
   }catch(e){clearInterval(intv);console.error('Error:',e);vis('secUpload',true);vis('loader',false);toast('⚠️ '+(e.message||'Error al analizar'));}
 }
