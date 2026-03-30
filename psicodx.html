@@ -340,13 +340,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
     <!-- NIVEL SELECTOR -->
     <div class="ey" style="margin-bottom:.5rem">Selecciona modo y nivel</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1rem" id="game-mode-grid">
-      <div class="game-mode-card" onclick="startVignette(1)">
+      <div class="game-mode-card" id="gmc-vig">
         <div class="gmc-ic">📋</div>
         <div class="gmc-name">Vignette</div>
         <div class="gmc-sub">Caso completo → diagnóstico</div>
         <div class="gmc-levels" id="vig-levels"></div>
       </div>
-      <div class="game-mode-card" onclick="startDetective(1)">
+      <div class="game-mode-card" id="gmc-det">
         <div class="gmc-ic">🔍</div>
         <div class="gmc-name">Detective</div>
         <div class="gmc-sub">Síntomas → descarta trastornos</div>
@@ -363,17 +363,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 </div>
 
 <div class="bot-nav">
-  <button class="ni active" onclick="nav('home')"><div class="ni-ic">🏠</div><div class="ni-lb">Inicio</div></button>
-  <button class="ni" onclick="nav('flash')"><div class="ni-ic">⚡</div><div class="ni-lb">Flash</div></button>
-  <button class="ni" onclick="nav('game')"><div class="ni-ic">🎮</div><div class="ni-lb">Juego</div></button>
-  <button class="ni" onclick="nav('ref')"><div class="ni-ic">🗂️</div><div class="ni-lb">Clínica</div></button>
-  <button class="ni" onclick="nav('prog')"><div class="ni-ic">📊</div><div class="ni-lb">Progreso</div></button>
+  <button class="ni active" data-tab="home"><div class="ni-ic">🏠</div><div class="ni-lb">Inicio</div></button>
+  <button class="ni" data-tab="flash"><div class="ni-ic">⚡</div><div class="ni-lb">Flash</div></button>
+  <button class="ni" data-tab="game"><div class="ni-ic">🎮</div><div class="ni-lb">Juego</div></button>
+  <button class="ni" data-tab="ref"><div class="ni-ic">🗂️</div><div class="ni-lb">Clínica</div></button>
+  <button class="ni" data-tab="prog"><div class="ni-ic">📊</div><div class="ni-lb">Progreso</div></button>
 </div>
 
 <!-- TRASTORNO DETAIL OVERLAY -->
 <div id="dx-overlay" style="position:fixed;inset:0;background:var(--bg);z-index:160;display:none;flex-direction:column">
   <div style="flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--tl);padding:.75rem 1rem;display:flex;align-items:center;gap:.7rem">
-    <button class="x-btn" onclick="document.getElementById('dx-overlay').style.display='none'">←</button>
+    <button class="x-btn" id="dx-close-btn">←</button>
     <div style="flex:1">
       <div id="dx-ey" class="ey"></div>
       <div id="dx-title" style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text)"></div>
@@ -385,7 +385,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 <!-- SESSION DETAIL OVERLAY -->
 <div id="ses-detail">
   <div class="sd-hd">
-    <button class="x-btn" onclick="closeSesDetail()">←</button>
+    <button class="x-btn" id="ses-close-btn">←</button>
     <div style="flex:1">
       <div id="sd-ey" class="ey"></div>
       <div id="sd-title" style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--text)"></div>
@@ -394,15 +394,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   </div>
   <div class="sd-body" id="sd-body"></div>
   <div class="sd-ft">
-    <button class="btn btn-g" style="flex:1" onclick="startFlashcards(currentSes)">⚡ Flashcards</button>
-    <button class="btn btn-p" style="flex:1" onclick="startQuiz(currentSes)">Quiz Final</button>
+    <button class="btn btn-g" style="flex:1" id="ses-flash-btn">⚡ Flashcards</button>
+    <button class="btn btn-p" style="flex:1" id="ses-quiz-btn">Quiz Final</button>
   </div>
 </div>
 
 <!-- QUIZ OVERLAY -->
 <div id="qs">
   <div class="qhd">
-    <button class="x-btn" onclick="closeQuiz()">←</button>
+    <button class="x-btn" id="quiz-close-btn">←</button>
     <div class="qpw"><div class="qpf" id="qpf"></div></div>
     <div class="qn" id="qn">1/5</div>
   </div>
@@ -413,7 +413,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   </div>
   <div class="qft">
     <div class="qfb" id="qfb"></div>
-    <button class="btn btn-p" style="width:100%;display:none" id="q-next" onclick="nextQuestion()">Siguiente →</button>
+    <button class="btn btn-p" style="width:100%;display:none" id="q-next">Siguiente →</button>
   </div>
 </div>
 
@@ -425,21 +425,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   <div class="res-label">PRECISIÓN</div>
   <div class="res-sub" id="res-sub"></div>
   <div style="display:flex;gap:.65rem;flex-direction:column;width:100%;max-width:280px">
-    <button class="btn btn-p" onclick="closeResults()">Continuar →</button>
-    <button class="btn btn-g" onclick="retryQuiz()">Reintentar</button>
+    <button class="btn btn-p" id="res-cont-btn">Continuar →</button>
+    <button class="btn btn-g" id="res-retry-btn">Reintentar</button>
   </div>
 </div>
 
 <!-- FLASHCARDS OVERLAY -->
 <div id="fc-overlay">
   <div class="fc-hd">
-    <button class="x-btn" onclick="closeFlash()">←</button>
+    <button class="x-btn" id="fc-close-btn">←</button>
     <div style="flex:1;font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;color:var(--text)" id="fc-title">Flashcards</div>
     <div class="badge" id="fc-badge"></div>
   </div>
   <div class="fc-body">
     <div class="fc-counter" id="fc-counter">1 / 10</div>
-    <div class="fc-card-wrap" onclick="flipCard()">
+    <div class="fc-card-wrap" id="fc-wrap">
       <div class="fc-card" id="fc-card">
         <div class="fc-face fc-front">
           <div class="fc-hint">CONCEPTO</div>
@@ -453,13 +453,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
     </div>
     <div style="font-size:.72rem;color:var(--text);opacity:.4;text-align:center;margin-bottom:.8rem">Toca la tarjeta para voltear</div>
     <div class="fc-nav">
-      <button class="btn btn-g" onclick="fcPrev()">← Anterior</button>
-      <button class="btn btn-p" onclick="fcNext()">Siguiente →</button>
+      <button class="btn btn-g" id="fc-prev">← Anterior</button>
+      <button class="btn btn-p" id="fc-next">Siguiente →</button>
     </div>
   </div>
   <div class="fc-ft">
-    <button class="btn btn-g" style="flex:1" onclick="closeFlash()">Cerrar</button>
-    <button class="btn btn-p" style="flex:1" onclick="()=>{closeFlash();startQuiz(currentFcSes)}">→ Al Quiz</button>
+    <button class="btn btn-g" style="flex:1" id="fc-close2">Cerrar</button>
+    <button class="btn btn-p" style="flex:1" id="fc-toquiz">→ Al Quiz</button>
   </div>
 </div>
 
@@ -852,7 +852,6 @@ function nav(tab){
   document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   document.getElementById('sc-'+tab).classList.add('active');
-  event.currentTarget.classList.add('active');
   if(tab==='prog') refreshProg();
   if(tab==='flash') renderFlashList();
   if(tab==='ref'){renderRefFilters();renderRefList();}
@@ -2554,7 +2553,7 @@ function finishGame(){
   `;
   document.getElementById('go-ft').innerHTML=`
     <div style="display:flex;gap:.55rem">
-      <button class="btn btn-g" style="flex:1" onclick="closeGame()">← Salir</button>
+      <button class="btn btn-g" style="flex:1" id="game-close">← Salir</button>
       <button class="btn btn-p" style="flex:1" onclick="${gMode==='vig'?'startVignette('+gLevel+')':'startDetective('+gLevel+')'}">Repetir nivel</button>
     </div>`;
 }
@@ -2573,11 +2572,45 @@ function popXP(txt){
   setTimeout(()=>el.remove(),900);
 }
 
+// ══════════════════════════════════════════
+//  INIT — all static event listeners
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+  // NAV
+  document.querySelectorAll('[data-tab]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+      btn.classList.add('active');
+      nav(btn.dataset.tab);
+    });
+  });
+  function bind(id, fn){ var e=document.getElementById(id); if(e) e.addEventListener('click',fn); }
+  bind('dx-close-btn',   function(){ document.getElementById('dx-overlay').style.display='none'; });
+  bind('ses-close-btn',  closeSesDetail);
+  bind('ses-flash-btn',  function(){ startFlashcards(currentSes); });
+  bind('ses-quiz-btn',   function(){ startQuiz(currentSes); });
+  bind('quiz-close-btn', closeQuiz);
+  bind('q-next',         nextQuestion);
+  bind('res-cont-btn',   closeResults);
+  bind('res-retry-btn',  retryQuiz);
+  bind('fc-close-btn',   closeFlash);
+  bind('fc-wrap',        flipCard);
+  bind('fc-prev',        fcPrev);
+  bind('fc-next',        fcNext);
+  bind('fc-close2',      closeFlash);
+  bind('fc-toquiz',      function(){ closeFlash(); startQuiz(currentFcSes); });
+  bind('gmc-vig',        function(){ startVignette(GS.vig_unlocked||1); });
+  bind('gmc-det',        function(){ startDetective(GS.det_unlocked||1); });
+  bind('game-close',     closeGame);
+  refreshHome();
+});
+</script>
+
 
 <!-- GAME OVERLAY -->
 <div id="game-overlay">
   <div class="go-hd">
-    <button class="x-btn" onclick="closeGame()">←</button>
+    <button class="x-btn" id="game-close">←</button>
     <div style="flex:1;min-width:0">
       <div id="go-mode-label" class="ey" style="margin-bottom:.05rem"></div>
       <div id="go-title" style="font-family:'Playfair Display',serif;font-size:.92rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
