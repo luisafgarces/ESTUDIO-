@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VelozMente · Curso de Lectura Rápida</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rose:#cd8e9d;--bg:#fadae1;--text:#643000;--white:#fff9fb;
+  --rl:rgba(205,142,157,.18);--rm:rgba(205,142,157,.45);--rd:#b8758a;
+  --ok:#6a9e7f;--err:#c0553a;--warn:#c49a3a;
+  --m1:#cd8e9d;--m2:#9b6fa8;--m3:#5c7eb8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+
+/* HEADER */
+.app-header{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text)}
+.logo em{color:var(--rose);font-style:italic}
+.hstats{display:flex;gap:.9rem}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--rose);line-height:1}
+.hs-l{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text);opacity:.5}
+.sync-btn{background:none;border:1.5px solid var(--rm);border-radius:20px;padding:.22rem .6rem;font-family:'Jost',sans-serif;font-size:.62rem;font-weight:600;color:var(--rose);cursor:pointer;letter-spacing:.06em;transition:all .2s;white-space:nowrap}
+.sync-btn:hover{background:var(--rose);color:#fff}
+
+/* NAV */
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.25rem 0 .4rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.35rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif;transition:all .15s}
+.ni-ic{font-size:1.15rem;line-height:1}
+.ni-lb{font-size:.54rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.35;transition:all .15s}
+.ni.active .ni-lb{color:var(--rose);opacity:1}
+
+/* SCROLL */
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1.1rem 1rem 1rem}
+.sc.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* TYPOGRAPHY */
+.ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--rose);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:300;color:var(--text);margin-bottom:1rem;line-height:1.1}
+.st em{color:var(--rose);font-style:italic}
+
+/* CARDS */
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.85rem}
+.badge{display:inline-flex;align-items:center;gap:.25rem;background:var(--bg);border:1px solid var(--rm);border-radius:20px;padding:.15rem .55rem;font-size:.62rem;font-weight:700;letter-spacing:.07em;color:var(--rose);text-transform:uppercase}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem 1.3rem;border-radius:30px;border:1.5px solid var(--rose);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase}
+.btn-p{background:var(--rose);color:#fff;border-color:var(--rose)}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--rose)}
+.btn-g:hover{background:var(--rl)}
+.btn-sm{padding:.3rem .75rem;font-size:.68rem;border-radius:20px;border:1px solid var(--rm);background:transparent;color:var(--text);cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;transition:all .15s}
+.btn-sm.on,.btn-sm:hover{background:var(--rose);color:#fff;border-color:var(--rose)}
+.btn-sm.ok-active{background:var(--ok);color:#fff;border-color:var(--ok)}
+.divider{height:1px;background:var(--rl);margin:.9rem 0}
+.ibox{background:var(--rl);border-radius:10px;padding:.75rem 1rem;font-size:.8rem;line-height:1.6;color:var(--text);margin-bottom:.9rem;display:flex;gap:.55rem;align-items:flex-start}
+.ii{font-size:.95rem;flex-shrink:0;margin-top:.05rem}
+
+/* ── HOME ── */
+.banner{background:linear-gradient(135deg,var(--rose) 0%,#e0a5b2 100%);border-radius:16px;padding:1.3rem 1.1rem;color:#fff;margin-bottom:1.1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%}
+.banner-ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.banner-s{font-size:.78rem;opacity:.85;line-height:1.5}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.8rem .5rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--rose);line-height:1}
+.sc3-l{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.45;margin-top:.15rem}
+
+/* MODULE PROGRESS */
+.mod-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.mod-card:hover{border-color:var(--rm);transform:translateY(-1px)}
+.mod-card.locked{opacity:.5;cursor:default}
+.mod-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}
+.mod-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text)}
+.mod-sub{font-size:.7rem;color:var(--text);opacity:.55;margin-top:.1rem}
+.mod-prog-wrap{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:.3rem}
+.mod-prog-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.mod-meta{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text);opacity:.55;margin-top:.4rem}
+
+/* BADGES DISPLAY */
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.badge-item{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.7rem .4rem;text-align:center;transition:all .2s}
+.badge-item.earned{border-color:var(--rose);background:linear-gradient(135deg,var(--bg),var(--white))}
+.badge-item.locked-b{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:1.5rem;line-height:1;margin-bottom:.25rem}
+.badge-name{font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);opacity:.7;line-height:1.2}
+
+/* RECENT */
+.ri{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--rl);cursor:pointer}
+.ri:last-child{border-bottom:none}
+.ri-score{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
+.sp{background:rgba(106,158,127,.15);color:var(--ok);border:1.5px solid var(--ok)}
+.sf{background:rgba(192,85,58,.12);color:var(--err);border:1.5px solid var(--err)}
+.sn{background:var(--bg);color:var(--rose);border:1.5px solid var(--rm);font-size:.85rem}
+.ri-info{flex:1;min-width:0}
+.ri-t{font-size:.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-m{font-size:.68rem;opacity:.5;margin-top:.08rem}
+.ri-w{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--rose);flex-shrink:0}
+
+/* ── LIBRARY ── */
+.filter-bar{display:flex;gap:.45rem;margin-bottom:.9rem;overflow-x:auto;padding-bottom:.25rem;-webkit-overflow-scrolling:touch}
+.rc{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:.9rem 1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.rc:hover{border-color:var(--rm);transform:translateY(-1px)}
+.rc.locked-r{opacity:.45;cursor:default}
+.rc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem;margin-bottom:.4rem}
+.rc-badges{display:flex;gap:.35rem;flex-wrap:wrap}
+.rc-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:.2rem}
+.rc-author{font-size:.7rem;color:var(--rose);font-style:italic;margin-bottom:.4rem}
+.rc-preview{font-size:.78rem;line-height:1.55;color:var(--text);opacity:.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rc-footer{display:flex;justify-content:space-between;align-items:center;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--rl)}
+.dd{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:2px}
+.d1{background:var(--ok)}.d2{background:var(--warn)}.d3{background:var(--err)}
+
+/* PRE-READING INSTRUCTIONS */
+#pre-read{position:fixed;inset:0;background:var(--bg);z-index:199;display:none;flex-direction:column}
+#pre-read.open{display:flex}
+.pre-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.pre-body{flex:1;overflow-y:auto;padding:1.3rem 1rem;-webkit-overflow-scrolling:touch}
+.pre-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:.2rem}
+.pre-author{font-size:.75rem;color:var(--rose);font-style:italic;margin-bottom:1.2rem}
+.instr-block{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.instr-block-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--rose);margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem}
+.instr-item{display:flex;align-items:flex-start;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--rl)}
+.instr-item:last-child{border-bottom:none}
+.instr-ic{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--bg);border:1.5px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.85rem;margin-top:.05rem}
+.instr-text{flex:1}
+.instr-label{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rose);margin-bottom:.2rem}
+.instr-desc{font-size:.83rem;line-height:1.6;color:var(--text);opacity:.85}
+.target-box{background:linear-gradient(135deg,var(--rose),var(--rd));border-radius:12px;padding:1rem 1.1rem;color:#fff;margin-bottom:.85rem}
+.target-label{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin-bottom:.3rem}
+.target-wpm{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;line-height:1;margin-bottom:.2rem}
+.target-sub{font-size:.78rem;opacity:.85;line-height:1.5}
+.pre-ft{flex-shrink:0;padding:.9rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.65rem}
+#rs{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#rs.open{display:flex}
+.rs-hd{flex-shrink:0;padding:.75rem 1rem;border-bottom:1.5px solid var(--rl);display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:var(--white)}
+.rs-title{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs-timer{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;color:var(--rose);letter-spacing:.03em;flex-shrink:0}
+.x-btn{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;flex-shrink:0}
+.rs-body{flex:1;overflow-y:auto;padding:1.4rem 1.1rem;-webkit-overflow-scrolling:touch}
+.rs-text{font-family:'Cormorant Garamond',serif;font-size:1.12rem;font-weight:400;line-height:1.88;color:var(--text);max-width:640px;margin:0 auto}
+.rs-text p{margin-bottom:1em}
+.rs-ft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.6rem;align-items:center}
+.wpm-live{flex:1;text-align:center}
+.wpm-lv{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:300;color:var(--rose);line-height:1}
+.wpm-ll{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.4}
+
+/* ── QUIZ ── */
+#qs{position:fixed;inset:0;background:var(--bg);z-index:201;display:none;flex-direction:column}
+#qs.open{display:flex}
+.qhd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem}
+.qpw{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.qpf{height:100%;background:var(--rose);border-radius:2px;transition:width .3s ease}
+.qn{font-size:.7rem;font-weight:700;color:var(--rose);flex-shrink:0}
+.qbody{flex:1;overflow-y:auto;padding:1.4rem 1rem;-webkit-overflow-scrolling:touch}
+.qq{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.3rem}
+.qopts{display:flex;flex-direction:column;gap:.6rem}
+.qopt{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.85rem .95rem;cursor:pointer;font-size:.86rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.qopt:hover{border-color:var(--rm);background:var(--rl)}
+.qopt.sel{border-color:var(--rose);background:var(--rl)}
+.qopt.cor{border-color:var(--ok)!important;background:rgba(106,158,127,.12)!important;color:var(--ok);font-weight:600}
+.qopt.wrg{border-color:var(--err)!important;background:rgba(192,85,58,.1)!important;color:var(--err)}
+.qft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.qfb{font-size:.8rem;line-height:1.55;color:var(--text);background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin-bottom:.75rem;display:none;border-left:3px solid var(--rose)}
+.qfb.show{display:block}
+.qfb.cor-fb{border-left-color:var(--ok)}
+.qfb.wrg-fb{border-left-color:var(--err)}
+
+/* ── RESULTS ── */
+#res{position:fixed;inset:0;background:var(--bg);z-index:202;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.4rem;text-align:center}
+#res.open{display:flex}
+.res-circle{width:105px;height:105px;border-radius:50%;border:3px solid var(--rose);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.1rem}
+.res-pct{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:300;line-height:1}
+.res-pl{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.55}
+.res-v{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:.4rem}
+.res-s{font-size:.82rem;opacity:.7;line-height:1.6;margin-bottom:1.3rem}
+.res-row{display:flex;gap:1.3rem;justify-content:center;margin-bottom:1.6rem}
+.rd{text-align:center}
+.rd-v{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:300;color:var(--rose)}
+.rd-l{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+.new-badge-pop{background:var(--white);border:2px solid var(--rose);border-radius:14px;padding:1rem;margin-bottom:1rem;width:100%;max-width:320px;text-align:center}
+.nbp-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--rose);margin-bottom:.3rem}
+.nbp-icon{font-size:2rem;margin-bottom:.2rem}
+.nbp-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--text)}
+
+/* ── RSVP ── */
+.rsvp-stage{background:var(--white);border:2px solid var(--rose);border-radius:18px;padding:1.8rem 1.4rem;text-align:center;margin-bottom:.9rem}
+.rsvp-word{font-family:'Cormorant Garamond',serif;font-size:2.7rem;font-weight:400;color:var(--text);min-height:3.6rem;display:flex;align-items:center;justify-content:center;letter-spacing:.01em}
+.rsvp-pw{height:3px;background:var(--bg);border-radius:2px;margin:.75rem 0;overflow:hidden}
+.rsvp-pf{height:100%;background:var(--rose);border-radius:2px;transition:width .08s linear}
+.rsvp-row{display:flex;gap:.8rem;justify-content:center;font-size:.72rem;font-weight:600;color:var(--rose);margin-bottom:.9rem}
+.speed-row{display:flex;gap:.45rem;flex-wrap:wrap;justify-content:center;margin-bottom:.85rem}
+
+/* ── VISUAL FIELD EXERCISE ── */
+.vf-stage{background:var(--white);border:2px solid var(--rose);border-radius:18px;padding:1.5rem 1rem;margin-bottom:1rem;text-align:center;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.vf-word{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--text);position:absolute;transition:left .05s,top .05s;white-space:nowrap}
+.vf-center-dot{width:12px;height:12px;border-radius:50%;background:var(--rose);position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.vf-instruction{font-size:.8rem;color:var(--text);opacity:.6;line-height:1.5;margin-bottom:1rem}
+.vf-score{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--rose)}
+
+/* ── REACTION TIMER ── */
+.rt-stage{background:var(--white);border:2px solid var(--rose);border-radius:18px;padding:2rem 1.5rem;text-align:center;margin-bottom:1rem;cursor:pointer;transition:all .2s;-webkit-user-select:none;user-select:none}
+.rt-stage.waiting{border-color:var(--warn);background:rgba(196,154,58,.08)}
+.rt-stage.go{border-color:var(--ok);background:rgba(106,158,127,.1)}
+.rt-big{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--text);line-height:1;margin-bottom:.3rem}
+.rt-sub{font-size:.78rem;opacity:.65;line-height:1.5}
+.rt-history{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem}
+.rt-chip{background:var(--bg);border:1px solid var(--rm);border-radius:20px;padding:.2rem .6rem;font-size:.72rem;font-weight:600;color:var(--text)}
+
+/* ── PROGRESS ── */
+.prog-top{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:.9rem;text-align:center}
+.prog-wpm{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:300;color:var(--rose);line-height:1}
+.prog-lbl{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.45}
+.pg2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.9rem}
+.pgc{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.85rem;text-align:center}
+.pgc-v{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:300;color:var(--rose)}
+.pgc-l{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.45}
+.chart-box{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:.9rem;margin-bottom:.9rem}
+.chart-title{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--rose);margin-bottom:.7rem}
+.wpm-input-row{display:flex;gap:.65rem;margin-bottom:.9rem}
+.wpm-inp{flex:1;padding:.62rem .9rem;border:1.5px solid var(--rm);border-radius:10px;font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--text);background:var(--white);outline:none;text-align:center}
+.hist-row{display:flex;align-items:center;justify-content:space-between;padding:.55rem 0;border-bottom:1px solid var(--rl);font-size:.8rem}
+.hist-row:last-child{border-bottom:none}
+.hist-t{color:var(--text);font-weight:500;flex:1;padding-right:.4rem}
+.hist-w{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--rose)}
+.hist-sc{font-size:.72rem;font-weight:700;margin-left:.7rem}
+.hist-p{color:var(--ok)}.hist-f{color:var(--err)}
+
+/* MODALS */
+.mo{position:fixed;inset:0;background:rgba(100,48,0,.3);z-index:300;display:none;align-items:flex-end}
+.mo.open{display:flex}
+.ms{width:100%;background:var(--white);border-radius:20px 20px 0 0;padding:1.4rem 1.1rem 2rem;animation:su .3s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.ms-title{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;margin-bottom:.35rem}
+.ms-sub{font-size:.8rem;opacity:.65;margin-bottom:1.1rem;line-height:1.5}
+.ms-inp{width:100%;padding:.75rem 1rem;border:1.5px solid var(--rm);border-radius:10px;font-family:'Jost',sans-serif;font-size:1rem;color:var(--text);background:var(--bg);outline:none;margin-bottom:.9rem;text-align:center;letter-spacing:.15em;font-weight:600}
+.ms-btns{display:flex;gap:.65rem}
+.ms-btns .btn{flex:1}
+
+/* CERTIFICATION */
+.cert-box{background:var(--white);border:3px solid var(--rose);border-radius:20px;padding:1.5rem;text-align:center;margin-bottom:1rem;position:relative;overflow:hidden}
+.cert-box::before{content:'';position:absolute;inset:8px;border:1px solid var(--rl);border-radius:13px;pointer-events:none}
+.cert-title{font-family:'Cormorant Garamond',serif;font-size:.7rem;font-weight:400;letter-spacing:.3em;text-transform:uppercase;color:var(--rose);margin-bottom:.5rem}
+.cert-name{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:var(--text);margin-bottom:.3rem}
+.cert-sub{font-size:.78rem;opacity:.65;line-height:1.5;margin-bottom:.8rem}
+.cert-score{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--rose)}
+
+/* MODULE TABS */
+.mod-tabs{display:flex;border-bottom:1.5px solid var(--rl);margin-bottom:1rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mt-btn{flex-shrink:0;padding:.7rem 1rem;background:none;border:none;border-bottom:2px solid transparent;font-family:'Jost',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.45;cursor:pointer;transition:all .2s;white-space:nowrap}
+.mt-btn.active{opacity:1;border-bottom-color:var(--rose);color:var(--rose)}
+
+/* WEEK CHART */
+.wbar{display:flex;gap:.35rem;justify-content:space-between;align-items:flex-end;height:50px;margin-bottom:.4rem}
+.wb-item{flex:1;background:var(--rose);border-radius:3px 3px 0 0;opacity:.6;min-height:3px;transition:height .5s ease}
+.wlabels{display:flex;gap:.35rem;justify-content:space-between}
+.wl{flex:1;text-align:center;font-size:.58rem;font-weight:600;text-transform:uppercase;opacity:.4;letter-spacing:.05em}
+</style>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="logo">Veloz<em>Mente</em></div>
+  <div class="hstats">
+    <div class="hs"><div class="hs-v" id="h-wpm">—</div><div class="hs-l">WPM</div></div>
+    <div class="hs"><div class="hs-v" id="h-streak">0</div><div class="hs-l">Racha</div></div>
+    <div class="hs"><div class="hs-v" id="h-badges">0</div><div class="hs-l">Insignias</div></div>
+  </div>
+  <button class="sync-btn" onclick="openSync()">☁ Sync</button>
+</div>
+
+<div class="sa">
+
+  <!-- HOME -->
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">VelozMente · Curso avanzado</div>
+      <div class="banner-t" id="bann-t">Cargando…</div>
+      <div class="banner-s" id="bann-s">Tu camino hacia la lectura experta.</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="s-sess">0</div><div class="sc3-l">Sesiones</div></div>
+      <div class="sc3"><div class="sc3-n" id="s-avg">—</div><div class="sc3-l">WPM prom.</div></div>
+      <div class="sc3"><div class="sc3-n" id="s-best">—</div><div class="sc3-l">Mejor WPM</div></div>
+    </div>
+    <!-- Weekly activity -->
+    <div class="card" style="padding:1rem">
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--rose);margin-bottom:.7rem">Actividad semanal</div>
+      <div class="wbar" id="wbar"></div>
+      <div class="wlabels" id="wlabels"></div>
+    </div>
+    <!-- Modules overview -->
+    <div class="ey" style="margin-bottom:.5rem">Módulos del curso</div>
+    <div id="mod-cards"></div>
+    <!-- Badges -->
+    <div class="ey" style="margin-bottom:.5rem;margin-top:.3rem">Insignias</div>
+    <div class="badges-grid" id="badges-grid"></div>
+    <!-- Recent -->
+    <div class="ey" style="margin-bottom:.5rem">Historial reciente</div>
+    <div class="card"><div style="padding:.75rem 1rem" id="recent-home"></div></div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="sc" id="sc-library">
+    <div class="ey">Biblioteca</div>
+    <div class="st">Tus <em>Lecturas</em></div>
+    <div class="filter-bar" id="filter-bar">
+      <button class="btn-sm on" onclick="filt('all',this)">Todas</button>
+      <button class="btn-sm" onclick="filt('1',this)">Módulo 1</button>
+      <button class="btn-sm" onclick="filt('2',this)">Módulo 2</button>
+      <button class="btn-sm" onclick="filt('3',this)">Módulo 3</button>
+      <button class="btn-sm" onclick="filt('ES',this)">Español</button>
+      <button class="btn-sm" onclick="filt('EN',this)">English</button>
+    </div>
+    <div id="lib-list"></div>
+  </div>
+
+  <!-- EXERCISES -->
+  <div class="sc" id="sc-ex">
+    <div class="ey">Entrenamiento</div>
+    <div class="st">Ejercicios <em>Activos</em></div>
+    <div class="mod-tabs">
+      <button class="mt-btn active" onclick="showEx('rsvp',this)">⚡ RSVP</button>
+      <button class="mt-btn" onclick="showEx('vf',this)">👁 Campo visual</button>
+      <button class="mt-btn" onclick="showEx('rt',this)">⚡ Reacción</button>
+    </div>
+
+    <!-- RSVP -->
+    <div id="ex-rsvp">
+      <div class="ibox"><span class="ii">⚡</span><span>Lee cada palabra en el mismo punto. Elimina el movimiento ocular. <strong>Semana 1:</strong> 250 wpm. Sube 50 cada 3 días. <strong>Meta:</strong> sostener 500+ wpm.</span></div>
+      <div class="rsvp-stage">
+        <div class="rsvp-row">
+          <span id="rsvp-wshow">200 wpm</span>
+          <span id="rsvp-pct">0%</span>
+          <span id="rsvp-cnt"></span>
+        </div>
+        <div class="rsvp-word" id="rsvp-w">· · ·</div>
+        <div class="rsvp-pw"><div class="rsvp-pf" id="rsvp-pf" style="width:0%"></div></div>
+      </div>
+      <div class="speed-row">
+        <button class="btn-sm on" onclick="setRS(200,this)">200</button>
+        <button class="btn-sm" onclick="setRS(250,this)">250</button>
+        <button class="btn-sm" onclick="setRS(300,this)">300</button>
+        <button class="btn-sm" onclick="setRS(350,this)">350</button>
+        <button class="btn-sm" onclick="setRS(400,this)">400</button>
+        <button class="btn-sm" onclick="setRS(500,this)">500</button>
+        <button class="btn-sm" onclick="setRS(600,this)">600</button>
+        <button class="btn-sm" onclick="setRS(700,this)">700</button>
+        <button class="btn-sm" onclick="setRS(800,this)">800</button>
+      </div>
+      <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="rsStart()">▶ Iniciar</button>
+        <button class="btn btn-g" onclick="rsPause()">⏸</button>
+        <button class="btn btn-g" onclick="rsReset()">↺</button>
+      </div>
+    </div>
+
+    <!-- VISUAL FIELD -->
+    <div id="ex-vf" style="display:none">
+      <div class="ibox"><span class="ii">👁</span><span>Mantén los ojos en el punto central rojo. Cuando aparezca una palabra en la periferia, léela sin mover los ojos. Entrena a ampliar tu campo visual funcional.</span></div>
+      <div class="vf-stage" id="vf-stage">
+        <div class="vf-instruction" id="vf-inst">Presiona Iniciar. Mantén los ojos en el punto rojo central.</div>
+        <div class="vf-center-dot"></div>
+        <div class="vf-word" id="vf-word" style="display:none"></div>
+      </div>
+      <div style="background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem">
+        <div style="font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--rose);margin-bottom:.5rem">¿Qué palabra viste?</div>
+        <div id="vf-opts" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem"></div>
+        <div style="font-size:.75rem;color:var(--text);opacity:.6" id="vf-feedback"></div>
+      </div>
+      <div style="display:flex;gap:.6rem;justify-content:center;align-items:center;flex-wrap:wrap">
+        <div class="vf-score" id="vf-score">0/0</div>
+        <button class="btn btn-p" onclick="vfStart()">▶ Iniciar</button>
+        <button class="btn btn-g" onclick="vfReset()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- REACTION TIMER -->
+    <div id="ex-rt" style="display:none">
+      <div class="ibox"><span class="ii">⚡</span><span>Entrena la velocidad de procesamiento visual. Toca en cuanto veas el cambio. Objetivo: &lt;250ms. El cerebro lector experto procesa a esta velocidad.</span></div>
+      <div class="rt-stage" id="rt-stage" onclick="rtTap()">
+        <div class="rt-big" id="rt-big">Toca para empezar</div>
+        <div class="rt-sub" id="rt-sub">Test de velocidad de reacción visual</div>
+      </div>
+      <div class="rt-history" id="rt-hist"></div>
+      <div style="text-align:center;margin-top:.8rem">
+        <div style="font-size:.68rem;color:var(--text);opacity:.5">Promedio: <strong id="rt-avg">—</strong> ms · Mejor: <strong id="rt-best">—</strong> ms</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="sc" id="sc-prog">
+    <div class="ey">Mi camino</div>
+    <div class="st">Mi <em>Progreso</em></div>
+    <div class="prog-top">
+      <div class="prog-wpm" id="p-wpm">—</div>
+      <div class="prog-lbl">WPM promedio actual</div>
+    </div>
+    <div class="pg2">
+      <div class="pgc"><div class="pgc-v" id="p-best">—</div><div class="pgc-l">Mejor WPM</div></div>
+      <div class="pgc"><div class="pgc-v" id="p-sess">0</div><div class="pgc-l">Sesiones</div></div>
+      <div class="pgc"><div class="pgc-v" id="p-streak">0</div><div class="pgc-l">Racha días</div></div>
+      <div class="pgc"><div class="pgc-v" id="p-score">—</div><div class="pgc-l">Quiz prom.</div></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Evolución WPM</div>
+      <svg width="100%" height="100" viewBox="0 0 320 100" id="wpm-chart" preserveAspectRatio="none">
+        <text x="160" y="55" text-anchor="middle" font-family="Jost" font-size="10" fill="#cd8e9d" opacity="0.5">Registra sesiones para ver la gráfica</text>
+      </svg>
+    </div>
+    <div class="wpm-input-row">
+      <input type="number" class="wpm-inp" id="m-wpm" placeholder="WPM hoy">
+      <button class="btn btn-p" onclick="saveWPM()">Guardar</button>
+    </div>
+    <!-- Certification -->
+    <div id="cert-area" style="display:none">
+      <div class="ey" style="margin-bottom:.5rem">Certificación</div>
+      <div class="cert-box">
+        <div class="cert-title">VelozMente · Certificado de Completación</div>
+        <div class="cert-name">Módulo Completado</div>
+        <div class="cert-sub" id="cert-sub">Has completado el curso con excelencia.</div>
+        <div class="cert-score" id="cert-score">—</div>
+      </div>
+    </div>
+    <div class="ey" style="margin-bottom:.5rem">Historial</div>
+    <div class="card"><div style="padding:.6rem 1rem" id="hist-list">
+      <div style="text-align:center;padding:1rem;font-size:.82rem;opacity:.5">Sin lecturas aún</div>
+    </div></div>
+  </div>
+
+</div><!-- /sa -->
+
+<div class="bot-nav">
+  <button class="ni active" onclick="showSc('home',this)"><span class="ni-ic">🏠</span><span class="ni-lb">Inicio</span></button>
+  <button class="ni" onclick="showSc('library',this)"><span class="ni-ic">📖</span><span class="ni-lb">Lecturas</span></button>
+  <button class="ni" onclick="showSc('ex',this)"><span class="ni-ic">⚡</span><span class="ni-lb">Ejercicios</span></button>
+  <button class="ni" onclick="showSc('prog',this)"><span class="ni-ic">📈</span><span class="ni-lb">Progreso</span></button>
+</div>
+
+<!-- PRE-READING INSTRUCTIONS -->
+<div id="pre-read">
+  <div class="pre-hd">
+    <button class="x-btn" onclick="closePre()">✕</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;flex:1">Prepárate para leer</div>
+  </div>
+  <div class="pre-body">
+    <div class="pre-title" id="pre-title">—</div>
+    <div class="pre-author" id="pre-author">—</div>
+    <div class="target-box">
+      <div class="target-label">Velocidad objetivo para esta sesión</div>
+      <div class="target-wpm" id="pre-wpm-target">— wpm</div>
+      <div class="target-sub" id="pre-wpm-sub">Ajusta tu ritmo antes de empezar</div>
+    </div>
+    <div id="pre-instructions"></div>
+  </div>
+  <div class="pre-ft">
+    <button class="btn btn-g" style="flex:1" onclick="closePre()">← Volver</button>
+    <button class="btn btn-p" style="flex:2" onclick="startReading()">Empezar a leer →</button>
+  </div>
+</div>
+
+<!-- READING SESSION -->
+<div id="rs"><div class="rs-hd"><button class="x-btn" onclick="closeRS()">✕</button><div class="rs-title" id="rs-title">—</div><div class="rs-timer" id="rs-timer">0:00</div></div><div class="rs-body"><div class="rs-text" id="rs-text"></div></div><div class="rs-ft"><div class="wpm-live"><div class="wpm-lv" id="live-wpm">—</div><div class="wpm-ll">WPM en vivo</div></div><button class="btn btn-p" onclick="finishR()">Terminar y responder →</button></div></div>
+
+<!-- QUIZ -->
+<div id="qs"><div class="qhd"><div class="qpw"><div class="qpf" id="qpf" style="width:0%"></div></div><div class="qn" id="qn">1/5</div></div><div class="qbody"><div class="qq" id="qq">—</div><div class="qopts" id="qopts"></div></div><div class="qft"><div class="qfb" id="qfb"></div><button class="btn btn-p" style="width:100%" id="qnext" onclick="nextQ()" disabled>Siguiente</button></div></div>
+
+<!-- RESULTS -->
+<div id="res"><div class="res-circle" id="res-circ"><div class="res-pct" id="res-pct">—</div><div class="res-pl">Score</div></div><div class="res-v" id="res-v">—</div><div class="res-s" id="res-s">—</div><div class="new-badge-pop" id="nbp" style="display:none"><div class="nbp-title">🏅 Nueva insignia desbloqueada</div><div class="nbp-icon" id="nbp-icon"></div><div class="nbp-name" id="nbp-name"></div></div><div class="res-row"><div class="rd"><div class="rd-v" id="r-wpm">—</div><div class="rd-l">WPM</div></div><div class="rd"><div class="rd-v" id="r-time">—</div><div class="rd-l">Tiempo</div></div><div class="rd"><div class="rd-v" id="r-cor">—</div><div class="rd-l">Correctas</div></div></div><div style="display:flex;flex-direction:column;gap:.65rem;width:100%;max-width:300px"><button class="btn btn-p" onclick="closeRes()">← Volver a lecturas</button><button class="btn btn-g" onclick="retryR()">↺ Intentar de nuevo</button></div></div>
+
+<!-- SYNC MODAL -->
+<div class="mo" id="sync-mo"><div class="ms"><div class="ms-title">☁ Sincronización en tiempo real</div><div class="ms-sub">Elige un código personal (ej: LUISA2026) y úsalo en todos tus dispositivos. Tu progreso se sincroniza automáticamente en tiempo real vía Firebase.</div><input type="text" class="ms-inp" id="sync-inp" placeholder="LUISA2026" maxlength="12"><div class="ms-btns"><button class="btn btn-g" onclick="closeSyncModal()">Cancelar</button><button class="btn btn-p" onclick="applySync()">Conectar ☁</button></div><div style="margin-top:.9rem;font-size:.72rem;opacity:.45;text-align:center">Código actual: <strong id="cur-code">—</strong></div>
+    <div class="divider"></div>
+    <div style="font-size:.75rem;opacity:.6;margin-bottom:.7rem;line-height:1.5;text-align:center">¿Quieres hacer una copia de seguridad manual?</div>
+    <div style="display:flex;gap:.65rem">
+      <button class="btn btn-g" style="flex:1;font-size:.7rem" onclick="exportData()">⬇ Exportar backup</button>
+      <button class="btn btn-g" style="flex:1;font-size:.7rem" onclick="importData()">⬆ Importar backup</button>
+    </div></div></div>
+
+<script>
+// ══════════════════════════════════════════
+//  ALL READINGS — 24 lecturas
+// ══════════════════════════════════════════
+const READINGS=[
+// ── MÓDULO 1 · BÁSICO ────────────────────
+{id:'m1r1',mod:1,lang:'ES',cat:'narrativa',diff:1,words:280,
+title:'La metamorfosis',author:'Franz Kafka (fragmento)',
+preview:'Al despertar Gregorio Samsa una mañana, tras un sueño intranquilo, se encontró en su cama convertido en un monstruoso insecto.',
+text:`<p>Al despertar Gregorio Samsa una mañana, tras un sueño intranquilo, se encontró en su cama convertido en un monstruoso insecto. Estaba tumbado sobre su espalda dura, y en forma de caparazón, y al levantar un poco la cabeza vio la curva de su vientre oscuro, dividido por partes arqueadas, sobre cuya prominencia el cobertor, a punto de deslizarse, todavía se mantenía. Sus muchas patas, de una delgadez lamentable en comparación con el resto de su corpulencia, le bailaban desordenadas ante los ojos.</p>
+<p>¿Qué me ha pasado? pensó. No era un sueño. Su habitación, una habitación de verdad aunque algo pequeña, tenía el aspecto habitual entre sus cuatro conocidas paredes. Sobre la mesa se veía el muestrario de paños desempaquetado — Samsa era viajante de comercio — y encima colgaba el cuadro que poco antes había recortado de una revista ilustrada y enmarcado con un bonito marco dorado.</p>
+<p>La atención de Gregorio se dirigió luego hacia la ventana, y el tiempo nublado — se oían las gotas de lluvia golpear el reborde metálico de la ventana — le puso completamente melancólico. ¿Y si duermo un poco más y olvido todos estos disparates?, pensó. Pero eso era del todo imposible, pues tenía la costumbre de dormir sobre el lado derecho, y en su actual estado no podía ponerse en esa postura. Por más fuerza que pusiera para girar hacia el lado derecho, volvía a balancearse boca arriba.</p>`,
+questions:[
+{q:'¿En qué se ha convertido Gregorio Samsa?',opts:['Un pájaro','Un monstruoso insecto','Una serpiente','Un fantasma'],correct:1,feedback:'La primera oración es explícita: «se encontró en su cama convertido en un monstruoso insecto».'},
+{q:'¿A qué se dedicaba Gregorio profesionalmente?',opts:['Era médico','Era maestro','Era viajante de comercio','Era artista'],correct:2,feedback:'El texto dice «Samsa era viajante de comercio», mencionado al describir el muestrario de paños.'},
+{q:'¿Qué colgaba en la pared de su habitación?',opts:['Un espejo','Un cuadro recortado de una revista','Un calendario','Una fotografía familiar'],correct:1,feedback:'«encima colgaba el cuadro que poco antes había recortado de una revista ilustrada y enmarcado con un bonito marco dorado».'},
+{q:'¿Por qué no podía dormir sobre el lado derecho?',opts:['Tenía dolor','Su cuerpo transformado no le permitía ponerse en esa postura','Tenía miedo','La cama era demasiado pequeña'],correct:1,feedback:'«en su actual estado no podía ponerse en esa postura. Por más fuerza que pusiera para girar hacia el lado derecho, volvía a balancearse boca arriba».'},
+{q:'¿Cómo era el tiempo meteorológico esa mañana?',opts:['Soleado y despejado','Ventoso','Nublado y lluvioso','Nevando'],correct:2,feedback:'«se dirigió luego hacia la ventana, y el tiempo nublado — se oían las gotas de lluvia golpear el reborde metálico de la ventana».'}
+]},
+
+{id:'m1r2',mod:1,lang:'ES',cat:'psicologia',diff:1,words:270,
+title:'El aprendizaje condicionado',author:'Divulgación científica',
+preview:'A finales del siglo XIX, el fisiólogo Ivan Pávlov realizaba experimentos sobre la digestión en perros cuando descubrió, casi por accidente, uno de los principios más influyentes de la psicología del aprendizaje.',
+text:`<p>A finales del siglo XIX, el fisiólogo Ivan Pávlov realizaba experimentos sobre la digestión en perros cuando descubrió, casi por accidente, uno de los principios más influyentes de la psicología del aprendizaje. Sus perros comenzaban a salivar no solo ante la presencia de la comida, sino también ante la llegada de los ayudantes que la traían, o incluso ante el sonido de sus pasos.</p>
+<p>Pávlov entendió que estaba ante un fenómeno nuevo: los animales habían asociado un estímulo neutro (los pasos, una campanilla) con uno que naturalmente provoca una respuesta fisiológica (la comida). A esta asociación la llamó reflejo condicionado. El experimento clásico consiste en hacer sonar una campanilla antes de dar comida al perro; después de varios ensayos, el perro saliva solo con el sonido.</p>
+<p>Lo que Pávlov no podía imaginar entonces es el alcance que tendría su descubrimiento. El condicionamiento clásico explica desde el miedo aprendido hasta las respuestas emocionales ante canciones, olores o lugares. En psicología clínica, la comprensión de estos mecanismos está en la base de terapias de exposición para fobias y trastornos de ansiedad.</p>
+<p>El condicionamiento no opera solo en animales. Cada vez que un aroma nos transporta a un recuerdo de infancia, estamos experimentando exactamente el mismo principio que Pávlov documentó en su laboratorio de San Petersburgo hace más de cien años.</p>`,
+questions:[
+{q:'¿Cómo descubrió Pávlov el condicionamiento clásico?',opts:['Planificó un experimento específico sobre aprendizaje','Lo descubrió casi por accidente durante experimentos sobre la digestión','Lo leyó en un artículo científico previo','Un colega le describió el fenómeno'],correct:1,feedback:'El texto dice «casi por accidente» mientras realizaba experimentos sobre la digestión en perros.'},
+{q:'¿Cómo llamó Pávlov a la asociación entre estímulo neutro y respuesta?',opts:['Reflejo innato','Condicionamiento operante','Reflejo condicionado','Respuesta automática'],correct:2,feedback:'Pávlov denominó al fenómeno «reflejo condicionado».'},
+{q:'¿Qué ocurre tras varios ensayos de campanilla+comida?',opts:['El perro deja de salivar con la comida','El perro saliva solo con el sonido de la campanilla','El perro ignora la campanilla','El perro teme la campanilla'],correct:1,feedback:'Después de los ensayos repetidos, el estímulo neutro (campanilla) provoca por sí solo la respuesta (salivación).'},
+{q:'¿Dónde trabajaba Pávlov?',opts:['Moscú','San Petersburgo','Londres','Berlín'],correct:1,feedback:'El texto menciona «su laboratorio de San Petersburgo».'},
+{q:'¿Cuál es UNA aplicación clínica del condicionamiento clásico mencionada en el texto?',opts:['Tratamiento del TDAH','Terapia cognitiva','Terapias de exposición para fobias','Neurocirugía'],correct:2,feedback:'«la comprensión de estos mecanismos está en la base de terapias de exposición para fobias y trastornos de ansiedad».'}
+]},
+
+{id:'m1r3',mod:1,lang:'ES',cat:'ciencia',diff:1,words:265,
+title:'La selección natural',author:'Divulgación científica',
+preview:'Cuando Charles Darwin publicó El origen de las especies en 1859, la humanidad tuvo que replantear su lugar en el universo.',
+text:`<p>Cuando Charles Darwin publicó El origen de las especies en 1859, la humanidad tuvo que replantear su lugar en el universo. La idea central de Darwin era deceptivamente simple: los individuos de una especie varían entre sí, algunas variaciones son heredables, y aquellas que aumentan la probabilidad de sobrevivir y reproducirse tenderán a ser más frecuentes en generaciones posteriores.</p>
+<p>Este proceso, al que llamó selección natural, no requiere un diseñador ni un plan. Actúa sobre variaciones aleatorias y, a través de millones de generaciones, puede producir estructuras de una complejidad asombrosa: el ojo humano, las alas del murciélago, la ecolocalización de los delfines.</p>
+<p>Lo que hace poderosa a la teoría no es solo su capacidad explicativa sino su valor predictivo. Darwin predijo, antes de que existieran los medios para comprobarlo, que debía existir un eslabón evolutivo entre los continentes africano y europeo. Décadas después, los fósiles encontrados confirmaron su predicción.</p>
+<p>Hoy, con el conocimiento del ADN que Darwin no poseía, la teoría evolutiva se ha enriquecido con la genética. Podemos ver la selección natural operando en tiempo real: bacterias desarrollando resistencia a antibióticos, virus mutando, poblaciones aisladas divergiendo. Darwin vio el principio; nosotros vemos los mecanismos.</p>`,
+questions:[
+{q:'¿En qué año publicó Darwin El origen de las especies?',opts:['1839','1849','1859','1869'],correct:2,feedback:'El texto indica explícitamente 1859.'},
+{q:'¿Qué tres condiciones requiere la selección natural según el texto?',opts:['Diseño, planificación, ejecución','Variación, herencia, ventaja reproductiva','Mutación, cruce, tiempo','Ambiente, adaptación, extinción'],correct:1,feedback:'Los individuos varían, algunas variaciones son heredables, y las que aumentan supervivencia/reproducción se vuelven más frecuentes.'},
+{q:'¿Qué predijo Darwin antes de que existieran los medios para comprobarlo?',opts:['La existencia del ADN','La resistencia bacteriana a antibióticos','Un eslabón evolutivo entre África y Europa','La estructura del ojo humano'],correct:2,feedback:'«Darwin predijo, antes de que existieran los medios para comprobarlo, que debía existir un eslabón evolutivo entre los continentes africano y europeo».'},
+{q:'¿Cuál de estos es un ejemplo de selección natural en tiempo real mencionado en el texto?',opts:['La formación de montañas','Bacterias desarrollando resistencia a antibióticos','La fotosíntesis','La tectónica de placas'],correct:1,feedback:'El texto cita específicamente «bacterias desarrollando resistencia a antibióticos» como ejemplo de selección natural observable hoy.'},
+{q:'¿Qué conocimiento que Darwin no poseía ha enriquecido la teoría evolutiva?',opts:['La física cuántica','La termodinámica','El conocimiento del ADN','La neurología'],correct:2,feedback:'«con el conocimiento del ADN que Darwin no poseía, la teoría evolutiva se ha enriquecido con la genética».'}
+]},
+
+{id:'m1r4',mod:1,lang:'EN',cat:'psicologia',diff:1,words:255,
+title:'The Placebo Effect',author:'Scientific communication text',
+preview:'In the 1950s, anesthesiologist Henry Beecher published a landmark paper showing that a significant portion of patients improved after receiving treatment with no active medical ingredient.',
+text:`<p>In the 1950s, anesthesiologist Henry Beecher published a landmark paper showing that roughly 35% of patients improved after receiving inert treatments — substances with no active medical ingredient. He called this the placebo effect, and its implications challenged everything medicine thought it knew about the relationship between mind and body.</p>
+<p>A placebo works not through chemistry but through expectation. When a patient believes they are receiving treatment, the brain responds by releasing neurotransmitters including dopamine and endorphins, which can reduce pain, improve mood, and in some cases accelerate healing. The body, in essence, heals itself because it believes it is being helped.</p>
+<p>What makes the placebo effect remarkable is that it works even when patients know they are taking a placebo. Studies at Harvard Medical School found that patients with irritable bowel syndrome showed significant improvement even when told explicitly that their pills contained no active ingredient. Expectation alone was enough to trigger a physiological response.</p>
+<p>Modern medicine now uses this knowledge deliberately. Understanding the placebo effect has improved clinical trial design, led to the development of open-label placebo treatments, and deepened our understanding of how psychological states directly influence physical health. The mind does not merely observe illness — it participates in it.</p>`,
+questions:[
+{q:'Who first described the placebo effect in a landmark paper?',opts:['Sigmund Freud','Henry Beecher','Ivan Pavlov','James Watson'],correct:1,feedback:'Henry Beecher, an anesthesiologist, published the landmark paper in the 1950s.'},
+{q:'What percentage of patients improved with inert treatments in Beecher\'s finding?',opts:['15%','25%','35%','50%'],correct:2,feedback:'The text states «roughly 35% of patients improved after receiving inert treatments».'},
+{q:'How does a placebo produce its effect?',opts:['Through chemical reactions in the pill','Through expectation and brain neurotransmitter release','Through the doctor\'s touch','Through nutritional value'],correct:1,feedback:'«A placebo works not through chemistry but through expectation», triggering neurotransmitter release.'},
+{q:'What did Harvard studies show about open-label placebos?',opts:['They had no effect','They only worked for pain','Patients improved even knowing the pills had no active ingredient','They worked only with doctor guidance'],correct:2,feedback:'Patients with IBS showed improvement even when explicitly told their pills contained no active ingredient.'},
+{q:'What does the final sentence mean: "The mind does not merely observe illness — it participates in it"?',opts:['The mind causes all illness','Psychological states directly influence physical health','Mental illness is always fake','The mind cannot affect the body'],correct:1,feedback:'The final paragraph argues that understanding the placebo effect has deepened understanding of how psychological states directly influence physical health.'}
+]},
+
+{id:'m1r5',mod:1,lang:'ES',cat:'narrativa',diff:1,words:260,
+title:'El aleph',author:'Jorge Luis Borges (fragmento)',
+preview:'En la parte inferior de la escalera, hacia la derecha, vi una pequeña esfera tornasolada, de casi intolerable fulgor.',
+text:`<p>En la parte inferior de la escalera, hacia la derecha, vi una pequeña esfera tornasolada, de casi intolerable fulgor. Al principio la creí giratoria; luego comprendí que ese movimiento era una ilusión producida por los vertiginosos espectáculos que encerraba. El diámetro del Aleph sería de dos o tres centímetros, pero el espacio cósmico estaba ahí, sin disminución de tamaño. Cada cosa (la luna del espejo, digamos) era infinitas cosas, porque yo claramente la veía desde todos los puntos del universo.</p>
+<p>Vi el populoso mar, vi el alba y la tarde, vi las muchedumbres de América, vi una plateada telaraña en el centro de una negra pirámide, vi un laberinto roto (era Londres), vi interminables ojos inmediatos escrutándose en mí como en un espejo, vi todos los espejos del planeta y ninguno me reflejó. Vi en un traspatio de la calle Soler las mismas baldosas que hace treinta años vi en el zaguán de una casa en Fray Bentos, vi racimos, nieve, tabaco, vetas de metal, vapor de agua.</p>
+<p>Vi el Aleph, desde todos los ángulos, vi en el Aleph la tierra y en la tierra otra vez el Aleph y en el Aleph la tierra, vi mi cara y mis vísceras, vi tu cara y sentí vértigo y lloré, porque mis ojos habían visto ese objeto secreto y conjetural, cuyo nombre usurpan los hombres, pero que ningún hombre ha mirado: el inconcebible universo.</p>`,
+questions:[
+{q:'¿Cuál era el diámetro aproximado del Aleph?',opts:['Un metro','Dos o tres centímetros','Diez centímetros','Cincuenta centímetros'],correct:1,feedback:'«El diámetro del Aleph sería de dos o tres centímetros».'},
+{q:'¿Por qué el narrador creyó inicialmente que la esfera giraba?',opts:['Porque estaba mareado','Porque era una ilusión producida por los vertiginosos espectáculos que encerraba','Porque alguien la había movido','Porque tenía un mecanismo interno'],correct:1,feedback:'«luego comprendí que ese movimiento era una ilusión producida por los vertiginosos espectáculos que encerraba».'},
+{q:'¿Qué ciudad identifica el narrador como «un laberinto roto»?',opts:['Buenos Aires','París','Nueva York','Londres'],correct:3,feedback:'«vi un laberinto roto (era Londres)».'},
+{q:'¿Qué es el Aleph según la conclusión del fragmento?',opts:['Una joya antigua','Un portal al pasado','El inconcebible universo visto desde todos los ángulos','Un espejo mágico'],correct:2,feedback:'El narrador lo define como «ese objeto secreto y conjetural... el inconcebible universo».'},
+{q:'¿Qué emoción experimenta el narrador al final del fragmento?',opts:['Euforia y alegría','Indiferencia','Vértigo y llanto','Miedo y huida'],correct:2,feedback:'«sentí vértigo y lloré, porque mis ojos habían visto ese objeto secreto».'}
+]},
+
+{id:'m1r6',mod:1,lang:'EN',cat:'narrativa',diff:1,words:275,
+title:'The Tell-Tale Heart',author:'Edgar Allan Poe (excerpt)',
+preview:'True! — nervous — very, very dreadfully nervous I had been and am; but why will you say that I am mad?',
+text:`<p>True! — nervous — very, very dreadfully nervous I had been and am; but why will you say that I am mad? The disease had sharpened my senses — not destroyed — not dulled them. Above all was the sense of hearing acute. I heard all things in the heaven and in the earth. I heard many things in hell. How, then, am I mad? Hearken! and observe how healthily — how calmly I can tell you the whole story.</p>
+<p>It is impossible to say how first the idea entered my brain; but once conceived, it haunted me day and night. Object there was none. Passion there was none. I loved the old man. He had never wronged me. He had never given me insult. For his gold I had no desire. I think it was his eye! yes, it was this! He had the eye of a vulture — a pale blue eye, with a film over it. Whenever it fell upon me, my blood ran cold; and so by degrees — very gradually — I made up my mind to take the life of the old man, and thus rid myself of the eye forever.</p>
+<p>Now this is the point. You fancy me mad. Madmen know nothing. But you should have seen me. You should have seen how wisely I proceeded — with what caution — with what foresight — with what dissimulation I went to work!</p>`,
+questions:[
+{q:'What does the narrator claim the disease did to his senses?',opts:['Destroyed them','Dulled them','Sharpened them','Made him blind'],correct:2,feedback:'«The disease had sharpened my senses — not destroyed — not dulled them».'},
+{q:'Why did the narrator decide to kill the old man?',opts:['For money','Because of the old man\'s eye','Because the man had insulted him','Out of jealousy'],correct:1,feedback:'«I think it was his eye! yes, it was this!» — the vulture eye was the sole reason.'},
+{q:'How is the old man\'s eye described?',opts:['Dark brown and sharp','Green and glowing','Pale blue with a film over it','Black and empty'],correct:2,feedback:'«He had the eye of a vulture — a pale blue eye, with a film over it».'},
+{q:'What happened when the old man\'s eye fell upon the narrator?',opts:['He felt happy','His blood ran cold','He felt pity','He felt sleepy'],correct:1,feedback:'«Whenever it fell upon me, my blood ran cold».'},
+{q:'What does the narrator\'s insistence on explaining his sanity suggest about his actual state?',opts:['He is completely rational','His detailed justifications ironically reveal his instability','He is telling the truth','He is pretending to be mad'],correct:1,feedback:'The dramatic irony of Poe\'s story: the narrator\'s desperate attempts to prove his sanity through increasingly elaborate logic reveal his unreliability and instability.'}
+]},
+
+{id:'m1r7',mod:1,lang:'ES',cat:'ciencia',diff:1,words:268,
+title:'La neuroplasticidad',author:'Texto de neurociencia divulgativa',
+preview:'Durante décadas la neurociencia mantuvo un dogma: el cerebro adulto es fijo e inmutable. Los estudios de las últimas tres décadas han demolido esta creencia.',
+text:`<p>Durante décadas la neurociencia mantuvo un dogma: el cerebro adulto es fijo e inmutable. Una vez que la infancia terminaba, las conexiones neuronales quedaban establecidas para siempre. Los estudios de las últimas tres décadas han demolido esta creencia por completo.</p>
+<p>La neuroplasticidad es la capacidad del cerebro para reorganizarse a sí mismo formando nuevas conexiones neuronales a lo largo de toda la vida. Cada vez que aprendes algo nuevo, cada vez que repites una habilidad, cada vez que experimentas algo significativo, el cerebro físicamente cambia: fortalece ciertas sinapsis, debilita otras, e incluso genera nuevas neuronas en áreas específicas como el hipocampo.</p>
+<p>Uno de los estudios más citados es el de los taxistas de Londres, cuyos hipocampos — la región del cerebro implicada en la navegación espacial — son significativamente más grandes que los de la población general. Cuantos más años llevan como taxistas, mayor es el volumen. El cerebro, literalmente, crece hacia donde se le exige.</p>
+<p>Las implicaciones terapéuticas son profundas. Pacientes que han sufrido accidentes cerebrovasculares pueden recuperar funciones que parecían perdidas para siempre mediante rehabilitación intensiva, porque el cerebro recluta zonas adyacentes para asumir las funciones dañadas. La neuroplasticidad no es metáfora: es anatomía real en movimiento.</p>`,
+questions:[
+{q:'¿Qué afirmaba el dogma previo de la neurociencia sobre el cerebro adulto?',opts:['Que seguía creciendo','Que era fijo e inmutable','Que regeneraba neuronas continuamente','Que no podía aprender nuevas habilidades'],correct:1,feedback:'«el cerebro adulto es fijo e inmutable. Una vez que la infancia terminaba, las conexiones neuronales quedaban establecidas para siempre».'},
+{q:'¿Qué es la neuroplasticidad?',opts:['La capacidad de las neuronas de transmitir señales','La capacidad del cerebro para reorganizarse formando nuevas conexiones','La dureza del tejido cerebral','El proceso de envejecimiento neuronal'],correct:1,feedback:'«La neuroplasticidad es la capacidad del cerebro para reorganizarse a sí mismo formando nuevas conexiones neuronales a lo largo de toda la vida».'},
+{q:'¿Qué tienen de especial los taxistas de Londres en este contexto?',opts:['Sus cortezas prefrontales son más grandes','Sus hipocampos son significativamente más grandes','Tienen mejor memoria verbal','Procesan información más rápido'],correct:1,feedback:'«cuyos hipocampos — la región del cerebro implicada en la navegación espacial — son significativamente más grandes que los de la población general».'},
+{q:'¿Cuál es la relación entre años de trabajo y tamaño del hipocampo en los taxistas?',opts:['No hay relación','A más años, menor hipocampo','A más años, mayor volumen','El tamaño se estabiliza después de 5 años'],correct:2,feedback:'«Cuantos más años llevan como taxistas, mayor es el volumen».'},
+{q:'¿Cómo se recuperan funciones tras un accidente cerebrovascular según el texto?',opts:['Las neuronas dañadas se regeneran','El cerebro recluta zonas adyacentes para asumir las funciones dañadas','Se reemplaza tejido cerebral','El lado sano se duplica'],correct:1,feedback:'«el cerebro recluta zonas adyacentes para asumir las funciones dañadas» mediante rehabilitación intensiva.'}
+]},
+
+{id:'m1r8',mod:1,lang:'EN',cat:'ciencia',diff:1,words:260,
+title:'Black Holes',author:'Astrophysics educational text',
+preview:'A black hole is a region of spacetime where gravity is so extreme that nothing — not even light — can escape its pull.',
+text:`<p>A black hole is a region of spacetime where gravity is so extreme that nothing — not even light — can escape its pull. The boundary beyond which escape becomes impossible is called the event horizon. Cross it, and the laws of physics as we understand them break down entirely. What lies at the center remains one of the deepest unsolved problems in science.</p>
+<p>Black holes form when massive stars collapse at the end of their lives. When a star roughly 20 times the mass of our Sun exhausts its nuclear fuel, the outward pressure that held it up disappears, and gravity crushes the star's core into an almost infinitely dense point called a singularity. The resulting black hole can then grow by consuming surrounding gas, dust, and other stars.</p>
+<p>For decades, black holes were purely theoretical — predicted by Einstein's equations but never directly seen. In 2019, the Event Horizon Telescope collaboration achieved something extraordinary: the first direct image of a black hole's shadow, located 55 million light-years away in the galaxy M87. The image showed a glowing ring of superheated gas surrounding a dark central region.</p>
+<p>Despite their reputation for destruction, black holes play a crucial role in galactic structure. Most large galaxies, including our own Milky Way, contain a supermassive black hole at their center. These giants appear to regulate star formation across entire galaxies, shaping the cosmos on the largest scales we can observe.</p>`,
+questions:[
+{q:'What is the event horizon?',opts:['The center of a black hole','The boundary beyond which escape is impossible','The glowing ring of gas','The moment of star collapse'],correct:1,feedback:'«The boundary beyond which escape becomes impossible is called the event horizon».'},
+{q:'What mass relative to the Sun is needed for a star to form a black hole?',opts:['Roughly 5 times','Roughly 10 times','Roughly 20 times','Roughly 100 times'],correct:2,feedback:'«When a star roughly 20 times the mass of our Sun exhausts its nuclear fuel» — it collapses into a black hole.'},
+{q:'When was the first direct image of a black hole taken?',opts:['1999','2009','2019','2023'],correct:2,feedback:'«In 2019, the Event Horizon Telescope collaboration achieved… the first direct image of a black hole\'s shadow».'},
+{q:'How far away is the black hole in galaxy M87?',opts:['55 thousand light-years','55 million light-years','55 billion light-years','550 light-years'],correct:1,feedback:'«located 55 million light-years away in the galaxy M87».'},
+{q:'What role do supermassive black holes play in galaxies?',opts:['They destroy all stars','They have no effect on star formation','They appear to regulate star formation across entire galaxies','They only affect nearby stars'],correct:2,feedback:'«These giants appear to regulate star formation across entire galaxies, shaping the cosmos on the largest scales we can observe».'}
+]},
+
+// ── MÓDULO 2 · INTERMEDIO ─────────────────
+{id:'m2r1',mod:2,lang:'ES',cat:'psicologia',diff:2,words:310,
+title:'Disonancia cognitiva',author:'Psicología social',
+preview:'En 1957 Leon Festinger propuso una teoría que cambiaría para siempre cómo entendemos la relación entre nuestras creencias y nuestras acciones.',
+text:`<p>En 1957 Leon Festinger propuso una teoría que cambiaría para siempre cómo entendemos la relación entre nuestras creencias y nuestras acciones. La disonancia cognitiva describe el malestar psicológico que experimentamos cuando sostenemos simultáneamente dos cogniciones contradictorias — creencias, valores, o comportamientos — y la motivación que ese malestar genera para resolver la contradicción.</p>
+<p>El experimento fundacional de Festinger y Carlsmith en 1959 es elegante en su sencillez. Los participantes realizaban una tarea enormemente aburrida y luego se les pedía que dijeran a otros participantes (que en realidad eran confederados del experimento) que la tarea había sido interesante. A unos se les pagaba un dólar; a otros, veinte dólares. Después, se les preguntaba su opinión real sobre la tarea.</p>
+<p>El resultado fue contraintuitivo: quienes habían recibido un dólar calificaron la tarea como más interesante que quienes habían recibido veinte. La explicación: los participantes mal pagados no tenían justificación externa suficiente para haber mentido, de modo que resolvieron la disonancia cambiando genuinamente su actitud. Los bien pagados tenían una justificación externa — el dinero — y no necesitaban modificar sus creencias.</p>
+<p>Las estrategias de reducción de la disonancia son tres: cambiar una de las cogniciones en conflicto, adquirir nueva información que apoye una de ellas, o reducir la importancia de una de las cogniciones. Los fumadores que conocen los riesgos del tabaco pero continúan fumando suelen emplear la tercera estrategia: «el estrés mata más rápido que los cigarrillos».</p>
+<p>La investigación contemporánea ha extendido el concepto a la polarización política, el comportamiento del consumidor y la toma de decisiones morales. Entender la disonancia es entender por qué las personas no cambian de opinión cuando se les presentan hechos contrarios a sus creencias: primero necesitan resolver la amenaza a su coherencia interna.</p>`,
+questions:[
+{q:'¿En qué año propuso Festinger la teoría de la disonancia cognitiva?',opts:['1945','1957','1963','1970'],correct:1,feedback:'El texto indica explícitamente que Festinger propuso la teoría en 1957.'},
+{q:'¿Por qué los participantes que ganaron un dólar calificaron la tarea como más interesante?',opts:['Disfrutaron genuinamente la tarea','Recibieron instrucciones de hacerlo','Cambiaron su actitud para resolver la disonancia de haber mentido sin justificación suficiente','Fueron más honestos que el grupo de veinte dólares'],correct:2,feedback:'Sin justificación externa suficiente, resolvieron la disonancia modificando genuinamente su actitud hacia la tarea.'},
+{q:'¿Cuáles son las tres estrategias de reducción de la disonancia?',opts:['Negación, racionalización, proyección','Cambiar una cognición, adquirir nueva información, reducir la importancia de una cognición','Evitar, confrontar, ignorar','Hablar, escribir, actuar'],correct:1,feedback:'El cuarto párrafo enumera las tres estrategias explícitamente.'},
+{q:'¿Qué estrategia emplea el fumador que dice «el estrés mata más rápido»?',opts:['Cambiar la cognición sobre el tabaco','Adquirir nueva información','Reducir la importancia de la cognición sobre los riesgos','Negar la existencia del riesgo'],correct:2,feedback:'Al decir que el estrés mata más rápido, el fumador no elimina la creencia sobre el riesgo sino que reduce su importancia relativa.'},
+{q:'¿Por qué las personas no cambian de opinión al recibir hechos contrarios según el texto?',opts:['Porque no entienden los hechos','Porque primero necesitan resolver la amenaza a su coherencia interna','Porque tienen mala memoria','Porque los hechos son irrelevantes'],correct:1,feedback:'El último párrafo explica que «primero necesitan resolver la amenaza a su coherencia interna» antes de poder actualizar creencias.'}
+]},
+
+{id:'m2r2',mod:2,lang:'ES',cat:'narrativa',diff:2,words:300,
+title:'Pedro Páramo',author:'Juan Rulfo (fragmento)',
+preview:'Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo. Mi madre me lo dijo.',
+text:`<p>Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo. Mi madre me lo dijo. Y yo le prometí que vendría a verlo en cuanto ella muriera. Le aprete sus manos en señal de que lo haría; pues ella estaba por morirse y yo en un plan de prometerle todo.</p>
+<p>— No dejes de ir a visitarlo — me encargó. — Se llama de otro modo y de otro modo. Pero no olvides decirle que yo fui su mujer, aunque él nunca lo haya querido. Ya sé que te negará; pero no te importe.</p>
+<p>— Lo haré, madre.</p>
+<p>Pero no pensé cumplir mi promesa. Hasta que ahora pronto comencé a llenarme de sueños, a darle vuelo a las ilusiones. Y de esta manera se me fue formando un mundo alrededor de la esperanza que era aquel señor llamado Pedro Páramo, el marido de mi madre. Por eso vine a Comala.</p>
+<p>Era ese tiempo de la canícula, cuando el aire de agosto sopla caliente, envenenado por el olor podrido de las saponarias. El camino subía y bajaba. Sube o baja según se va o se viene. Para el que va, sube; para el que viene, baja.</p>
+<p>— ¿Cómo se llama el pueblo que se ve allá abajo?</p>
+<p>— Comala, señor.</p>
+<p>— ¿Está seguro de que ya es Comala?</p>
+<p>— Seguro, señor.</p>
+<p>— ¿Y por qué se ve esto tan triste?</p>
+<p>— Son los tiempos, señor.</p>`,
+questions:[
+{q:'¿Por qué fue el narrador a Comala?',opts:['A vender mercancías','A buscar a su padre Pedro Páramo','A visitar a su madre','A encontrar trabajo'],correct:1,feedback:'«Vine a Comala porque me dijeron que acá vivía mi padre, un tal Pedro Páramo».'},
+{q:'¿Cuándo decidió el narrador hacer el viaje prometido a su madre?',opts:['Inmediatamente después de la muerte de ella','Nunca pensó cumplirlo hasta que comenzó a llenarme de sueños','Antes de que ella muriera','Cuando recibió una carta'],correct:1,feedback:'«no pensé cumplir mi promesa. Hasta que ahora pronto comencé a llenarme de sueños, a darle vuelo a las ilusiones».'},
+{q:'¿Qué mes era y cómo era el clima al llegar a Comala?',opts:['Diciembre, frío y lluvioso','Marzo, primaveral','Agosto, caliente con olor a saponarias','Noviembre, ventoso'],correct:2,feedback:'«Era ese tiempo de la canícula, cuando el aire de agosto sopla caliente, envenenado por el olor podrido de las saponarias».'},
+{q:'¿Qué característica peculiar tiene el camino hacia Comala según el narrador?',opts:['Es completamente plano','Sube para quien va y baja para quien viene','Tiene muchas curvas peligrosas','Está sin pavimentar'],correct:1,feedback:'«El camino subía y bajaba. Sube o baja según se va o se viene. Para el que va, sube; para el que viene, baja».'},
+{q:'¿Cómo le parece el pueblo al narrador al llegar?',opts:['Animado y colorido','Familiar y acogedor','Triste','Ruidoso'],correct:2,feedback:'El narrador pregunta «¿Y por qué se ve esto tan triste?», y la respuesta es «Son los tiempos, señor».'}
+]},
+
+{id:'m2r3',mod:2,lang:'EN',cat:'psicologia',diff:2,words:295,
+title:'Attachment Theory',author:'Developmental psychology text',
+preview:'In the late 1950s, British psychiatrist John Bowlby proposed that the emotional bonds formed between infants and their caregivers are not merely social luxuries but biological necessities.',
+text:`<p>In the late 1950s, British psychiatrist John Bowlby proposed that the emotional bonds formed between infants and their caregivers are not merely social luxuries but biological necessities with deep evolutionary roots. His attachment theory challenged the prevailing behaviorist view that love was simply learned through feeding and reward, arguing instead that the need for closeness is a primary motivational system, as fundamental as hunger or thirst.</p>
+<p>Bowlby's colleague Mary Ainsworth later developed the Strange Situation procedure, a systematic method for observing attachment behaviors in toddlers. She identified three main attachment styles: secure, anxious-ambivalent, and avoidant. A fourth style — disorganized attachment — was later added by Main and Hesse. The key insight was that the quality of early attachment predicts patterns of relating throughout adult life.</p>
+<p>Securely attached children use their caregiver as a safe base from which to explore. They are distressed by separation but easily comforted upon reunion. Anxiously attached children show extreme distress and are difficult to soothe, reflecting inconsistent caregiving. Avoidantly attached children show apparent indifference to separation, having learned that emotional needs will not be reliably met.</p>
+<p>The implications for therapeutic practice are substantial. Adult attachment patterns often replicate in the therapeutic relationship itself, offering a unique opportunity for what Bowlby called a corrective emotional experience. Many contemporary therapies — including emotionally focused therapy and schema therapy — are built directly on attachment theory's foundations.</p>`,
+questions:[
+{q:'What did Bowlby argue was the need for closeness comparable to?',opts:['The need for safety','The need for learning','Hunger or thirst','Social status'],correct:2,feedback:'Bowlby argued «the need for closeness is a primary motivational system, as fundamental as hunger or thirst».'},
+{q:'Who developed the Strange Situation procedure?',opts:['John Bowlby','Mary Ainsworth','Main and Hesse','Carl Rogers'],correct:1,feedback:'«Bowlby\'s colleague Mary Ainsworth later developed the Strange Situation procedure».'},
+{q:'Which attachment style is characterized by apparent indifference to separation?',opts:['Secure','Anxious-ambivalent','Avoidant','Disorganized'],correct:2,feedback:'«Avoidantly attached children show apparent indifference to separation, having learned that emotional needs will not be reliably met».'},
+{q:'Who added the fourth attachment style — disorganized?',opts:['Bowlby','Ainsworth','Main and Hesse','Freud'],correct:2,feedback:'«A fourth style — disorganized attachment — was later added by Main and Hesse».'},
+{q:'What did Bowlby call the therapeutic opportunity offered by attachment patterns in therapy?',opts:['Transference','A corrective emotional experience','Secure base therapy','Emotional regulation'],correct:1,feedback:'Bowlby called it «a corrective emotional experience», referencing the therapeutic relationship as an opportunity to revise attachment patterns.'}
+]},
+
+{id:'m2r4',mod:2,lang:'ES',cat:'ciencia',diff:2,words:305,
+title:'El sistema inmune',author:'Biología — texto divulgativo avanzado',
+preview:'El sistema inmune humano es uno de los sistemas más complejos y elegantes de la biología. En términos de sofisticación, supera a cualquier tecnología que la humanidad haya diseñado.',
+text:`<p>El sistema inmune humano es uno de los sistemas más complejos y elegantes de la biología. En términos de sofisticación computacional, supera a cualquier tecnología que la humanidad haya diseñado: es capaz de distinguir entre lo propio y lo extraño, recordar amenazas pasadas, aprender de cada infección y generar respuestas específicas para cada uno de los miles de millones de patógenos posibles.</p>
+<p>El sistema opera en dos capas principales. La inmunidad innata es la primera línea de defensa: rápida, inespecífica, evolutivamente antigua. Células como los neutrófilos y los macrófagos atacan cualquier elemento reconocido como extraño mediante mecanismos que permanecen casi sin cambios desde hace cientos de millones de años. Esta respuesta se activa en minutos u horas.</p>
+<p>La inmunidad adaptativa es radicalmente diferente: lenta en su primera activación (días o semanas) pero extraordinariamente precisa y dotada de memoria. Los linfocitos T y B reconocen epítopos específicos en los patógenos y generan respuestas a medida. Los linfocitos B producen anticuerpos — proteínas diseñadas exactamente para neutralizar un antígeno particular. Lo notable es que este sistema puede generar más de diez mil millones de anticuerpos distintos antes de encontrar un patógeno.</p>
+<p>La memoria inmunológica explica por qué no enfermamos dos veces de sarampión: tras la primera infección, el sistema mantiene células de memoria que permiten una respuesta fulminante ante reencuentros con el mismo patógeno. Las vacunas aprovechan exactamente este mecanismo sin necesitar que el individuo enferme primero.</p>
+<p>Cuando el sistema inmune falla — ya sea por exceso o por defecto — las consecuencias pueden ser devastadoras: desde enfermedades autoinmunes (el sistema ataca lo propio) hasta inmunodeficiencias que dejan al organismo expuesto a infecciones oportunistas.</p>`,
+questions:[
+{q:'¿Qué capacidad hace al sistema inmune más sofisticado que cualquier tecnología humana según el texto?',opts:['Su tamaño microscópico','Distinguir lo propio de lo extraño, recordar amenazas, aprender y generar respuestas específicas','Su velocidad de reacción','La cantidad de células que produce'],correct:1,feedback:'El texto describe estas cuatro capacidades combinadas como lo que supera en sofisticación a cualquier tecnología humana.'},
+{q:'¿Cuál es la diferencia principal entre inmunidad innata y adaptativa?',opts:['La innata es más fuerte','La innata es rápida e inespecífica; la adaptativa es lenta pero precisa y tiene memoria','La adaptativa solo funciona en adultos','La innata usa anticuerpos'],correct:1,feedback:'La innata actúa en minutos, es inespecífica. La adaptativa tarda días/semanas pero es precisa y genera memoria.'},
+{q:'¿Cuántos anticuerpos distintos puede generar el sistema inmune antes de encontrar un patógeno?',opts:['Un millón','Cien millones','Mil millones','Más de diez mil millones'],correct:3,feedback:'«este sistema puede generar más de diez mil millones de anticuerpos distintos antes de encontrar un patógeno».'},
+{q:'¿Por qué no enfermamos dos veces de sarampión?',opts:['El virus muta demasiado rápido','El organismo produce vitaminas que lo neutralizan','El sistema mantiene células de memoria que permiten respuesta rápida','El sarampión es poco infeccioso'],correct:2,feedback:'«tras la primera infección, el sistema mantiene células de memoria que permiten una respuesta fulminante ante reencuentros».'},
+{q:'¿Qué ocurre cuando el sistema inmune ataca lo propio?',opts:['Inmunodeficiencia','Infección oportunista','Enfermedad autoinmune','Alergias'],correct:2,feedback:'«enfermedades autoinmunes (el sistema ataca lo propio)» — esta es la falla por exceso mencionada.'}
+]},
+
+{id:'m2r5',mod:2,lang:'EN',cat:'narrativa',diff:2,words:290,
+title:'Mrs Dalloway',author:'Virginia Woolf (excerpt)',
+preview:'Mrs Dalloway said she would buy the flowers herself.',
+text:`<p>Mrs Dalloway said she would buy the flowers herself. For Lucy had her work cut out for her. The doors would be taken off their hinges; Rumpelmayer's men were coming. And then, thought Clarissa Dalloway, what a morning — fresh as if issued to children on a beach.</p>
+<p>What a lark! What a plunge! For so it had always seemed to her, when, with a little squeak of the hinges, which she could hear now, she had burst open the French windows and plunged at Bourton into the open air. How fresh, how calm, stiller than this of course, the air was in the early morning; like the flap of a wave; the kiss of a wave; chill and sharp and yet (for a girl of eighteen as she then was) solemn, feeling as she did, standing there at the open window, that something awful was about to happen.</p>
+<p>Peter Walsh had said that. Not that she was vague. Not that she was not feeling. Only she felt very young; at the same time unspeakably aged. She sliced like a knife through everything; at the same time was outside, looking on. She had a perpetual sense, as she watched the taxicabs, of being out there, out, far out to sea and alone; she always had the feeling that it was very, very dangerous to live even one day.</p>`,
+questions:[
+{q:'Why does Mrs Dalloway decide to buy the flowers herself?',opts:['She enjoys shopping','Lucy is too busy with other work','The shops are closed','She wants to be alone'],correct:1,feedback:'«For Lucy had her work cut out for her» — Lucy is occupied with the preparations.'},
+{q:'What event is being prepared at the Dalloway household?',opts:['A wedding','A party — doors taken off hinges, Rumpelmayer\'s men coming','A funeral','A business meeting'],correct:1,feedback:'«The doors would be taken off their hinges; Rumpelmayer\'s men were coming» — preparations for a party.'},
+{q:'Where does Clarissa remember plunging into the open air from?',opts:['Her London home','A hotel in Paris','Bourton','The seaside at Brighton'],correct:2,feedback:'«she had burst open the French windows and plunged at Bourton into the open air».'},
+{q:'How old was Clarissa in the memory at the open window?',opts:['Sixteen','Eighteen','Twenty','Twenty-five'],correct:1,feedback:'«for a girl of eighteen as she then was».'},
+{q:'What paradoxical feelings does Clarissa experience simultaneously?',opts:['Joy and sadness','Courage and fear','Feeling very young and unspeakably aged','Love and hatred'],correct:2,feedback:'«She felt very young; at the same time unspeakably aged» — a central paradox of Woolf\'s stream-of-consciousness portrayal.'}
+]},
+
+{id:'m2r6',mod:2,lang:'ES',cat:'psicologia',diff:2,words:285,
+title:'El sesgo de confirmación',author:'Psicología cognitiva',
+preview:'Uno de los sesgos cognitivos más documentados y más difíciles de combatir es nuestra tendencia a buscar, interpretar y recordar información de un modo que confirme lo que ya creemos.',
+text:`<p>Uno de los sesgos cognitivos más documentados y más difíciles de combatir es nuestra tendencia a buscar, interpretar y recordar información de un modo que confirme lo que ya creemos. Esta tendencia, conocida como sesgo de confirmación, fue formalizada por el psicólogo Peter Wason en 1960 a través de su famoso experimento de la selección.</p>
+<p>En ese experimento, a los participantes se les presentaba una secuencia de números (2, 4, 6) y se les pedía que descubrieran la regla que la gobernaba proponiendo nuevas secuencias. La mayoría generaba secuencias que confirmaban su hipótesis inicial (números pares) en lugar de secuencias que pudieran refutarla. La regla real era simplemente «números ascendentes». Casi nadie la descubrió porque nadie probaba sus hipótesis buscando el fallo.</p>
+<p>El sesgo de confirmación opera en todos los niveles de la cognición. En la percepción: tendemos a notar los datos que confirman y a ignorar los que contradicen. En la memoria: recordamos mejor las evidencias que apoyan nuestras creencias. En la interpretación: el mismo dato puede leerse de formas opuestas según las creencias previas del lector.</p>
+<p>Sus consecuencias son vastas: desde diagnósticos médicos erróneos (el médico que busca confirmar su hipótesis inicial en lugar de refutarla) hasta la polarización política y la persistencia de pseudociencias. En el contexto clínico, es uno de los sesgos más estudiados y más relevantes para la formación de terapeutas: el riesgo de buscar en el paciente la evidencia que confirme la hipótesis diagnóstica inicial.</p>`,
+questions:[
+{q:'¿Quién formalizó el sesgo de confirmación y en qué año?',opts:['Leon Festinger, 1957','Peter Wason, 1960','Daniel Kahneman, 1974','B.F. Skinner, 1953'],correct:1,feedback:'«fue formalizada por el psicólogo Peter Wason en 1960».'},
+{q:'¿Cuál era la regla real en el experimento de Wason?',opts:['Números pares','Múltiplos de dos','Números ascendentes','Números divisibles por tres'],correct:2,feedback:'«La regla real era simplemente "números ascendentes"».'},
+{q:'¿Por qué casi nadie descubrió la regla en el experimento de Wason?',opts:['Era demasiado compleja','Nadie probaba hipótesis buscando el fallo','Los participantes no entendieron las instrucciones','La regla cambió durante el experimento'],correct:1,feedback:'«Casi nadie la descubrió porque nadie probaba sus hipótesis buscando el fallo» — buscaban confirmación, no refutación.'},
+{q:'¿En qué proceso de la memoria opera el sesgo de confirmación?',opts:['Recordamos mejor las evidencias que apoyan nuestras creencias','Olvidamos más rápido lo que confirma nuestras creencias','Tenemos mejor memoria para hechos neutros','La memoria no se ve afectada por este sesgo'],correct:0,feedback:'«En la memoria: recordamos mejor las evidencias que apoyan nuestras creencias».'},
+{q:'¿Cuál es el riesgo clínico específico del sesgo de confirmación mencionado en el texto?',opts:['Prescribir medicación inadecuada','Buscar en el paciente evidencia que confirme la hipótesis diagnóstica inicial','No escuchar al paciente','Trabajar demasiado deprisa'],correct:1,feedback:'«el riesgo de buscar en el paciente la evidencia que confirme la hipótesis diagnóstica inicial».'}
+]},
+
+{id:'m2r7',mod:2,lang:'EN',cat:'ciencia',diff:2,words:288,
+title:'CRISPR and Gene Editing',author:'Biotechnology educational text',
+preview:'In 2012, biochemist Jennifer Doudna and microbiologist Emmanuelle Charpentier published a paper that would earn them the Nobel Prize: a method for editing the DNA of living organisms with unprecedented precision.',
+text:`<p>In 2012, biochemist Jennifer Doudna and microbiologist Emmanuelle Charpentier published a paper that would earn them the Nobel Prize: a method for editing the DNA of living organisms with unprecedented precision. The technology, called CRISPR-Cas9, works like molecular scissors — guided by a short RNA sequence, the Cas9 protein locates and cuts a specific DNA sequence with extraordinary accuracy.</p>
+<p>Before CRISPR, gene editing existed but was slow, expensive, and imprecise. CRISPR reduced the time to edit a genome from years to weeks and the cost from millions of dollars to a few thousand. It democratized genetic engineering, making it accessible to laboratories worldwide that previously lacked the resources for gene editing research.</p>
+<p>The medical potential is staggering. CRISPR has shown promise in treating sickle cell disease, certain cancers, and blindness caused by genetic mutations. In 2023, the first CRISPR-based therapy — Casgevy — was approved for treating sickle cell disease and beta-thalassemia, marking a historic milestone: the first licensed medicine that edits human genes.</p>
+<p>But the technology raises profound ethical questions. In 2018, Chinese scientist He Jiankui claimed to have used CRISPR to create the first gene-edited human babies, altering their genomes to confer resistance to HIV. The scientific community responded with near-universal condemnation: editing the germline — changes that would be inherited by future generations — crosses ethical boundaries that the field has not yet agreed how to define.</p>`,
+questions:[
+{q:'What award did Doudna and Charpentier receive for their CRISPR work?',opts:['Pulitzer Prize','Fields Medal','Nobel Prize','Lasker Award'],correct:2,feedback:'The text states their paper «would earn them the Nobel Prize».'},
+{q:'How did CRISPR change the time required to edit a genome?',opts:['From months to days','From years to weeks','From decades to years','From weeks to hours'],correct:1,feedback:'«CRISPR reduced the time to edit a genome from years to weeks».'},
+{q:'What was the first CRISPR-based therapy approved, and when?',opts:['GenEdit in 2019','CRISPR-X in 2021','Casgevy in 2023','CasTherapy in 2022'],correct:2,feedback:'«In 2023, the first CRISPR-based therapy — Casgevy — was approved for treating sickle cell disease and beta-thalassemia».'},
+{q:'What did He Jiankui claim to have done in 2018?',opts:['Cured cancer with CRISPR','Created the first gene-edited human babies resistant to HIV','Edited plant genomes for food production','Reversed aging in mice'],correct:1,feedback:'«Chinese scientist He Jiankui claimed to have used CRISPR to create the first gene-edited human babies, altering their genomes to confer resistance to HIV».'},
+{q:'Why did the scientific community condemn He Jiankui\'s work?',opts:['The science was flawed','Editing the germline crosses ethical boundaries as changes would be inherited by future generations','He did not publish his results','He worked without funding'],correct:1,feedback:'«editing the germline — changes that would be inherited by future generations — crosses ethical boundaries that the field has not yet agreed how to define».'}
+]},
+
+// ── MÓDULO 3 · AVANZADO ───────────────────
+{id:'m3r1',mod:3,lang:'ES',cat:'narrativa',diff:3,words:330,
+title:'Continuidad de los parques',author:'Julio Cortázar',
+preview:'Había empezado a leer la novela unos días antes. La abandonó por negocios urgentes...',
+text:`<p>Había empezado a leer la novela unos días antes. La abandonó por negocios urgentes, volvió a abrirla cuando regresaba en tren a la finca; se dejaba interesar lentamente por la trama, por el dibujo de los personajes. Esa tarde, después de escribir una carta a su apoderado y discutir con el mayordomo una cuestión de aparcerías, volvió al libro en la tranquilidad del estudio que miraba hacia el parque de los robles.</p>
+<p>Arrellanado en su sillón favorito, de espaldas a la puerta que lo hubiera molestado como una irritante posibilidad de intrusiones, dejó que su mano izquierda acariciara una y otra vez el terciopelo verde y se puso a leer los últimos capítulos. Su memoria retenía sin esfuerzo los nombres y las imágenes de los protagonistas; la ilusión novelesca lo ganó casi en seguida.</p>
+<p>Gozaba del placer casi perverso de irse desgajando línea a línea de lo que lo rodeaba, y sentir a la vez que su cabeza descansaba cómodamente en el terciopelo del alto respaldo, que los cigarrillos seguían al alcance de la mano, que más allá de los ventanales danzaba el aire del atardecer bajo los robles.</p>
+<p>Palabra a palabra, absorbido por la sórdida disyuntiva de los héroes, dejándose ir hacia las imágenes que se concertaban y adquirían color y movimiento, fue testigo del último encuentro en la cabaña del monte. Primero entró la mujer, recelosa; ahora llegaba el amante, lastimada la cara por el chicotazo de una rama. Admirablemente restañaba ella la sangre con sus besos, pero él no quería demoras, y ella tuvo que oír mientras una parte de ella se alejaba. El puñal se calentaba contra su pecho. Cuando la mujer se fue, él no se atrevió a salir inmediatamente; el árbol perfumaba el aire de la noche. La dirección hacia la gran casa. Subió los peldaños del porche. Dentro, la sangre acompasada al corazón latía en sus oídos. El hombre del sillón le volvía la espalda. Los ventanales dorados de atardecer. El puñal en la mano, la luz de los ventanales, el alto respaldo del sillón de terciopelo verde.</p>`,
+questions:[
+{q:'¿Qué efecto literario central construye Cortázar en este cuento?',opts:['La novela dentro de la novela se vuelve realidad y el lector parece ser la víctima','El narrador resulta ser el asesino','La mujer es quien está leyendo el libro','El mayordomo organiza el crimen'],correct:0,feedback:'El cuento construye una «mise en abyme» perfecta: los detalles del sillón de terciopelo verde y los ventanales del atardecer aparecen tanto en la realidad del lector como en la novela que lee, colapsando la frontera ficción/realidad.'},
+{q:'¿Qué detalle físico del sillón conecta las dos capas de realidad?',opts:['El color dorado','El cuero café','El terciopelo verde','Los pies de madera tallada'],correct:2,feedback:'El terciopelo verde se menciona tanto en el sillón del hombre real como en la descripción final del sillón de la víctima.'},
+{q:'¿Por qué estaba el lector de espaldas a la puerta?',opts:['Para ver mejor la luz de los ventanales','Para no ser molestado por posibles intrusiones','Porque la puerta rechina','Porque tenía frío'],correct:1,feedback:'«de espaldas a la puerta que lo hubiera molestado como una irritante posibilidad de intrusiones».'},
+{q:'¿Qué llevaba el amante en la cara al llegar a la cabaña?',opts:['Una máscara','Una herida por el chicotazo de una rama','Polvo del camino','Una bufanda'],correct:1,feedback:'«llegaba el amante, lastimada la cara por el chicotazo de una rama».'},
+{q:'¿Qué implica la expresión "el puñal en la mano, la luz de los ventanales, el alto respaldo del sillón de terciopelo verde" al final?',opts:['El asesino llega al lugar donde está el lector','El asesino huye por la ventana','El amante abandona su misión','La mujer toma el puñal'],correct:0,feedback:'La acumulación de detalles idénticos a los del lector real (ventanales dorados, sillón de terciopelo verde) sugiere que el asesino entra en la habitación donde el lector está leyendo: la ficción ha consumido la realidad.'}
+]},
+
+{id:'m3r2',mod:3,lang:'EN',cat:'psicologia',diff:3,words:320,
+title:'Trauma and Memory',author:'Clinical psychology — advanced text',
+preview:'The relationship between trauma and memory represents one of the most contested and clinically significant intersections in modern psychology.',
+text:`<p>The relationship between trauma and memory represents one of the most contested and clinically significant intersections in modern psychology. Unlike ordinary memories, which tend to fade and blur over time, traumatic memories often appear with hallucinatory intensity — intrusive, fragmented, resistant to integration into narrative form. Understanding why requires examining how extreme stress disrupts normal memory consolidation.</p>
+<p>Under conditions of acute threat, the brain's stress response floods the system with cortisol and adrenaline. These hormones enhance the encoding of survival-relevant information while impairing the prefrontal cortex's capacity to organize experience into coherent narrative. The hippocampus, responsible for contextualizing memories in time and space, is simultaneously activated and dysregulated. The result is memory material that is intensely encoded but poorly integrated — vivid fragments without a stable temporal framework.</p>
+<p>This explains the phenomenology of post-traumatic symptoms: intrusive recollections feel like present experiences rather than past ones, because the memory lacks the hippocampal timestamp that would locate it in the past. The body responds as if the threat is happening now. This is not a failure of memory — it is memory doing exactly what it was designed to do in the evolutionary context of repeated predator encounters.</p>
+<p>Contemporary trauma therapies such as EMDR (Eye Movement Desensitization and Reprocessing) and somatic approaches work precisely by facilitating the integration of these isolated fragments into coherent autobiographical narrative, allowing the hippocampal contextualization that was disrupted at the time of the trauma. The therapeutic goal is not to eliminate the memory but to relocate it — firmly — in the past.</p>`,
+questions:[
+{q:'Why do traumatic memories appear so vivid and fragmented compared to ordinary memories?',opts:['Because trauma is more interesting to the brain','Because extreme stress enhances encoding but impairs narrative organization by disrupting the prefrontal cortex','Because traumatized people have better memories','Because trauma memories are stored in a different brain region entirely'],correct:1,feedback:'Stress hormones enhance encoding of survival-relevant information while impairing the prefrontal cortex\'s capacity to organize experience into coherent narrative.'},
+{q:'What role does the hippocampus play in traumatic memory, according to the text?',opts:['It stores only positive memories','It is entirely inactive during trauma','It provides temporal and spatial context but is dysregulated during trauma','It generates the stress response'],correct:2,feedback:'The hippocampus is «responsible for contextualizing memories in time and space» and is «simultaneously activated and dysregulated» during trauma.'},
+{q:'Why do intrusive traumatic recollections feel like present experiences rather than past ones?',opts:['Because the person wants to relive them','Because the memory lacks the hippocampal timestamp that locates it in the past','Because the amygdala stores them differently','Because trauma deletes all other memories'],correct:1,feedback:'«the memory lacks the hippocampal timestamp that would locate it in the past. The body responds as if the threat is happening now».'},
+{q:'How does the text explain traumatic memory from an evolutionary perspective?',opts:['It is an evolutionary failure that needs to be corrected','It is memory doing what it was designed to do in the context of repeated predator encounters','It evolved only in humans','It is an artifact of modern civilization'],correct:1,feedback:'«This is not a failure of memory — it is memory doing exactly what it was designed to do in the evolutionary context of repeated predator encounters».'},
+{q:'What is the specific therapeutic goal of EMDR and somatic approaches according to the text?',opts:['To eliminate the traumatic memory entirely','To suppress emotional responses','To facilitate integration of fragments into coherent autobiographical narrative, relocating the memory in the past','To create new positive memories'],correct:2,feedback:'«facilitating the integration of these isolated fragments into coherent autobiographical narrative… The therapeutic goal is not to eliminate the memory but to relocate it — firmly — in the past».'}
+]},
+
+{id:'m3r3',mod:3,lang:'ES',cat:'psicologia',diff:3,words:315,
+title:'El vínculo terapéutico',author:'Psicología clínica avanzada',
+preview:'De todas las variables estudiadas en la investigación sobre psicoterapia, ninguna predice con tanta consistencia el resultado del tratamiento como la calidad de la alianza terapéutica.',
+text:`<p>De todas las variables estudiadas en la investigación sobre psicoterapia, ninguna predice con tanta consistencia el resultado del tratamiento como la calidad de la alianza terapéutica. Este hallazgo, replicado en cientos de estudios y a través de todas las orientaciones teóricas, es uno de los más robustos de la psicología clínica contemporánea: la relación entre terapeuta y paciente importa más que la técnica específica utilizada.</p>
+<p>El concepto fue sistematizado por Edward Bordin en 1979, quien identificó tres componentes de la alianza: el acuerdo sobre las tareas terapéuticas (qué se hace en la terapia), el acuerdo sobre los objetivos (hacia dónde se trabaja) y el vínculo afectivo entre terapeuta y paciente (la calidad de la relación humana). Según Bordin, los tres componentes son interdependientes y necesarios.</p>
+<p>Las rupturas en la alianza terapéutica — momentos de tensión, desacuerdo o distancia — son inevitables. La investigación indica, de manera paradójica, que las terapias con rupturas y reparaciones exitosas producen mejores resultados que aquellas sin rupturas aparentes. La habilidad terapéutica se mide menos por evitar el conflicto que por la capacidad de reconocer la ruptura, nombrarla y trabajarla en sesión.</p>
+<p>El meta-análisis más comprehensivo, realizado por Norcross y Lambert, estima que los factores comunes relacionales explican aproximadamente el 30% de la varianza en los resultados terapéuticos, frente al 15% atribuible a la técnica específica. Esto no niega la importancia de las técnicas sino que las contextualiza: la técnica mejor validada produce resultados mediocres en ausencia de una alianza sólida.</p>`,
+questions:[
+{q:'¿Qué variable predice con más consistencia el resultado de la psicoterapia según la investigación?',opts:['La técnica específica utilizada','La experiencia del terapeuta','La calidad de la alianza terapéutica','La duración del tratamiento'],correct:2,feedback:'«ninguna predice con tanta consistencia el resultado del tratamiento como la calidad de la alianza terapéutica».'},
+{q:'¿Quién sistematizó el concepto de alianza terapéutica y en qué año?',opts:['Carl Rogers, 1951','Aaron Beck, 1963','Edward Bordin, 1979','Irvin Yalom, 1980'],correct:2,feedback:'«El concepto fue sistematizado por Edward Bordin en 1979».'},
+{q:'¿Cuál es el hallazgo paradójico sobre las rupturas en la alianza?',opts:['Las rupturas siempre terminan la terapia','Las terapias sin rupturas son siempre las mejores','Las terapias con rupturas y reparaciones exitosas producen mejores resultados que las sin rupturas aparentes','Las rupturas solo ocurren en pacientes resistentes'],correct:2,feedback:'«las terapias con rupturas y reparaciones exitosas producen mejores resultados que aquellas sin rupturas aparentes».'},
+{q:'¿Qué porcentaje de la varianza en resultados terapéuticos explican los factores comunes relacionales según Norcross y Lambert?',opts:['15%','30%','45%','60%'],correct:1,feedback:'«los factores comunes relacionales explican aproximadamente el 30% de la varianza en los resultados terapéuticos».'},
+{q:'¿Qué conclusión extrae el texto sobre la relación entre técnica y alianza?',opts:['La técnica es más importante que la alianza','La alianza es más importante que la técnica','La técnica mejor validada produce resultados mediocres en ausencia de alianza sólida','La técnica y la alianza son independientes entre sí'],correct:2,feedback:'«la técnica mejor validada produce resultados mediocres en ausencia de una alianza sólida» — ambas se necesitan, pero la alianza es el contexto que hace posible la técnica.'}
+]},
+
+{id:'m3r4',mod:3,lang:'EN',cat:'narrativa',diff:3,words:305,
+title:'Metamorphosis of Language',author:'Jorge Luis Borges — essay excerpt',
+preview:'Every language is a way of feeling the universe. To learn a second language is not to acquire a code for translating thoughts already complete in one\'s mother tongue.',
+text:`<p>Every language is a way of feeling the universe. To learn a second language is not to acquire a code for translating thoughts already complete in one's mother tongue: it is to gain access to a different way of being in the world, a different architecture of time, causality, and self. Languages do not say the same things differently — they say different things.</p>
+<p>The Hopi language, as Benjamin Lee Whorf observed, has no grammatical categories for time as a flowing entity — no past, present, or future tense in the sense that European languages possess. This does not mean Hopi speakers cannot distinguish temporal sequence, but that they organize temporal experience differently, through distinctions that have no equivalent in English. Whether this linguistic difference produces cognitive difference remains one of the most debated questions in cognitive science — the strong Sapir-Whorf hypothesis, largely discredited, versus the weaker version, which has substantial empirical support.</p>
+<p>What seems beyond dispute is the emotional dimension of language. Bilinguals consistently report that the same moral dilemma feels less urgent in their second language, and that emotional memories are more intensely reactivated in the language in which they were formed. The mother tongue carries a weight — of early experience, of primary relationships, of the body itself — that no second language fully replicates.</p>
+<p>For the clinical practitioner working across languages, this is not merely an academic observation. The patient who switches to English mid-session when describing a traumatic event in Spanish may be doing something psychologically deliberate: creating distance, regulating affect through the emotional flatness of the non-native tongue. Language choice, in therapy, is never arbitrary.</p>`,
+questions:[
+{q:'What does the author argue learning a second language gives access to?',opts:['A translation code for mother tongue thoughts','A different way of being in the world with different architecture of time and self','Better memory storage','Enhanced logical thinking'],correct:1,feedback:'«it is to gain access to a different way of being in the world, a different architecture of time, causality, and self».'},
+{q:'What is notable about the Hopi language according to the text?',opts:['It has no words for color','It has no grammatical categories for time as a flowing entity','It is the oldest known language','It has the largest vocabulary'],correct:1,feedback:'«The Hopi language… has no grammatical categories for time as a flowing entity — no past, present, or future tense in the sense that European languages possess».'},
+{q:'What is the current scientific status of the strong Sapir-Whorf hypothesis?',opts:['Fully confirmed','Under active investigation with no conclusion','Largely discredited','Accepted in linguistics but rejected in psychology'],correct:2,feedback:'The text describes the strong Sapir-Whorf hypothesis as «largely discredited», while the weaker version «has substantial empirical support».'},
+{q:'What do bilinguals consistently report about moral dilemmas in their second language?',opts:['They feel more urgent','They feel less urgent','They feel identical to the first language','They cannot be processed'],correct:1,feedback:'«Bilinguals consistently report that the same moral dilemma feels less urgent in their second language».'},
+{q:'What clinical interpretation does the text offer when a patient switches language mid-session?',opts:['It is an accidental habit','It indicates confusion','It may be a deliberate act to create distance and regulate affect through emotional flatness of the non-native tongue','It signals the session should end'],correct:2,feedback:'«The patient who switches to English mid-session… may be doing something psychologically deliberate: creating distance, regulating affect through the emotional flatness of the non-native tongue. Language choice, in therapy, is never arbitrary».'}
+]},
+
+{id:'m3r5',mod:3,lang:'ES',cat:'ciencia',diff:3,words:310,
+title:'Termodinámica y entropía',author:'Física — texto avanzado',
+preview:'La segunda ley de la termodinámica es quizás la ley más melancólica de la física: afirma que en cualquier proceso natural, el desorden total del universo siempre aumenta.',
+text:`<p>La segunda ley de la termodinámica es quizás la ley más melancólica de la física: afirma que en cualquier proceso natural, el desorden total del universo — su entropía — siempre aumenta o, en el mejor de los casos, permanece constante. Nunca disminuye. El universo evoluciona inexorablemente hacia estados de mayor desorden.</p>
+<p>La entropía puede entenderse intuitivamente. Una taza de café caliente en una habitación fría se enfría: el calor fluye espontáneamente del objeto más caliente al más frío, aumentando el desorden total del sistema. El proceso inverso — que el café se caliente espontáneamente absorbiendo calor de la habitación fría — no viola ninguna ley mecánica, pero nunca ocurre. La segunda ley distingue el pasado del futuro: es la única ley fundamental de la física que señala una dirección temporal.</p>
+<p>Erwin Schrödinger, en su célebre libro ¿Qué es la vida?, señaló una paradoja aparente: los seres vivos parecen desafiar la entropía, construyendo orden complejo a partir de materiales simples. La resolución de la paradoja radica en que los organismos son sistemas abiertos: importan energía de baja entropía (alimento, luz solar) y exportan entropía de vuelta al ambiente en forma de calor y desechos. La vida no viola la segunda ley; la obedece a expensas del entorno.</p>
+<p>El físico y matemático Roger Penrose ha argumentado que el origen del universo en un estado de extraordinaria baja entropía — el Big Bang — es el hecho más improbable de la historia cósmica, más inexplicable incluso que la propia existencia del universo. La flecha del tiempo, el envejecimiento, la muerte, la irreversibilidad de los procesos naturales: todo apunta, en última instancia, al estado inicial del universo y a la segunda ley.</p>`,
+questions:[
+{q:'¿Qué afirma la segunda ley de la termodinámica sobre la entropía?',opts:['Siempre disminuye con el tiempo','Permanece siempre constante','En cualquier proceso natural siempre aumenta o permanece constante, nunca disminuye','Solo aumenta en sistemas cerrados'],correct:2,feedback:'«en cualquier proceso natural, el desorden total del universo — su entropía — siempre aumenta o, en el mejor de los casos, permanece constante. Nunca disminuye».'},
+{q:'¿Por qué la segunda ley es especial entre las leyes fundamentales de la física?',opts:['Es la más matemáticamente compleja','Es la única que señala una dirección temporal','Es la más recientemente descubierta','Es la única que aplica a seres vivos'],correct:1,feedback:'«La segunda ley distingue el pasado del futuro: es la única ley fundamental de la física que señala una dirección temporal».'},
+{q:'¿Cómo resuelve el texto la paradoja de que los seres vivos parezcan desafiar la entropía?',opts:['Los seres vivos sí violan la segunda ley','Los organismos son sistemas abiertos que importan baja entropía y exportan entropía al entorno','La entropía no aplica a sistemas biológicos','La vida es un error en las leyes de la física'],correct:1,feedback:'«los organismos son sistemas abiertos: importan energía de baja entropía y exportan entropía de vuelta al ambiente».'},
+{q:'¿Quién argumentó que el Big Bang fue el hecho más improbable de la historia cósmica?',opts:['Erwin Schrödinger','Albert Einstein','Stephen Hawking','Roger Penrose'],correct:3,feedback:'«El físico y matemático Roger Penrose ha argumentado que el origen del universo en un estado de extraordinaria baja entropía… es el hecho más improbable de la historia cósmica».'},
+{q:'¿Qué fenómenos asocia el texto con la segunda ley de la termodinámica?',opts:['Solo fenómenos físicos abstractos','La flecha del tiempo, el envejecimiento, la muerte y la irreversibilidad de los procesos naturales','Solo la temperatura de los objetos','Los campos electromagnéticos'],correct:1,feedback:'«La flecha del tiempo, el envejecimiento, la muerte, la irreversibilidad de los procesos naturales: todo apunta, en última instancia, al estado inicial del universo y a la segunda ley».'}
+]},
+
+{id:'m3r6',mod:3,lang:'EN',cat:'psicologia',diff:3,words:298,
+title:'Cognitive Behavioral Therapy',author:'Clinical psychology — critical analysis',
+preview:'Since its formalization by Aaron Beck in the 1960s, Cognitive Behavioral Therapy has accumulated the largest evidence base of any psychological treatment.',
+text:`<p>Since its formalization by Aaron Beck in the 1960s, Cognitive Behavioral Therapy has accumulated the largest evidence base of any psychological treatment. Its core premise — that distorted thinking patterns drive emotional distress and behavioral dysfunction, and that systematically restructuring these patterns produces lasting change — has been validated across hundreds of randomized controlled trials for conditions ranging from depression and anxiety to OCD and PTSD.</p>
+<p>CBT's strength is its structure. Sessions follow a clear agenda, homework is assigned, thought records are completed between sessions, and progress is monitored with standardized measures. This structure is both its greatest clinical asset and the source of its most sustained criticism: critics argue that the emphasis on cognitive restructuring can inadvertently communicate to patients that their distress is a product of faulty thinking — a message that may be experienced as invalidating, particularly by those whose suffering has real external causes.</p>
+<p>The third-wave adaptations — Acceptance and Commitment Therapy, Dialectical Behavior Therapy, and Mindfulness-Based Cognitive Therapy — have addressed this limitation by shifting the therapeutic target from changing the content of thoughts to changing the individual's relationship to their thoughts. Rather than challenging whether a thought is true, these approaches ask whether acting on it serves the person's valued goals.</p>
+<p>The debate within the field is not whether CBT works — the evidence is overwhelming — but for whom, under what conditions, and whether the active mechanisms are truly cognitive or whether relational and behavioral factors account for most of the variance. What is clear is that CBT is not a monolith: it is a family of approaches sharing some structural features but increasingly diverging in theory, technique, and philosophical assumptions.</p>`,
+questions:[
+{q:'Who formalized Cognitive Behavioral Therapy and in what decade?',opts:['Carl Rogers in the 1950s','Aaron Beck in the 1960s','Albert Ellis in the 1970s','Albert Bandura in the 1980s'],correct:1,feedback:'«Since its formalization by Aaron Beck in the 1960s».'},
+{q:'What is CBT\'s core theoretical premise?',opts:['Trauma causes all psychological disorders','Distorted thinking patterns drive emotional distress and behavioral dysfunction','The unconscious determines all behavior','Social environment is the sole cause of distress'],correct:1,feedback:'«distorted thinking patterns drive emotional distress and behavioral dysfunction, and that systematically restructuring these patterns produces lasting change».'},
+{q:'What is the main criticism of CBT\'s emphasis on cognitive restructuring according to the text?',opts:['It is too expensive','It is not evidence-based','It may communicate that distress is a product of faulty thinking, which can feel invalidating','It takes too long to produce results'],correct:2,feedback:'«the emphasis on cognitive restructuring can inadvertently communicate to patients that their distress is a product of faulty thinking — a message that may be experienced as invalidating».'},
+{q:'What shift do third-wave CBT approaches make?',opts:['From behavioral to cognitive focus','From changing thought content to changing the relationship to thoughts','From individual to group therapy','From structured to unstructured sessions'],correct:1,feedback:'Third-wave approaches shift «from changing the content of thoughts to changing the individual\'s relationship to their thoughts».'},
+{q:'According to the text\'s final paragraph, what is the unresolved central question about CBT?',opts:['Whether CBT works at all','For whom and under what conditions it works, and whether cognitive or relational/behavioral factors drive outcomes','Whether CBT should replace all other therapies','Whether CBT can be delivered online'],correct:1,feedback:'«The debate within the field is not whether CBT works — the evidence is overwhelming — but for whom, under what conditions, and whether the active mechanisms are truly cognitive or whether relational and behavioral factors account for most of the variance».'}
+]}
+];
+
+// ══════════════════════════════════════════
+//  BADGES DEFINITIONS
+// ══════════════════════════════════════════
+const BADGES=[
+{id:'b1',icon:'🔥',name:'Primera sesión',desc:'Completa tu primera lectura',condition:s=>s.sessions.length>=1},
+{id:'b2',icon:'⚡',name:'Velocista',desc:'Alcanza 300 WPM',condition:s=>(s.wpmHistory||[]).some(w=>w.wpm>=300)},
+{id:'b3',icon:'🎯',name:'Precision 90',desc:'Saca 90%+ en un quiz',condition:s=>s.sessions.some(x=>x.score>=90)},
+{id:'b4',icon:'🌟',name:'Perfecto',desc:'Saca 100% en un quiz',condition:s=>s.sessions.some(x=>x.score===100)},
+{id:'b5',icon:'🗓',name:'Racha de 3',desc:'Practica 3 días seguidos',condition:s=>(s.streak||0)>=3},
+{id:'b6',icon:'📚',name:'5 lecturas',desc:'Completa 5 lecturas',condition:s=>s.sessions.length>=5},
+{id:'b7',icon:'🚀',name:'Velocidad 400',desc:'Alcanza 400 WPM',condition:s=>(s.wpmHistory||[]).some(w=>w.wpm>=400)},
+{id:'b8',icon:'🧠',name:'Módulo 1',desc:'Completa el Módulo 1',condition:s=>modProgress(s,1)>=80},
+{id:'b9',icon:'💡',name:'Bilingual',desc:'Completa una lectura en inglés',condition:s=>s.sessions.some(x=>{const r=READINGS.find(r=>r.id===x.readingId);return r&&r.lang==='EN';})},
+{id:'b10',icon:'🏆',name:'Módulo 2',desc:'Completa el Módulo 2',condition:s=>modProgress(s,2)>=80},
+{id:'b11',icon:'⚡',name:'Velocidad 500',desc:'Alcanza 500 WPM',condition:s=>(s.wpmHistory||[]).some(w=>w.wpm>=500)},
+{id:'b12',icon:'👑',name:'Maestría',desc:'Completa el Módulo 3',condition:s=>modProgress(s,3)>=80},
+];
+
+function modProgress(s,mod){
+  const rs=READINGS.filter(r=>r.mod===mod);
+  if(!rs.length)return 0;
+  const done=rs.filter(r=>s.sessions.some(x=>x.readingId===r.id&&x.score>=90)).length;
+  return Math.round((done/rs.length)*100);
+}
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let ST={syncCode:null,wpmHistory:[],sessions:[],streak:0,lastDate:null,earnedBadges:[],rtResults:[]};
+function load(){try{const r=localStorage.getItem('vm_v3');if(r)ST={...ST,...JSON.parse(r)};}catch(e){}}
+function save(){localStorage.setItem('vm_v3',JSON.stringify(ST));}
+
+// ══════════════════════════════════════════
+//  FIREBASE — sincronización en tiempo real
+// ══════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyCsqumG_BRCWwnFEOcoNfLXtfaUlzvPqYE",
+  authDomain: "seguimiento-pacientes-a842f.firebaseapp.com",
+  projectId: "seguimiento-pacientes-a842f",
+  storageBucket: "seguimiento-pacientes-a842f.firebasestorage.app",
+  messagingSenderId: "641640192728",
+  appId: "1:641640192728:web:14a1d4074e2a6fa6e3d5ad"
+};
+
+let fbApp, db, liveUnsub = null;
+
+function initFirebase() {
+  try {
+    if (!firebase.apps.length) {
+      fbApp = firebase.initializeApp(firebaseConfig);
+    } else {
+      fbApp = firebase.app();
+    }
+    db = firebase.firestore();
+    return true;
+  } catch(e) {
+    console.warn('Firebase init error:', e);
+    return false;
+  }
+}
+
+// Sube el estado completo a Firestore (colección velozmente, doc = syncCode)
+async function syncUp() {
+  if (!ST.syncCode || !db) return;
+  try {
+    const payload = { ...ST, _ts: Date.now(), _v: 3 };
+    await db.collection('velozmente').doc(ST.syncCode.toUpperCase()).set(payload);
+  } catch(e) { console.warn('syncUp error:', e); }
+}
+
+// Descarga una vez desde Firestore
+async function syncDown() {
+  if (!ST.syncCode || !db) return false;
+  try {
+    const doc = await db.collection('velozmente').doc(ST.syncCode.toUpperCase()).get();
+    if (doc.exists) {
+      const rem = doc.data();
+      // Merge: tomar el más completo
+      const merged = {
+        ...ST,
+        sessions:     mergeArr(ST.sessions,     rem.sessions||[],     'id'),
+        wpmHistory:   mergeArr(ST.wpmHistory,   rem.wpmHistory||[],   'date'),
+        earnedBadges: [...new Set([...(ST.earnedBadges||[]), ...(rem.earnedBadges||[])])],
+        streak:       Math.max(ST.streak||0,    rem.streak||0),
+        lastDate:     rem._ts > (ST._ts||0) ? rem.lastDate : ST.lastDate,
+        syncCode:     ST.syncCode,
+        _ts:          Date.now()
+      };
+      ST = merged;
+      save();
+      refreshAll();
+      return true;
+    }
+  } catch(e) { console.warn('syncDown error:', e); }
+  return false;
+}
+
+// Escucha cambios en tiempo real — se activa cuando hay syncCode
+function startLiveSync() {
+  if (liveUnsub) { liveUnsub(); liveUnsub = null; }
+  if (!ST.syncCode || !db) return;
+  const code = ST.syncCode.toUpperCase();
+  liveUnsub = db.collection('velozmente').doc(code)
+    .onSnapshot(doc => {
+      if (!doc.exists) return;
+      const rem = doc.data();
+      // Solo aplicar si el cambio vino de otro dispositivo (ts más reciente)
+      if (rem._ts && rem._ts > (ST._ts || 0)) {
+        const merged = {
+          ...ST,
+          sessions:     mergeArr(ST.sessions,   rem.sessions||[],   'id'),
+          wpmHistory:   mergeArr(ST.wpmHistory, rem.wpmHistory||[], 'date'),
+          earnedBadges: [...new Set([...(ST.earnedBadges||[]), ...(rem.earnedBadges||[])])],
+          streak:       Math.max(ST.streak||0, rem.streak||0),
+          lastDate:     rem.lastDate || ST.lastDate,
+          syncCode:     ST.syncCode,
+          _ts:          rem._ts
+        };
+        ST = merged;
+        save();
+        refreshAll();
+        setSyncStatus('☁ ✓ Sincronizado', true);
+      }
+    }, err => console.warn('liveSync error:', err));
+}
+
+// Merge de arrays por campo clave, sin duplicados
+function mergeArr(a, b, key) {
+  const map = new Map();
+  [...(a||[]), ...(b||[])].forEach(item => {
+    const k = item[key];
+    if (k && !map.has(k)) map.set(k, item);
+  });
+  return Array.from(map.values());
+}
+
+function setSyncStatus(txt, ok) {
+  const btn = document.querySelector('.sync-btn');
+  btn.textContent = txt;
+  btn.style.color = ok ? 'var(--ok)' : 'var(--err)';
+  setTimeout(() => { btn.textContent = '☁ Sync'; btn.style.color = ''; }, 3000);
+}
+
+function openSync() {
+  document.getElementById('sync-mo').classList.add('open');
+  document.getElementById('cur-code').textContent = ST.syncCode || '—';
+  document.getElementById('sync-inp').value = ST.syncCode || '';
+}
+function closeSyncModal() { document.getElementById('sync-mo').classList.remove('open'); }
+
+async function applySync() {
+  const c = document.getElementById('sync-inp').value.trim().toUpperCase();
+  if (!c || c.length < 2) return;
+  ST.syncCode = c; save(); closeSyncModal();
+  document.querySelector('.sync-btn').textContent = '☁ Conectando…';
+  if (!db) initFirebase();
+  const ok = await syncDown();
+  await syncUp();
+  startLiveSync();
+  setSyncStatus(ok ? '☁ ✓ Conectado' : '☁ ✓ Nuevo perfil', true);
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(ST)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'velozmente_backup.json'; a.click();
+}
+function importData() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try { const d = JSON.parse(ev.target.result); ST = { ...ST, ...d }; save(); refreshAll(); syncUp(); alert('✓ Importado y sincronizado.'); }
+      catch { alert('Archivo inválido.'); }
+    };
+    r.readAsText(f);
+  }; inp.click();
+}
+
+// ══════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════
+function showSc(id,btn){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='home')refreshHome();
+  if(id==='library')renderLib();
+  if(id==='prog')refreshProg();
+}
+function showEx(id,btn){
+  document.querySelectorAll('[id^="ex-"]').forEach(e=>e.style.display='none');
+  document.querySelectorAll('.mt-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ex-'+id).style.display='block';
+  btn.classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════
+function refreshHome(){
+  const h=new Date().getHours();
+  const g=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
+  document.getElementById('bann-t').textContent=g+' — sigue leyendo';
+  const done=ST.sessions.length;
+  document.getElementById('bann-s').textContent=done===0?'Comienza tu primera lectura en la biblioteca.':done+' sesión'+(done>1?'es':'')+' completadas. ¡Sigue así!';
+  const wpms=(ST.wpmHistory||[]).map(w=>w.wpm);
+  const avg=wpms.length?Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length):null;
+  const best=wpms.length?Math.max(...wpms):null;
+  document.getElementById('s-sess').textContent=done;
+  document.getElementById('s-avg').textContent=avg||'—';
+  document.getElementById('s-best').textContent=best||'—';
+  document.getElementById('h-wpm').textContent=avg||'—';
+  document.getElementById('h-streak').textContent=ST.streak||0;
+  const eb=(ST.earnedBadges||[]).length;
+  document.getElementById('h-badges').textContent=eb;
+  // weekly bars
+  const now=new Date();
+  const labels=['Lu','Ma','Mi','Ju','Vi','Sa','Do'];
+  let wbar='',wlabels='';
+  for(let i=0;i<7;i++){
+    const d=new Date(now);
+    const dow=now.getDay()===0?7:now.getDay();
+    d.setDate(now.getDate()-(dow-1)+i);
+    const ds=d.toDateString();
+    const cnt=ST.sessions.filter(s=>{try{return new Date(s.date).toDateString()===ds;}catch{return false;}}).length;
+    const h=Math.min(100,cnt*30+3);
+    wbar+=`<div class="wb-item" style="height:${h}%"></div>`;
+    wlabels+=`<div class="wl">${labels[i]}</div>`;
+  }
+  document.getElementById('wbar').innerHTML=wbar;
+  document.getElementById('wlabels').innerHTML=wlabels;
+  // module cards
+  const mc=document.getElementById('mod-cards');
+  const mods=[
+    {n:1,label:'Módulo 1',sub:'Fundamentos · 8 lecturas',icon:'🌱',col:'var(--m1)',minWPM:0},
+    {n:2,label:'Módulo 2',sub:'Velocidad · 7 lecturas',icon:'⚡',col:'var(--m2)',minWPM:250},
+    {n:3,label:'Módulo 3',sub:'Maestría · 6 lecturas',icon:'🏆',col:'var(--m3)',minWPM:350},
+  ];
+  mc.innerHTML=mods.map(m=>{
+    const prog=modProgress(ST,m.n);
+    const currentWPM=avg||0;
+    const locked=m.n>1&&currentWPM<m.minWPM&&modProgress(ST,m.n-1)<60;
+    return `<div class="mod-card${locked?' locked':''}" onclick="${locked?'':'openModule('+m.n+')'}">
+      <div class="mod-header">
+        <div class="mod-icon" style="background:${m.col}20;border:1.5px solid ${m.col}40">${m.icon}</div>
+        <div class="mod-info">
+          <div class="mod-title">${m.label}${locked?' 🔒':''}</div>
+          <div class="mod-sub">${locked?'Necesitas '+m.minWPM+' WPM y completar el módulo anterior':m.sub}</div>
+          <div class="mod-prog-wrap"><div class="mod-prog-fill" style="width:${prog}%;background:${m.col}"></div></div>
+        </div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:${m.col};flex-shrink:0">${prog}%</div>
+      </div>
+    </div>`;
+  }).join('');
+  // badges
+  checkBadges();
+  const bg=document.getElementById('badges-grid');
+  bg.innerHTML=BADGES.map(b=>{
+    const earned=(ST.earnedBadges||[]).includes(b.id);
+    return `<div class="badge-item${earned?' earned':' locked-b'}" title="${b.desc}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+    </div>`;
+  }).join('');
+  // recent
+  const rl=document.getElementById('recent-home');
+  if(!ST.sessions.length){rl.innerHTML='<div style="text-align:center;padding:1.2rem;font-size:.82rem;opacity:.5">Sin sesiones aún. ¡Empieza a leer!</div>';return;}
+  rl.innerHTML=[...ST.sessions].reverse().slice(0,5).map(s=>{
+    const p=s.score>=90;
+    return `<div class="ri">
+      <div class="ri-score ${p?'sp':'sf'}">${s.score!=null?s.score+'%':'—'}</div>
+      <div class="ri-info"><div class="ri-t">${s.title}</div><div class="ri-m">${s.wpm} wpm · ${fmtDate(s.date)}</div></div>
+      <div class="ri-w">${s.wpm}</div>
+    </div>`;
+  }).join('');
+}
+function fmtDate(d){try{return new Date(d).toLocaleDateString('es-CO',{day:'numeric',month:'short'});}catch{return '';}}
+function openModule(n){showSc('library',document.querySelectorAll('.ni')[1]);setTimeout(()=>{const b=document.querySelector('.filter-bar');if(b){const btn=b.children[n];if(btn)btn.click();}},100);}
+
+// ══════════════════════════════════════════
+//  BADGE CHECK
+// ══════════════════════════════════════════
+function checkBadges(){
+  let newB=null;
+  BADGES.forEach(b=>{
+    if(!(ST.earnedBadges||[]).includes(b.id)&&b.condition(ST)){
+      (ST.earnedBadges=ST.earnedBadges||[]).push(b.id);
+      newB=b;
+    }
+  });
+  save();
+  return newB;
+}
+
+// ══════════════════════════════════════════
+//  LIBRARY
+// ══════════════════════════════════════════
+let libFilter='all';
+function filt(f,btn){
+  libFilter=f;
+  document.querySelectorAll('.filter-bar .btn-sm').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderLib();
+}
+function renderLib(){
+  const list=document.getElementById('lib-list');
+  let rs=READINGS;
+  if(libFilter==='ES')rs=rs.filter(r=>r.lang==='ES');
+  else if(libFilter==='EN')rs=rs.filter(r=>r.lang==='EN');
+  else if(['1','2','3'].includes(libFilter))rs=rs.filter(r=>r.mod==libFilter);
+  const avg=(ST.wpmHistory||[]).length?Math.round(ST.wpmHistory.reduce((a,b)=>a+b.wpm,0)/ST.wpmHistory.length):0;
+  list.innerHTML=rs.map(r=>{
+    const done=ST.sessions.find(s=>s.readingId===r.id);
+    const modLocked=r.mod>1&&avg<[0,0,250,350][r.mod]&&modProgress(ST,r.mod-1)<60;
+    const langB=r.lang==='EN'?'🇬🇧 EN':'🇨🇴 ES';
+    const diffL=['','N1 · Básico','N2 · Intermedio','N3 · Avanzado'][r.diff];
+    const diffC=['','d1','d2','d3'][r.diff];
+    const doneB=done?`<span class="badge" style="background:rgba(106,158,127,.15);color:var(--ok);border-color:var(--ok)">✓ ${done.score}%</span>`:'';
+    const modB=`<span class="badge" style="background:rgba(205,142,157,.12)">M${r.mod}</span>`;
+    return `<div class="rc${done?'':''} ${modLocked?'locked-r':''}" onclick="${modLocked?'alert(\"Completa el módulo anterior y alcanza el WPM necesario.\")':'openR(\''+r.id+'\')'}">
+      <div class="rc-top"><div class="rc-badges">${modB}<span class="badge">${langB}</span>${doneB}</div></div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-author">${r.author}</div>
+      <div class="rc-preview">${r.preview}</div>
+      <div class="rc-footer">
+        <div style="display:flex;gap:.8rem">
+          <span style="font-size:.68rem;color:var(--text);opacity:.55"><strong style="color:var(--rose)">${r.words}</strong> palabras</span>
+          <span style="font-size:.68rem;color:var(--text);opacity:.55"><strong style="color:var(--rose)">${r.questions.length}</strong> preguntas</span>
+        </div>
+        <span style="font-size:.7rem;opacity:.6"><span class="dd ${diffC}"></span>${diffL}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  INSTRUCTIONS ENGINE
+// ══════════════════════════════════════════
+const INSTRS = {
+  1: [ // Module 1 - Fundamentals
+    {ic:'☝️', label:'Técnica del dedo guía', desc:'Coloca tu dedo índice debajo de la primera línea y deslízalo suavemente de izquierda a derecha, <strong>más rápido de lo que lees cómodamente</strong>. Tu ojo seguirá el movimiento. No te detengas a releer — sigue avanzando.'},
+    {ic:'👄', label:'Identifica tu subvocalización', desc:'¿Estás "escuchando" las palabras en tu cabeza mientras lees? Eso es subvocalización y te limita a ~130 wpm. En esta sesión solo <strong>obsérvala</strong> — no la fuerces a desaparecer aún. El primer paso es notar el hábito.'},
+    {ic:'👁', label:'Fija los ojos, no las palabras', desc:'Tu ojo se detiene (fijación) cada 1-3 palabras. Intenta que cada fijación capture al menos <strong>2 palabras juntas</strong> como si fueran una imagen. No silabees — reconoce la palabra completa de un vistazo.'},
+    {ic:'⏱', label:'Sin regresiones', desc:'Una regresión es volver a releer algo. En esta sesión, <strong>prohíbete retroceder</strong>. Si no entendiste algo, sigue. Al final verás cuánto retuviste sin releer — probablemente más de lo que esperabas.'},
+  ],
+  2: [ // Module 2 - Speed
+    {ic:'✋', label:'Dedo guía a ritmo forzado', desc:'Mueve el dedo <strong>deliberadamente más rápido</strong> de lo que lees. El objetivo es que el ojo tenga que esforzarse por seguirle el ritmo. Es incómodo — eso es señal de que estás entrenando. Descansa el dedo entre párrafos si necesitas.'},
+    {ic:'🔇', label:'Suprimir la voz interna', desc:'Mastica chicle, cuenta mentalmente 1-2-3-4, o repite en silencio una sílaba neutra (ta-ta-ta) mientras lees. Esto ocupa el canal de subvocalización y <strong>fuerza al cerebro a procesar visualmente</strong> en lugar de auditivamente.'},
+    {ic:'📦', label:'Leer en bloques de palabras', desc:'En lugar de leer palabra por palabra, practica ver <strong>grupos de 3-4 palabras como una unidad</strong>. Ejemplo: [El hombre llegó] [caminando despacio] [hasta la puerta]. Cada fijación = un bloque de significado, no una palabra aislada.'},
+    {ic:'🎯', label:'Primera oración de cada párrafo', desc:'Los lectores expertos escanean primero la <strong>primera oración de cada párrafo</strong> para captar la idea central antes de leer el resto. Practica esta anticipación: antes de leer un párrafo, hazle una pregunta mental sobre lo que va a decir.'},
+  ],
+  3: [ // Module 3 - Mastery
+    {ic:'⚡', label:'Velocidad de pushing sostenida', desc:'Lee a una velocidad que te haga sentir que vas "al límite" — comprendiendo ~70-80% es suficiente en la primera pasada. Tu cerebro rellenará los huecos con inferencia. Reserva la comprensión profunda para los textos que lo merezcan.'},
+    {ic:'🧠', label:'Lectura activa con preguntas previas', desc:'Antes de leer, formula <strong>3 preguntas</strong> sobre el texto basándote en el título y el autor. Ejemplo: "¿Qué argumenta este texto?", "¿Con qué idea podría estar en desacuerdo?", "¿Qué relación tiene con lo que ya sé?". Leer buscando respuestas activa la atención.'},
+    {ic:'📐', label:'Campo visual ampliado', desc:'Empieza y termina cada línea <strong>1-2 palabras antes del margen</strong>. Tu visión periférica puede captar esas palabras marginales sin necesidad de fijar la mirada ahí. Esto elimina fijaciones en los extremos y acelera el avance por línea.'},
+    {ic:'🔁', label:'Meta-cognición lectora', desc:'Al terminar cada párrafo, pregúntate en 2 segundos: "¿Cuál fue la idea central?" Si no puedes responder, <strong>no releas</strong> — sigue. Al final del texto tendrás una impresión global más útil que los detalles aislados de un párrafo.'},
+  ]
+};
+
+function getWPMTarget(mod, currentAvgWPM) {
+  const base = currentAvgWPM || 200;
+  if (mod === 1) return { wpm: Math.max(220, Math.round(base * 1.1)), sub: 'Un 10% por encima de tu ritmo cómodo actual. Incomódate un poco — eso es entrenamiento.' };
+  if (mod === 2) return { wpm: Math.max(280, Math.round(base * 1.2)), sub: 'Un 20% por encima de tu promedio. Usa el dedo guía más rápido de lo cómodo para forzar el ritmo.' };
+  if (mod === 3) return { wpm: Math.max(380, Math.round(base * 1.3)), sub: 'Un 30% por encima de tu promedio. A esta velocidad la subvocalización se rompe — es normal no entender todo al 100% en la primera pasada.' };
+  return { wpm: base, sub: '' };
+}
+
+function openR(id) {
+  curR = READINGS.find(r => r.id === id);
+  if (!curR) return;
+  // Show pre-reading panel
+  document.getElementById('pre-title').textContent = curR.title;
+  document.getElementById('pre-author').textContent = curR.author;
+  const avgWPM = (ST.wpmHistory||[]).length ? Math.round(ST.wpmHistory.reduce((a,b)=>a+b.wpm,0)/ST.wpmHistory.length) : null;
+  const target = getWPMTarget(curR.mod, avgWPM);
+  document.getElementById('pre-wpm-target').textContent = target.wpm + ' wpm';
+  document.getElementById('pre-wpm-sub').textContent = target.sub;
+  const instrSet = INSTRS[curR.mod] || INSTRS[1];
+  document.getElementById('pre-instructions').innerHTML = `
+    <div class="instr-block">
+      <div class="instr-block-title">📋 Cómo leer esta sesión · Módulo ${curR.mod}</div>
+      ${instrSet.map(ins=>`
+        <div class="instr-item">
+          <div class="instr-ic">${ins.ic}</div>
+          <div class="instr-text">
+            <div class="instr-label">${ins.label}</div>
+            <div class="instr-desc">${ins.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="instr-block">
+      <div class="instr-block-title">📏 Datos de esta lectura</div>
+      <div class="instr-item">
+        <div class="instr-ic">📖</div>
+        <div class="instr-text">
+          <div class="instr-label">Palabras aproximadas</div>
+          <div class="instr-desc"><strong>${curR.words} palabras</strong> → A ${target.wpm} wpm tardarás aprox. <strong>${Math.ceil(curR.words/target.wpm)} minuto${Math.ceil(curR.words/target.wpm)>1?'s':''}</strong></div>
+        </div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">❓</div>
+        <div class="instr-text">
+          <div class="instr-label">Quiz posterior</div>
+          <div class="instr-desc"><strong>${curR.questions.length} preguntas de comprensión</strong>. Necesitas ≥90% para aprobar. Las preguntas incluyen inferencia y análisis crítico — no solo datos literales.</div>
+        </div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">${curR.lang==='EN'?'🇬🇧':'🇨🇴'}</div>
+        <div class="instr-text">
+          <div class="instr-label">Idioma · Categoría · Dificultad</div>
+          <div class="instr-desc">${curR.lang==='EN'?'English':'Español'} · ${curR.cat} · Nivel ${curR.diff} de 3</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('pre-read').classList.add('open');
+}
+
+function closePre() {
+  document.getElementById('pre-read').classList.remove('open');
+  curR = null;
+}
+
+function startReading() {
+  if (!curR) return;
+  document.getElementById('pre-read').classList.remove('open');
+  // Now open the actual reading session
+  document.getElementById('rs-title').textContent = curR.title;
+  document.getElementById('rs-text').innerHTML = curR.text;
+  document.getElementById('rs-timer').textContent = '0:00';
+  document.getElementById('live-wpm').textContent = '—';
+  document.getElementById('rs').classList.add('open');
+  document.querySelector('.rs-body').scrollTop = 0;
+  sessStart = Date.now();
+  sessInt = setInterval(() => {
+    const e = Math.floor((Date.now()-sessStart)/1000);
+    const m = Math.floor(e/60), s = e%60;
+    document.getElementById('rs-timer').textContent = m+':'+String(s).padStart(2,'0');
+    if(e>5) document.getElementById('live-wpm').textContent = Math.round(curR.words/(e/60));
+  }, 1000);
+}
+function closeRS(){clearInterval(sessInt);document.getElementById('rs').classList.remove('open');}
+function finishR(){
+  clearInterval(sessInt);
+  const e=Math.floor((Date.now()-sessStart)/1000);
+  window._sw=e>0?Math.round(curR.words/(e/60)):0;
+  window._st=e;
+  document.getElementById('rs').classList.remove('open');
+  startQ();
+}
+
+// ══════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════
+let qIdx=0,qAns=[],qDone=false;
+function startQ(){qIdx=0;qAns=[];qDone=false;document.getElementById('qs').classList.add('open');renderQ();}
+function renderQ(){
+  const q=curR.questions[qIdx];
+  const tot=curR.questions.length;
+  document.getElementById('qpf').style.width=((qIdx/tot)*100)+'%';
+  document.getElementById('qn').textContent=(qIdx+1)+'/'+tot;
+  document.getElementById('qq').textContent=q.q;
+  document.getElementById('qfb').className='qfb';
+  document.getElementById('qnext').disabled=true;
+  qDone=false;
+  document.getElementById('qopts').innerHTML=q.opts.map((o,i)=>
+    `<button class="qopt" onclick="pickQ(${i})" id="qo${i}">${o}</button>`
+  ).join('');
+  document.getElementById('qnext').textContent=qIdx===tot-1?'Ver resultados':'Siguiente';
+}
+function pickQ(idx){
+  if(qDone)return;qDone=true;
+  const q=curR.questions[qIdx];
+  const correct=idx===q.correct;
+  qAns.push(correct);
+  document.querySelectorAll('.qopt').forEach((el,i)=>{
+    el.disabled=true;
+    if(i===q.correct)el.classList.add('cor');
+    else if(i===idx)el.classList.add('wrg');
+  });
+  const fb=document.getElementById('qfb');
+  fb.textContent=(correct?'✓ Correcto — ':'✗ Incorrecto — ')+q.feedback;
+  fb.className='qfb show '+(correct?'cor-fb':'wrg-fb');
+  document.getElementById('qnext').disabled=false;
+}
+function nextQ(){
+  qIdx++;
+  if(qIdx>=curR.questions.length)showRes();
+  else renderQ();
+}
+function showRes(){
+  document.getElementById('qs').classList.remove('open');
+  const cor=qAns.filter(Boolean).length;
+  const tot=qAns.length;
+  const pct=Math.round((cor/tot)*100);
+  const wpm=window._sw||0;
+  const e=window._st||0;
+  const pass=pct>=90;
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-pct').style.color=pass?'var(--ok)':'var(--err)';
+  document.getElementById('res-circ').style.borderColor=pass?'var(--ok)':'var(--err)';
+  document.getElementById('res-v').textContent=pass?'✓ Superado — excelente':'✗ No superado';
+  document.getElementById('res-s').textContent=pass
+    ?`Comprensión ≥90% alcanzada. Velocidad: ${wpm} wpm.`
+    :`Necesitas ≥90% para aprobar. Obtuviste ${pct}% (${cor}/${tot}). Revisa las explicaciones e intenta de nuevo.`;
+  const m=Math.floor(e/60),s=e%60;
+  document.getElementById('r-wpm').textContent=wpm;
+  document.getElementById('r-time').textContent=m+'m'+String(s).padStart(2,'0')+'s';
+  document.getElementById('r-cor').textContent=cor+'/'+tot;
+  // New badge?
+  const sess={id:Date.now().toString(),readingId:curR.id,title:curR.title,wpm,score:pct,time:e,date:new Date().toISOString()};
+  ST.sessions.push(sess);
+  if(wpm>50&&wpm<2000)ST.wpmHistory.push({date:new Date().toISOString(),wpm,source:'reading'});
+  const today=new Date().toDateString();
+  if(ST.lastDate!==today){const y=new Date();y.setDate(y.getDate()-1);ST.streak=ST.lastDate===y.toDateString()?(ST.streak||0)+1:1;ST.lastDate=today;}
+  const nb=checkBadges();
+  const nbp=document.getElementById('nbp');
+  if(nb){nbp.style.display='block';document.getElementById('nbp-icon').textContent=nb.icon;document.getElementById('nbp-name').textContent=nb.name;}
+  else nbp.style.display='none';
+  save();syncUp();
+  document.getElementById('res').classList.add('open');
+}
+function closeRes(){document.getElementById('res').classList.remove('open');curR=null;showSc('library',document.querySelectorAll('.ni')[1]);renderLib();}
+function retryR(){document.getElementById('res').classList.remove('open');if(curR)openR(curR.id);}
+
+// ══════════════════════════════════════════
+//  RSVP
+// ══════════════════════════════════════════
+const RSVP_TXT=`La lectura rápida transforma la relación del lector con el texto. No se trata únicamente de aumentar la velocidad sino de desarrollar una nueva forma de procesar la información escrita. El cerebro humano es capaz de reconocer palabras completas de un solo vistazo sin necesidad de descomponerlas en letras o sílabas. Este reconocimiento global es la base de la lectura experta. Con práctica deliberada cualquier persona puede desarrollar esta capacidad de manera significativa. La subvocalización interna limita la velocidad al ritmo del habla que ronda las ciento treinta palabras por minuto. Aprender a suprimir este hábito en textos simples libera la velocidad de procesamiento visual que puede superar las quinientas palabras por minuto sin pérdida de comprensión. El campo visual también puede ampliarse con entrenamiento específico. En lugar de fijar la mirada en cada palabra el lector entrenado captura grupos de tres a cinco palabras por fijación reduciendo el número de movimientos oculares por línea. Las regresiones o movimientos de vuelta al texto leído representan hasta el treinta por ciento del tiempo de lectura en lectores no entrenados. Reducirlas mediante el uso de un dedo guía puede aumentar la velocidad en un veinte por ciento de manera inmediata. El progreso en lectura rápida es acumulativo y predecible. Las primeras semanas traen ganancias rápidas mientras el lector elimina malos hábitos. Las semanas intermedias consolidan la nueva forma de procesar el texto. Las semanas finales construyen resistencia y velocidad sostenida. Cada sesión de práctica cuenta. La constancia diaria importa más que la duración de cada sesión. Veinte minutos al día producen mejores resultados que dos horas cada fin de semana.`.split(' ');
+let rsSpeed=200,rsIdx=0,rsTimer=null,rsRun=false;
+function setRS(w,btn){rsSpeed=w;document.querySelectorAll('#ex-rsvp .btn-sm').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('rsvp-wshow').textContent=w+' wpm';if(rsRun){clearInterval(rsTimer);rsTimer=setInterval(rsTick,60000/w);}}
+function rsTick(){
+  if(rsIdx>=RSVP_TXT.length){clearInterval(rsTimer);rsRun=false;document.getElementById('rsvp-w').textContent='✓ Fin';return;}
+  document.getElementById('rsvp-w').textContent=RSVP_TXT[rsIdx];
+  const p=Math.round((rsIdx/RSVP_TXT.length)*100);
+  document.getElementById('rsvp-pf').style.width=p+'%';
+  document.getElementById('rsvp-pct').textContent=p+'%';
+  document.getElementById('rsvp-cnt').textContent=(rsIdx+1)+'/'+RSVP_TXT.length;
+  rsIdx++;
+}
+function rsStart(){if(rsRun)return;rsRun=true;rsTimer=setInterval(rsTick,60000/rsSpeed);}
+function rsPause(){clearInterval(rsTimer);rsRun=false;}
+function rsReset(){rsPause();rsIdx=0;document.getElementById('rsvp-w').textContent='· · ·';document.getElementById('rsvp-pf').style.width='0%';document.getElementById('rsvp-pct').textContent='0%';document.getElementById('rsvp-cnt').textContent='';}
+
+// ══════════════════════════════════════════
+//  VISUAL FIELD
+// ══════════════════════════════════════════
+const VF_WORDS=['libro','mente','foco','texto','vista','hoja','rápido','leer','campo','ojo','línea','página','cerebro','palabra','flash','nuevo','claro','frase','saber','ágil','breve','denso','clave','forma','luz'];
+let vfActive=false,vfCurrent=null,vfCorrect=0,vfTotal=0,vfTimer=null;
+function vfStart(){
+  vfActive=true;
+  document.getElementById('vf-inst').style.display='none';
+  vfNext();
+}
+function vfNext(){
+  const stage=document.getElementById('vf-stage');
+  const w=Math.floor(Math.random()*stage.offsetWidth*0.7);
+  const h=Math.floor(Math.random()*stage.offsetHeight*0.7);
+  const word=VF_WORDS[Math.floor(Math.random()*VF_WORDS.length)];
+  vfCurrent=word;
+  const el=document.getElementById('vf-word');
+  el.style.display='block';
+  el.style.left=w+'px';
+  el.style.top=h+'px';
+  el.textContent=word;
+  el.style.opacity='1';
+  // Show for 600ms then hide
+  vfTimer=setTimeout(()=>{
+    el.style.opacity='0';
+    el.style.display='none';
+    // Show options
+    const opts=document.getElementById('vf-opts');
+    const decoys=VF_WORDS.filter(w2=>w2!==word).sort(()=>Math.random()-.5).slice(0,3);
+    const all=[word,...decoys].sort(()=>Math.random()-.5);
+    opts.innerHTML=all.map(o=>`<button class="btn-sm" onclick="vfAnswer('${o}','${word}')">${o}</button>`).join('');
+  },600);
+}
+function vfAnswer(chosen,correct){
+  vfTotal++;
+  const ok=chosen===correct;
+  if(ok)vfCorrect++;
+  document.getElementById('vf-feedback').textContent=ok?'✓ Correcto':'✗ Era: '+correct;
+  document.getElementById('vf-score').textContent=vfCorrect+'/'+vfTotal;
+  setTimeout(vfNext,800);
+}
+function vfReset(){clearTimeout(vfTimer);vfActive=false;vfCorrect=0;vfTotal=0;document.getElementById('vf-word').style.display='none';document.getElementById('vf-opts').innerHTML='';document.getElementById('vf-feedback').textContent='';document.getElementById('vf-score').textContent='0/0';document.getElementById('vf-inst').style.display='block';}
+
+// ══════════════════════════════════════════
+//  REACTION TIMER
+// ══════════════════════════════════════════
+let rtState='idle',rtStart=null,rtWaiting=null;
+const rtResults=[];
+function rtTap(){
+  const stage=document.getElementById('rt-stage');
+  const big=document.getElementById('rt-big');
+  const sub=document.getElementById('rt-sub');
+  if(rtState==='idle'){
+    rtState='waiting';
+    stage.className='rt-stage waiting';
+    big.textContent='Espera…';
+    sub.textContent='Toca cuando veas el cambio de color';
+    const delay=1000+Math.random()*3000;
+    rtWaiting=setTimeout(()=>{
+      rtState='go';
+      stage.className='rt-stage go';
+      big.textContent='¡YA!';
+      rtStart=Date.now();
+    },delay);
+  } else if(rtState==='waiting'){
+    clearTimeout(rtWaiting);rtState='idle';
+    stage.className='rt-stage';big.textContent='¡Demasiado pronto!';sub.textContent='Toca de nuevo para intentarlo';
+  } else if(rtState==='go'){
+    const t=Date.now()-rtStart;
+    rtResults.push(t);
+    if(rtResults.length>8)rtResults.shift();
+    rtState='idle';
+    stage.className='rt-stage';
+    big.textContent=t+'ms';
+    const avg=Math.round(rtResults.reduce((a,b)=>a+b,0)/rtResults.length);
+    const best=Math.min(...rtResults);
+    sub.textContent=t<250?'⚡ Excelente':t<350?'👍 Bien':'Sigue entrenando';
+    document.getElementById('rt-avg').textContent=avg;
+    document.getElementById('rt-best').textContent=best;
+    document.getElementById('rt-hist').innerHTML=rtResults.map(r=>`<div class="rt-chip ${r<250?'':''}">  ${r}ms</div>`).join('');
+    // Save to state for streak
+    ST.rtResults=(ST.rtResults||[]).concat(t).slice(-20);save();
+  }
+}
+
+// ══════════════════════════════════════════
+//  PROGRESS
+// ══════════════════════════════════════════
+function refreshProg(){
+  const wpms=(ST.wpmHistory||[]).map(w=>w.wpm);
+  const avg=wpms.length?Math.round(wpms.reduce((a,b)=>a+b,0)/wpms.length):null;
+  const best=wpms.length?Math.max(...wpms):null;
+  const scores=ST.sessions.filter(s=>s.score!=null).map(s=>s.score);
+  const asc=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):null;
+  document.getElementById('p-wpm').textContent=avg||'—';
+  document.getElementById('p-best').textContent=best||'—';
+  document.getElementById('p-sess').textContent=ST.sessions.length;
+  document.getElementById('p-streak').textContent=ST.streak||0;
+  document.getElementById('p-score').textContent=asc!=null?asc+'%':'—';
+  drawChart();
+  // cert
+  const allDone=modProgress(ST,3)>=80;
+  const certArea=document.getElementById('cert-area');
+  if(allDone){
+    certArea.style.display='block';
+    document.getElementById('cert-sub').textContent='Has completado el curso completo VelozMente con un promedio de comprensión de '+(asc||'—')+'% y velocidad promedio de '+(avg||'—')+' WPM.';
+    document.getElementById('cert-score').textContent=(avg||'—')+' WPM';
+  } else certArea.style.display='none';
+  // history
+  const hl=document.getElementById('hist-list');
+  if(!ST.sessions.length){hl.innerHTML='<div style="text-align:center;padding:1rem;font-size:.82rem;opacity:.5">Sin lecturas aún</div>';return;}
+  hl.innerHTML=[...ST.sessions].reverse().slice(0,15).map(s=>{
+    const p=s.score>=90;
+    return `<div class="hist-row"><span class="hist-t">${s.title}</span><span class="hist-w">${s.wpm}</span><span class="hist-sc ${p?'hist-p':'hist-f'}">${s.score}%</span></div>`;
+  }).join('');
+}
+function drawChart(){
+  const data=(ST.wpmHistory||[]).slice(-15);
+  const svg=document.getElementById('wpm-chart');
+  if(data.length<2){svg.innerHTML='<text x="160" y="55" text-anchor="middle" font-family="Jost" font-size="10" fill="#cd8e9d" opacity="0.45">Registra sesiones para ver la gráfica</text>';return;}
+  const vals=data.map(d=>d.wpm);
+  const mn=Math.min(...vals)-15,mx=Math.max(...vals)+15;
+  const W=320,H=100,p=12;
+  const xs=i=>p+(i/(data.length-1))*(W-p*2);
+  const ys=v=>H-p-((v-mn)/(mx-mn||1))*(H-p*2);
+  const pts=data.map((d,i)=>xs(i)+','+ys(d.wpm)).join(' ');
+  const area='M '+xs(0)+','+(H-p)+' '+data.map((d,i)=>'L '+xs(i)+' '+ys(d.wpm)).join(' ')+' L '+xs(data.length-1)+','+(H-p)+' Z';
+  svg.innerHTML=`<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#cd8e9d" stop-opacity="0.3"/><stop offset="100%" stop-color="#cd8e9d" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#cg)"/><polyline points="${pts}" fill="none" stroke="#cd8e9d" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${data.map((d,i)=>'<circle cx="'+xs(i)+'" cy="'+ys(d.wpm)+'" r="2.5" fill="#cd8e9d"/>').join('')}${data.map((d,i)=>'<text x="'+xs(i)+'" y="'+(ys(d.wpm)-6)+'" text-anchor="middle" font-family="Jost" font-size="8" fill="#643000" opacity="0.65">'+d.wpm+'</text>').join('')}`;
+}
+function saveWPM(){
+  const v=parseInt(document.getElementById('m-wpm').value);
+  if(!v||v<50||v>2000)return;
+  ST.wpmHistory.push({date:new Date().toISOString(),wpm:v,source:'manual'});
+  const today=new Date().toDateString();
+  if(ST.lastDate!==today){const y=new Date();y.setDate(y.getDate()-1);ST.streak=ST.lastDate===y.toDateString()?(ST.streak||0)+1:1;ST.lastDate=today;}
+  checkBadges();save();syncUp();
+  document.getElementById('m-wpm').value='';
+  refreshProg();refreshHome();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function refreshAll(){refreshHome();renderLib();refreshProg();}
+load();
+initFirebase();
+if (ST.syncCode) { syncDown().then(() => startLiveSync()); }
+refreshAll();
+</script>
+</body>
+</html>
