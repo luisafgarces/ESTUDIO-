@@ -771,6 +771,240 @@ const LESSONS = {
  ]
 }
 
+
+,'d2':{
+ title:'Distimia, Doble Depresión y Diferencial Completo',
+ mod:'Trastornos Depresivos',
+ bloques:[
+  {t:'text', content:`<p>El Trastorno Persistente del Estado de Ánimo — antes llamado distimia — es una de las condiciones más subdiagnosticadas en clínica. ¿Por qué? Porque el paciente no viene a consultar por "depresión". Viene por problemas de pareja, bajo rendimiento laboral, o simplemente "porque siempre ha sido así". Y ahí está la trampa: <strong>normaliza su propio sufrimiento</strong>.</p>
+  <p><strong>Criterio central:</strong> ánimo deprimido la mayor parte del día, la mayoría de los días, durante al menos <em>2 años</em> en adultos (1 año en niños/adolescentes). Los períodos libres de síntomas no superan 2 meses consecutivos. Además, ≥2 de: apetito alterado, sueño alterado, fatiga, baja autoestima, dificultad para concentrarse, desesperanza.</p>
+  <p>La frase más frecuente en consulta: <em>"Yo siempre fui así"</em> o <em>"Soy una persona negativa de naturaleza"</em>. Llevan tanto tiempo sintiéndose así que confunden el trastorno con su personalidad. Tu trabajo es reconocer que eso no es carácter — es un trastorno tratable.</p>`},
+  {t:'case', label:'Caso clínico — TPPD',
+   text:`<strong>Rodrigo, 45 años, abogado.</strong> Consulta por "problemas en el trabajo". Al explorar: desde que recuerda se ha sentido "pesimista". No recuerda períodos en que se haya sentido bien más de unas pocas semanas. Come menos de lo normal, duerme mal, se siente sin energía. "No soy depresivo — simplemente soy realista". No cumple criterios de TDM en este momento. Lleva así desde los 22 años.
+   <br><br><strong>Claves diagnósticas:</strong> duración >2 años, sin episodios discretos, normalización del malestar, ausencia de eutimia sostenida. → TPPD.`},
+  {t:'section', content:'Doble Depresión — cuando se superponen'},
+  {t:'text', content:`<p>La <strong>doble depresión</strong> no es un diagnóstico oficial del DSM-5-TR — es un término clínico que describe la superposición de TPPD + TDM. Es más frecuente de lo que parece: hasta el <em>75% de los pacientes con TPPD</em> desarrollarán un episodio de TDM en algún momento de su vida.</p>
+  <p>El patrón: el paciente tiene un nivel base de ánimo deprimido crónico (TPPD), y sobre ese nivel aparece un episodio agudo de TDM. Cuando el episodio remite, el paciente "vuelve a su nivel normal" — que sigue siendo deprimido.</p>
+  <p>La trampa clínica: si solo tratas el episodio de TDM, el paciente "mejora" pero sigue con el TPPD de base. El tratamiento debe abordar ambos — más duración de farmacoterapia y psicoterapia enfocada en esquemas crónicos (terapia de esquemas de Young).</p>`},
+  {t:'question',
+   q:'Un paciente con TPPD de 3 años desarrolla ahora síntomas adicionales que cumplen criterios completos de TDM. ¿Qué diagnósticos corresponde asignar?',
+   opts:['Solo TDM — supera al TPPD','Solo TPPD — el TDM no aplica si hay TPPD previo','TPPD + TDM (doble depresión) — ambos se diagnostican','TDM con especificador crónico'],
+   cor:2,
+   fb:'Ambos diagnósticos se asignan simultáneamente. El TPPD se mantiene como diagnóstico de base, y el TDM se añade como episodio superpuesto. Esto tiene implicaciones directas en el tratamiento: mayor duración de farmacoterapia y psicoterapia que aborde tanto el episodio agudo como los esquemas crónicos subyacentes.'},
+  {t:'section', content:'TDM vs T. de Adaptación vs TPPD — la tabla que necesitas'},
+  {t:'table',
+   headers:['','TDM','T. Adaptación','TPPD'],
+   rows:[
+    ['Duración','≥2 semanas','<6 meses post-estresante','≥2 años'],
+    ['Estresante','No necesario','Siempre presente','No necesario'],
+    ['Criterios','≥5 síntomas','No cumple TDM','Ánimo dep. + 2 sínt.'],
+    ['Curso','Episódico','Remite con estresante','Crónico continuo'],
+    ['Tratamiento','Psicoterapia + farmaco','Psicoterapia principalmente','Ambos, más prolongado']
+   ]
+  },
+  {t:'alert', label:'Error que más daña a pacientes',
+   text:'Diagnosticar T. de Adaptación cuando el paciente cumple criterios de TDM porque "tiene un estresante identificable". El estresante puede precipitar el episodio pero no excluye el diagnóstico de TDM si se cumplen los criterios completos. Usar T. de Adaptación como "papelera" infradiagnostica y deja al paciente sin tratamiento adecuado.'},
+  {t:'question',
+   q:'¿Cuál es la diferencia más importante entre TPPD y TDM en la presentación clínica?',
+   opts:['El TPPD tiene más síntomas que el TDM','El TDM es episódico con cambio claro del funcionamiento; el TPPD es crónico sin períodos claros de eutimia y el paciente normaliza su malestar','El TPPD solo ocurre en mujeres','El TDM responde a psicoterapia y el TPPD no'],
+   cor:1,
+   fb:'La distinción clave es temporal y fenomenológica. El TDM tiene inicio relativamente identificable, representa un cambio respecto al funcionamiento previo y el paciente reconoce que "algo cambió". El TPPD es crónico, sin períodos claros de bienestar, y el paciente lo vive como su forma de ser. Esta diferencia determina la estrategia terapéutica.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima para diagnosticar TPPD en adultos?',
+   opts:['6 meses','1 año','2 años','5 años'], cor:2,
+   fb:'2 años en adultos, con períodos libres de síntomas no mayores a 2 meses consecutivos. En niños y adolescentes el criterio es 1 año, y el ánimo puede manifestarse como irritabilidad en lugar de tristeza.'},
+  {q:'¿Por qué el paciente con TPPD raramente consulta por depresión?',
+   opts:['Porque el TPPD no produce malestar suficiente','Porque normaliza el malestar — lo vive como su forma de ser, no como un trastorno','Porque los síntomas son leves','Porque el TPPD no produce disfunción'], cor:1,
+   fb:'La cronicidad del TPPD lleva a que el paciente integre el malestar como parte de su identidad. Frases como "siempre fui así" o "soy una persona negativa" son señales de alarma diagnóstica. El clínico debe explorar activamente si este "siempre" representa un trastorno tratable.'},
+  {q:'¿Qué implica diagnósticamente la "doble depresión"?',
+   opts:['Dos diagnósticos de TDM simultáneos','TPPD como base + episodio de TDM superpuesto — ambos se diagnostican y ambos se tratan','Una forma especialmente grave de TDM','Solo TPPD con síntomas graves'], cor:1,
+   fb:'Doble depresión = TPPD (base crónica) + TDM (episodio agudo superpuesto). Ambos diagnósticos se asignan. El tratamiento debe ser más prolongado y abordar tanto el episodio agudo como la cronicidad subyacente con psicoterapia orientada a esquemas.'}
+ ]
+}
+,'b2':{
+ title:'Bipolar II — El más subdiagnosticado',
+ mod:'Trastornos Bipolares',
+ bloques:[
+  {t:'text', content:`<p>El Trastorno Bipolar II tiene el récord más triste de la psiquiatría: un promedio de <strong>10 años</strong> desde el inicio de síntomas hasta el diagnóstico correcto. En ese tiempo, el paciente ha recibido múltiples diagnósticos incorrectos — generalmente TDM — y múltiples ciclos de antidepresivos que no terminan de funcionar, o que empeoran el cuadro.</p>
+  <p>La razón es simple: el episodio hipomaníaco, que es el sello del Bipolar II, raramente se reporta espontáneamente. Para el paciente, esos períodos son sus <em>"mejores épocas"</em> — cuando es productivo, creativo, sociable, necesita dormir poco. ¿Por qué querrían perder eso?</p>`},
+  {t:'section', content:'El episodio hipomaníaco — criterios precisos'},
+  {t:'text', content:`<p>La hipomanía usa los mismos síntomas que la manía (DIG FAST) pero con diferencias críticas:</p>
+  <p><strong>Duración mínima: 4 días consecutivos</strong> (vs 7 en manía). Muchos episodios duran 4-6 días — si no preguntas específicamente, se pierden.</p>
+  <p><strong>Sin hospitalización:</strong> Si requirió hospitalización → es manía → Bipolar I.</p>
+  <p><strong>Sin psicosis:</strong> Si hay delirios o alucinaciones → es manía.</p>
+  <p><strong>Sin disfunción grave:</strong> El paciente puede funcionar — de hecho, a menudo funciona <em>mejor</em> de lo habitual. Esto confunde al paciente y al clínico.</p>
+  <p><strong>Observable por otros:</strong> El cambio es evidente para personas cercanas aunque el paciente no lo perciba como anormal.</p>`},
+  {t:'case', label:'Cómo preguntar por hipomanía',
+   text:`Lo que debes preguntar cuando sospechas Bipolar II en un paciente "depresivo":
+   <br><br>"¿Ha tenido épocas, aunque sea cortas, en que se sentía con mucha más energía de lo normal, necesitaba dormir menos pero no estaba cansado/a, hablaba más, tenía muchas ideas, estaba muy productivo/a?"
+   <br><br>"¿Su familia o amigos le han dicho que estaba 'muy acelerado/a' o 'diferente de lo normal'?"
+   <br><br>"¿Ha habido épocas en que tomó decisiones impulsivas — gastos, relaciones, trabajo — que después lamentó?"
+   <br><br>Si la respuesta es sí → explorar duración, frecuencia, impacto en funcionamiento.`},
+  {t:'question',
+   q:'Una paciente con 4 episodios depresivos previos relata períodos de 5-6 días con "mucha energía, duermo 4 horas y no me hace falta, tengo mil ideas, mis amigos dicen que estoy acelerada". Nunca hospitalización ni psicosis. ¿Cuál es el diagnóstico?',
+   opts:['TDM recurrente — las épocas buenas son eutimia normal','Ciclotimia — los cambios son subclínicos','Trastorno Bipolar II — hipomanía + episodios depresivos mayores','Trastorno Bipolar I — tiene episodios maníacos'],
+   cor:2,
+   fb:'Bipolar II: episodios hipomaníacos (≥4 días, sin hospitalización ni psicosis, con cambio observable) + episodios depresivos mayores. Ciclotimia requeriría que los síntomas hipomaníacos NO cumplan criterios de hipomanía completa. Bipolar I requeriría un episodio maníaco con ≥7 días o gravedad suficiente para hospitalización.'},
+  {t:'alert', label:'Nunca antidepresivos solos en Bipolar II',
+   text:'ISRS o IRSN sin estabilizador en un paciente con Bipolar II pueden: (1) precipitar hipomanía o manía, (2) inducir ciclación rápida (≥4 episodios/año), (3) producir estados mixtos con mayor riesgo suicida. Tratamiento de la depresión bipolar II: quetiapina (1ª línea), litio o lamotrigina. Nunca antidepresivo en monoterapia.'},
+  {t:'table',
+   headers:['Señal','Sugiere TDM','Sugiere Bipolar II'],
+   rows:[
+    ['Edad de inicio','Cualquier edad','<25 años frecuente'],
+    ['Historia familiar','Variable','Bipolar, psicosis, suicidio'],
+    ['Respuesta a AD','Buena y sostenida','Parcial, temporal, viraje'],
+    ['Episodios','Puede ser único','Múltiples, recurrentes'],
+    ['Hipersomnia/hiperfagia','Menos frecuente','Más frecuente'],
+    ['Épocas buenas','No reportadas','Presentes pero no reportadas']
+   ]
+  },
+  {t:'question',
+   q:'¿Por qué la respuesta parcial y temporal a múltiples antidepresivos es una señal de alerta para Bipolar II?',
+   opts:['Porque los ISRS no funcionan en ninguna depresión','Los AD sin estabilizador en bipolar pueden inducir ciclación — cada ciclo termina antes que el anterior','Porque la dosis siempre fue insuficiente','Es coincidencia sin implicación diagnóstica'],
+   cor:1,
+   fb:'En Bipolar II no diagnosticado, los antidepresivos pueden inducir ciclación acelerada: el episodio depresivo mejora brevemente pero luego hay un episodio hipomaníaco seguido de otro depresivo, cada vez más frecuente. La respuesta "funciona unas semanas y después nada" es el patrón clásico de ciclación inducida por antidepresivos en un bipolar no reconocido.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima del episodio hipomaníaco según el DSM-5-TR?',
+   opts:['1 día','4 días consecutivos','7 días','2 semanas'], cor:1,
+   fb:'4 días consecutivos, presente la mayor parte del día. Esta duración más breve (vs 7 días de la manía) hace que los episodios hipomaníacos sean fácilmente pasados por alto si no se pregunta activamente por ellos.'},
+  {q:'¿Qué diferencia fundamentalmente el Bipolar I del Bipolar II?',
+   opts:['El Bipolar I tiene más depresión','El Bipolar I requiere al menos un episodio maníaco; el II solo tiene hipomanía','El Bipolar II es más grave','El Bipolar I no tiene depresión'], cor:1,
+   fb:'La distinción definitoria es la presencia de manía (Bipolar I) vs solo hipomanía (Bipolar II). La manía tiene mayor gravedad, puede requerir hospitalización y puede incluir psicosis. Si alguna vez hubo un episodio maníaco completo → siempre Bipolar I, independientemente de cuánta hipomanía haya habido después.'},
+  {q:'¿Por qué el paciente con Bipolar II raramente reporta espontáneamente los episodios hipomaníacos?',
+   opts:['Porque los hipomaníacos son muy breves para recordarlos','Porque los vive como sus mejores épocas — productivos, energéticos — y no los percibe como patológicos','Porque tienen amnesia durante la hipomanía','Porque tienen vergüenza de reportarlos'], cor:1,
+   fb:'La hipomanía se vive como un estado positivo — mayor productividad, menos necesidad de sueño, más sociabilidad. El paciente no lo reporta porque no lo percibe como problema. Por esto, el clínico debe preguntar ACTIVAMENTE por épocas de "demasiada energía", gastos impulsivos, decisiones apresuradas o comentarios de terceros sobre estar "acelerado".'}
+ ]
+}
+,'a1':{
+ title:'TAG y Trastorno de Pánico',
+ mod:'Trastornos de Ansiedad',
+ bloques:[
+  {t:'text', content:`<p>El Trastorno de Ansiedad Generalizada (TAG) no es "nerviosismo". Es una enfermedad crónica que tiene la particularidad de que sus síntomas se confunden con "personalidad ansiosa", "estrés del trabajo" o "ser muy responsable".</p>
+  <p><strong>Criterio diagnóstico central:</strong> Ansiedad y preocupación excesivas, difíciles de controlar, sobre una <em>variedad</em> de eventos o actividades, la mayoría de los días durante al menos <em>6 meses</em>. Se requieren ≥3 síntomas: inquietud, fatiga, dificultad para concentrarse, irritabilidad, tensión muscular, alteraciones del sueño.</p>
+  <p>La palabra clave es <strong>variedad</strong>. El paciente con TAG no se preocupa solo por la salud o solo por el trabajo — se preocupa por todo. Si hoy resuelve un problema, mañana ya hay otro tema. La preocupación migra de un tema al siguiente indefinidamente.</p>`},
+  {t:'alert', label:'Error crítico en urgencias',
+   text:'Antes de diagnosticar TAG, SIEMPRE preguntar si el paciente ha usado benzodiacepinas y si las redujo o dejó recientemente. El síndrome de abstinencia a BZD produce un cuadro indistinguible del TAG — ansiedad intensa, insomnio, tensión, diaforesis — y puede ser potencialmente fatal (convulsiones). Una abstinencia brusca de BZD de alta dosis es una emergencia médica.'},
+  {t:'section', content:'Trastorno de Pánico — el que más visita urgencias'},
+  {t:'text', content:`<p>El Trastorno de Pánico es uno de los que más se presenta en urgencias médicas — el paciente convencido de que tiene el corazón malo. Los criterios son:</p>
+  <p><strong>Crisis de pánico recurrentes e inesperadas:</strong> inicio abrupto de síntomas intensos (palpitaciones, sudoración, temblor, sensación de asfixia, dolor torácico, náuseas, mareo, parestesias, escalofríos, sofoco, despersonalización/desrealización) con pico en menos de 10 minutos, y miedo a morir o perder el control.</p>
+  <p><strong>Seguidas de:</strong> ≥1 mes de ansiedad anticipatoria sobre nuevas crisis O cambios conductuales maladaptativos por miedo a las crisis (evitación).</p>
+  <p>Señal diagnóstica muy específica: <em>la crisis nocturna</em>. Una crisis que despierta al paciente del sueño es altamente específica del Trastorno de Pánico real — descarta que sea solo ansiedad situacional o simulación.</p>`},
+  {t:'question',
+   q:'¿Qué diferencia el TAG del Trastorno de Pánico en términos de la naturaleza de la ansiedad?',
+   opts:['No hay diferencia — ambos son ansiedad generalizada','TAG: ansiedad difusa, continua, sobre múltiples temas. Pánico: crisis discretas, inesperadas, con síntomas autonómicos intensos','TAG solo afecta el trabajo; Pánico solo las relaciones','El TAG es más grave porque dura más tiempo'],
+   cor:1,
+   fb:'La distinción es fundamental para el tratamiento. TAG: preocupación crónica, difusa, intelectualizada, sin crisis discretas. Pánico: episodios agudos, inesperados, con síntomas físicos intensos y pico en <10 minutos. Pueden coexistir, pero el manejo difiere: el Pánico responde especialmente a exposición interoceptiva; el TAG a técnicas de manejo de preocupación y tolerancia a la incertidumbre.'},
+  {t:'tip', label:'Exposición interoceptiva — el componente clave en Pánico',
+   text:'La TCC para Trastorno de Pánico incluye exposición interoceptiva: exponer deliberadamente al paciente a las sensaciones físicas temidas (hiperventilación, giro en silla, subir escaleras rápido). Esto desensibiliza el "miedo al miedo" — la catastrofización de las señales corporales que mantiene el trastorno. Sin este componente, la TCC para pánico es incompleta.'},
+  {t:'question',
+   q:'Paciente con clínica de ansiedad. Ha tomado 4mg de clonazepam diarios durante 2 años. La semana pasada lo redujo a 1mg "por su cuenta". Ahora tiene ansiedad intensa, insomnio, diaforesis y palpitaciones. ¿Cuál es el diagnóstico?',
+   opts:['TAG de novo — primera vez con estos síntomas','Trastorno de Pánico — las palpitaciones son el síntoma cardinal','Síndrome de abstinencia a benzodiacepinas — emergencia médica potencial','Trastorno Somático'],
+   cor:2,
+   fb:'Síndrome de abstinencia a BZD. La reducción de 4mg a 1mg de clonazepam en una semana = reducción del 75% de forma abrupta. Los síntomas son idénticos al TAG pero de causa farmacológica. En casos graves, la abstinencia de BZD puede causar convulsiones y es potencialmente mortal. Debe manejarse con reducción muy gradual (10-25% por semana máximo) bajo supervisión médica.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima de los síntomas para diagnosticar TAG?',
+   opts:['1 mes','3 meses','6 meses','1 año'], cor:2,
+   fb:'6 meses es el criterio temporal del TAG. Esta duración distingue el TAG de la ansiedad situacional o el trastorno de adaptación con ansiedad, que son más breves y responden a un estresante identificable.'},
+  {q:'¿Cuántos síntomas somáticos/cognitivos se requieren para el TAG en adultos (además de la preocupación)?',
+   opts:['1 síntoma','2 síntomas','3 síntomas','5 síntomas'], cor:2,
+   fb:'≥3 síntomas de: inquietud/tensión, fatiga, dificultad para concentrarse, irritabilidad, tensión muscular, alteraciones del sueño. En niños el criterio es más laxo: solo 1 síntoma adicional es suficiente.'},
+  {q:'¿Qué característica de las crisis de pánico es más específica del Trastorno de Pánico verdadero?',
+   opts:['Que ocurran en lugares públicos','Que el paciente tenga miedo a morir','Que una crisis ocurra mientras el paciente duerme','Que duren más de 30 minutos'], cor:2,
+   fb:'Las crisis nocturnas — que despiertan al paciente del sueño — son muy específicas del Trastorno de Pánico real. Descartan que las crisis sean puramente situacionales o reactivas a estresantes. Si el paciente tiene crisis mientras duerme, no puede estar "causándolas" voluntariamente ni ser reactivas al entorno inmediato.'}
+ ]
+}
+,'pe2':{
+ title:'Narcisista, Histriónico, Clústeres A y C',
+ mod:'Trastornos de Personalidad',
+ bloques:[
+  {t:'text', content:`<p>Continuamos el Clúster B con el Trastorno Narcisista y el Histriónico, y luego los Clústeres A (raros/excéntricos) y C (ansiosos/temerosos).</p>
+  <p><strong>Trastorno Narcisista de la Personalidad (TNP):</strong> Grandiosidad (en fantasía o conducta), necesidad de admiración y falta de empatía. ≥5 de 9 criterios: sentido grandioso, fantasías de éxito ilimitado, sentirse especial/único, necesita admiración excesiva, sentido de derecho, explotador interpersonal, carece de empatía, envidia, arrogante/soberbio.</p>
+  <p>Clave clínica: diferencia <em>narcisismo grandioso</em> (superficialmente seguro, dominante) de <em>narcisismo vulnerable</em> (hipersensible a la crítica, vergüenza subyacente intensa). El segundo es más frecuente en consulta y más difícil de reconocer.</p>`},
+  {t:'text', content:`<p><strong>Trastorno Histriónico de la Personalidad:</strong> Emotividad excesiva y búsqueda de atención. ≥5 de 8: incómodo cuando no es el centro, inapropiadamente seductor, emociones superficiales y cambiantes rápidamente, usa apariencia física para atraer atención, discurso impresionista sin detalles, teatral/dramático/exagerado, sugestionable, malinterpreta relaciones como más íntimas.</p>
+  <p>Diferencial con TLP: el TLP tiene inestabilidad de identidad marcada, autolesiones y miedo al abandono intenso. El Histriónico tiene identidad más estable y las conductas suicidas son más infrecuentes (aunque pueden ocurrir como gesto dramático).</p>`},
+  {t:'section', content:'Clúster A — Raros y excéntricos'},
+  {t:'text', content:`<p>Los tres trastornos del Clúster A comparten asociación genética con el espectro de la esquizofrenia:</p>
+  <p><strong>Paranoide:</strong> Desconfianza y suspicacia pervasiva. ≥4 de 7: sospecha de explotación sin base, dudas sobre lealtad, reluctante a confiar, lee amenazas en comentarios benignos, guarda rencores, percibe ataques no evidentes, sospecha infidelidad. Sin psicosis franca — diferencial con Esquizofrenia paranoide y T. Delirante.</p>
+  <p><strong>Esquizoide:</strong> Desapego de relaciones sociales y rango restringido de expresión emocional. Sin deseo de contacto social (diferencia del Evitativo que sí quiere pero tiene miedo). Indiferencia a la alabanza o crítica. Actividades solitarias.</p>
+  <p><strong>Esquizotípico:</strong> Malestar agudo en relaciones íntimas, distorsiones cognitivas/perceptuales y excentricidad. Pensamiento mágico, experiencias perceptuales inusuales, pensamiento y habla extraños, suspicacia, afecto inapropiado. Genéticamente más cercano a la esquizofrenia.</p>`},
+  {t:'section', content:'Clúster C — Ansiosos y temerosos'},
+  {t:'text', content:`<p><strong>Evitativo:</strong> Inhibición social, sentimientos de inadecuación, hipersensibilidad a la evaluación negativa. ≥4 de 7: evita trabajo por temor a crítica, no se involucra sin seguridad de ser aceptado, restricción íntima por vergüenza, preocupado por crítica/rechazo, inhibido en situaciones nuevas, se ve inadecuado, reluctante a tomar riesgos personales. Diferencial con Fobia Social: el TPE es más pervasivo y arraigado.</p>
+  <p><strong>Dependiente:</strong> Necesidad excesiva de ser cuidado. ≥5 de 8: dificultad para decisiones sin apoyo excesivo, necesita que otros asuman responsabilidades mayores, no desacuerda por miedo, dificultad para iniciar solo, va demasiado lejos para apoyo, incómodo solo, urgente buscar nueva relación tras ruptura, miedo irrealista al abandono.</p>
+  <p><strong>Obsesivo-Compulsivo de la Personalidad (TOCP):</strong> Preocupación por el orden, perfeccionismo y control. ≥4 de 8: preocupado por detalles/reglas, perfeccionismo que interfiere, excesivo trabajo/productividad, escrupulosidad, incapaz de tirar objetos, delega con dificultad, avaro, rigidez y obstinación. <em>Diferencial clave con TOC:</em> el TOCP es egosintónico (no le molesta, es "su forma de ser"); el TOC es egodistónico (le genera angustia).</p>`},
+  {t:'question',
+   q:'¿Cuál es la diferencia diagnóstica más importante entre el T. Evitativo de la Personalidad y la Fobia Social generalizada?',
+   opts:['Son el mismo trastorno con diferente nombre','El TPE es más pervasivo, arraigado y crónico; la Fobia Social puede ser más situacional. Pueden coexistir o ser un continuum','La Fobia Social es más grave','El TPE solo ocurre en adultos mayores'],
+   cor:1,
+   fb:'La distinción es de grado y profundidad. La Fobia Social (TAS) puede ser más situacional y responder mejor a TCC breve. El TPE es un patrón pervasivo que impregna toda la personalidad — el miedo al rechazo es un esquema nuclear que requiere terapia de esquemas o TCC más prolongada. En la práctica muchos pacientes cumplen criterios para ambos simultáneamente.'},
+  {t:'alert', label:'TOCP vs TOC — no confundirlos',
+   text:'El TOCP (perfeccionismo, orden, control como parte del carácter) es egosintónico — el paciente lo ve como una virtud, no como un problema. El TOC tiene obsesiones egodistónicas (pensamientos intrusivos que le dan asco) y compulsiones que el paciente sabe que son irracionales pero no puede controlar. Son trastornos completamente distintos con tratamientos diferentes. Un paciente con TOCP puede además tener TOC comórbido.'},
+  {t:'question',
+   q:'Paciente muy ordenado, perfeccionista, trabaja 12 horas al día, delega con dificultad, no tira nada. Dice "así soy yo, nada me molesta". ¿Cuál es el diagnóstico más probable?',
+   opts:['TOC — necesita ERP','TOCP — patrón egosintónico de perfeccionismo y control','T. de Ansiedad Generalizada','T. de Personalidad Narcisista'],
+   cor:1,
+   fb:'TOCP: el patrón es egosintónico — el paciente lo vive como parte de su identidad ("así soy yo"), no como algo que le genera angustia incontrolable. Si hubiera obsesiones egodistónicas que le producen angustia y compulsiones para neutralizarlas, sería TOC. La frase "nada me molesta" descarta el componente egodistónico del TOC.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la distinción clave entre el T. Esquizoide y el T. Evitativo de la Personalidad?',
+   opts:['El Esquizoide tiene síntomas psicóticos','El Esquizoide no desea contacto social; el Evitativo sí lo desea pero teme el rechazo','El Evitativo es más grave','No hay diferencia práctica'], cor:1,
+   fb:'La distinción es motivacional. El Esquizoide genuinamente no quiere el contacto social — hay ausencia de deseo. El Evitativo sí quiere relacionarse pero el miedo al rechazo y la vergüenza lo inhiben. Esta diferencia tiene implicaciones terapéuticas: el Evitativo puede beneficiarse de exposición gradual; el Esquizoide no tiene motivación para el cambio interpersonal.'},
+  {q:'¿Por qué el Trastorno de Personalidad Esquizotípico está en el Clúster A y no en el espectro psicótico?',
+   opts:['Por error histórico del DSM','Porque sus síntomas (pensamiento mágico, experiencias inusuales) son subclínicos y no llegan a psicosis franca, aunque hay asociación genética con la esquizofrenia','Porque no tiene síntomas psicóticos nunca','Porque responde a antidepresivos'], cor:1,
+   fb:'El Esquizotípico tiene síntomas que se asemejan a la esquizofrenia pero en forma atenuada: pensamiento mágico, experiencias perceptuales inusuales, pensamiento y habla extraños. No llega a la psicosis franca. Tiene asociación genética con la esquizofrenia (más que los otros TP del Clúster A) y puede ser el pródromo de una psicosis en algunos casos.'},
+  {q:'¿Cuál es el tratamiento psicológico más apropiado para el T. Dependiente de la Personalidad?',
+   opts:['DBT — es el tratamiento de los trastornos de personalidad','TCC con enfoque en autonomía gradual, asertividad y tolerancia a la soledad','ERP — exposición y prevención de respuesta','Solo farmacología con ISRS'], cor:1,
+   fb:'La TCC para el TDP se enfoca en construir gradualmente la autonomía: tomar pequeñas decisiones solo, practicar asertividad, tolerar la soledad sin buscar inmediatamente apoyo externo. La terapia de esquemas también es efectiva para trabajar el esquema nuclear de "soy incapaz sin los demás". El proceso es lento porque la dependencia es el mecanismo de seguridad del paciente.'}
+ ]
+}
+,'ev2':{
+ title:'MCMI-IV, WAIS-IV y el informe psicológico',
+ mod:'Evaluación e Instrumentos',
+ bloques:[
+  {t:'text', content:`<p>El <strong>MCMI-IV</strong> (Millon Clinical Multiaxial Inventory-IV) es el instrumento de personalidad diseñado específicamente para población <em>clínica</em> — no para población general. Esta es su diferencia más importante respecto al MMPI-2.</p>
+  <p>Tiene 195 ítems y usa <strong>Tasas Base (TB)</strong> en lugar de puntuaciones T. Las TB están ancladas a la prevalencia de cada patrón en poblaciones clínicas. TB ≥75 = presencia del rasgo. TB ≥85 = rasgo prominente. Esta diferencia importa: el MCMI sobreestima patología si se usa en población general.</p>
+  <p>Cubre 3 dominios: <strong>Patrones de personalidad</strong> (14 escalas), <strong>Síndromes clínicos</strong> (7 escalas), y <strong>Síndromes clínicos graves</strong> (3 escalas: T. del pensamiento mayor, Depresión mayor, T. Delirante).</p>`},
+  {t:'section', content:'WAIS-IV — los 4 índices que debes dominar'},
+  {t:'text', content:`<p>El WAIS-IV (Wechsler Adult Intelligence Scale-IV) mide la inteligencia mediante 4 índices principales:</p>
+  <p><strong>ICV — Índice de Comprensión Verbal:</strong> Vocabulario, semejanzas, información. Mide inteligencia cristalizada (Gc), conocimiento adquirido. Muy sensible a nivel educativo y cultural. La más afectada por privación cultural.</p>
+  <p><strong>IRP — Índice de Razonamiento Perceptivo:</strong> Cubos, matrices, rompecabezas visual. Mide inteligencia fluida (Gf), razonamiento no verbal. Menos sensible a cultura. En TEA suele ser más alto que ICV.</p>
+  <p><strong>IMT — Índice de Memoria de Trabajo:</strong> Dígitos, sucesión de letras y números. Mide capacidad de la memoria operativa. Muy sensible a ansiedad, TDAH y depresión.</p>
+  <p><strong>IVP — Índice de Velocidad de Procesamiento:</strong> Claves, búsqueda de símbolos. Mide velocidad cognitiva y eficiencia. Sensible a fatiga, depresión y daño cerebral difuso.</p>
+  <p>Las puntuaciones escalares tienen M=10, DS=3. ≤7 = bajo; 8-12 = promedio; ≥13 = superior. El CI Total solo es interpretable cuando el perfil es relativamente homogéneo — con discrepancias marcadas entre índices, son los índices parciales los informativos.</p>`},
+  {t:'case', label:'Interpretar un perfil WAIS-IV',
+   text:`<strong>Paciente, 28 años, con sospecha de TEA:</strong>
+   ICV = 115 (percentil 84) / IRP = 128 (percentil 97) / IMT = 102 (percentil 55) / IVP = 88 (percentil 21) / CI Total = 108
+   <br><br><strong>Interpretación:</strong> El CI Total de 108 es ENGAÑOSO porque hay una discrepancia IRP-ICV de 13 puntos (p<.05) y IRP-IVP de 40 puntos (muy significativa). El patrón IRP>>ICV con IVP bajo es frecuente en TEA y en dislexia. No se reporta el CI Total como medida representativa — se describe el perfil por índices.`},
+  {t:'section', content:'El informe psicológico que comunica de verdad'},
+  {t:'text', content:`<p>Un informe psicológico tiene 6 secciones irrenunciables:</p>
+  <p><strong>1. Datos de identificación:</strong> Nombre, edad, fecha, evaluador, motivo de derivación.</p>
+  <p><strong>2. Motivo de evaluación:</strong> La pregunta que se intenta responder — no "el paciente viene por..." sino "se solicita evaluación para determinar...".</p>
+  <p><strong>3. Procedimiento:</strong> Instrumentos administrados, fechas, condiciones de la evaluación (cooperación, esfuerzo, validez de los resultados).</p>
+  <p><strong>4. Resultados:</strong> Por dominio — cognitivo, emocional/afectivo, personalidad, funcional. Con datos específicos, no solo adjetivos.</p>
+  <p><strong>5. Integración diagnóstica:</strong> Diagnóstico con criterios, formulación del caso, factores predisponentes/precipitantes/perpetuantes.</p>
+  <p><strong>6. Recomendaciones:</strong> Concretas, realizables, dirigidas al destinatario del informe. Diferente si es para el paciente, para el médico, para el colegio o para el sistema judicial.</p>`},
+  {t:'alert', label:'Lo que nunca debe aparecer en un informe',
+   text:'(1) Diagnósticos sin sustento en los datos del informe. (2) Lenguaje técnico sin explicación cuando el destinatario no es clínico. (3) "El paciente es..." seguido de un adjetivo peyorativo. (4) Conclusiones que van más allá de lo que los instrumentos pueden decir. (5) Etiquetas diagnósticas de personalidad sin el proceso de evaluación que las sustenta.'},
+  {t:'question',
+   q:'¿Por qué el MCMI-IV no debe usarse en población general sin psicopatología?',
+   opts:['Porque tiene menos ítems que el MMPI-2','Porque sus Tasas Base están calibradas para prevalencia en poblaciones clínicas — sobreestima patología en población general','Porque solo mide personalidad, no psicopatología','Porque requiere formación especial para administrarlo'],
+   cor:1,
+   fb:'Las Tasas Base del MCMI-IV están ancladas a la prevalencia de cada patrón en poblaciones clínicas (no distribución normal de la población general). Aplicarlo a alguien sin psicopatología produce perfiles que sobrestiman la presencia de rasgos patológicos. El manual de Millon es explícito: está diseñado para adultos en evaluación o tratamiento con probable psicopatología.'}
+ ],
+ quiz:[
+  {q:'¿Qué diferencia fundamentalmente la Tasa Base (TB) del MCMI-IV de la puntuación T del MMPI-2?',
+   opts:['La TB es más fácil de calcular','La TB está basada en prevalencia clínica, no en distribución normal; esto hace al MCMI más apropiado para pacientes con probable psicopatología','Las puntuaciones T son más precisas','No hay diferencia práctica entre ambas'], cor:1,
+   fb:'La TB está calibrada para la prevalencia de cada patrón en poblaciones clínicas. Esto significa que TB ≥75 indica que ese rasgo es más frecuente en ese paciente que en la población clínica general. El MMPI-2 usa puntuaciones T basadas en distribución normal de la población general. La elección entre uno y otro depende del contexto: MCMI para clínica/terapia; MMPI para evaluación más amplia incluyendo forense.'},
+  {q:'Un paciente tiene en el WAIS-IV: ICV=95, IRP=125, IMT=98, IVP=82. ¿Qué conclusión es más apropiada sobre el CI Total?',
+   opts:['El CI Total resume adecuadamente la inteligencia del paciente','El CI Total no es representativo dado el perfil heterogéneo — la discrepancia IRP-ICV de 30 puntos y IRP-IVP de 43 puntos requieren interpretación por índices','El paciente tiene inteligencia promedio en todos los dominios','El IVP bajo indica discapacidad intelectual'], cor:1,
+   fb:'Cuando hay discrepancias significativas entre índices (≥15-20 puntos entre los más altos y más bajos), el CI Total pierde representatividad como medida global. En este caso, IRP=125 (superior) con IVP=82 (bajo promedio) sugiere un perfil heterogéneo — posiblemente TEA, dislexia, o daño cerebral específico. Se reporta el perfil por índices, no el CI Total como medida principal.'},
+  {q:'¿Cuál es el elemento más frecuentemente omitido en informes psicológicos y que reduce su utilidad clínica?',
+   opts:['Los datos de identificación del paciente','Las recomendaciones concretas y realizables dirigidas al destinatario específico','Los instrumentos utilizados','La fecha de evaluación'], cor:1,
+   fb:'Las recomendaciones son el elemento con mayor impacto clínico y el más frecuentemente ausente o genérico. "Se recomienda psicoterapia" no es una recomendación útil. "Se recomienda TCC con componente de exposición interoceptiva por un profesional con formación específica en T. de Pánico, con frecuencia semanal inicial" sí lo es. Las recomendaciones deben ser específicas, realizables y adaptadas al contexto del paciente y al destinatario del informe.'}
+ ]
+}
 }; // fin LESSONS
 
 // ── CASOS PARA EL JUEGO ──
@@ -862,7 +1096,9 @@ function refreshHome(){
   MODS.forEach((mod,mi)=>{
     const done=mod.lecciones.filter(l=>ST.done[l.id]).length;
     const total=mod.lecciones.length;
-    const prevUnlocked=mi===0||MODS[mi-1].lecciones.every(l=>ST.done[l.id]);
+    // Módulo desbloqueado si todas las lecciones CON contenido del módulo anterior están hechas
+    const prevModLessonsWithContent=mi===0?[]:MODS[mi-1].lecciones.filter(l=>LESSONS[l.id]);
+    const prevUnlocked=mi===0||prevModLessonsWithContent.length===0||prevModLessonsWithContent.every(l=>ST.done[l.id]);
     const locked=!prevUnlocked&&done===0;
     const pct=Math.round(done/total*100);
     const isDone=done===total;
@@ -898,8 +1134,10 @@ function openMod(mid){
   ${mod.lecciones.map((l,i)=>{
     const done=ST.done[l.id];
     const hasLesson=!!LESSONS[l.id];
-    const prevDone=i===0||ST.done[mod.lecciones[i-1].id];
-    const locked=!prevDone&&!done;
+    // Solo bloquear si la lección anterior que tiene contenido no está hecha
+    const prevWithContent=mod.lecciones.slice(0,i).filter(x=>LESSONS[x.id]);
+    const prevDone=prevWithContent.length===0||prevWithContent.every(x=>ST.done[x.id]);
+    const locked=!prevDone&&!done&&hasLesson;
     return `<div class="mod-card${locked||!hasLesson?' locked':''}" style="margin-bottom:.6rem" data-lid="${l.id}">
       <div class="mod-header" style="margin-bottom:0">
         <div class="mod-icon" style="background:${mod.color}22;color:${mod.color};font-size:.9rem;font-weight:700">${i+1}</div>
