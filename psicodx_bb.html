@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PsicoDx · Curso Intensivo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5b9bd5;--bg:#daeaf8;--text:#0d2a4a;--white:#f4f9ff;
+  --rl:rgba(91,155,213,.18);--rm:rgba(91,155,213,.45);--rd:#3a7bbf;
+  --ok:#3a9e6f;--err:#c0553a;--warn:#c49a3a;
+  --b1:#5b9bd5;--b2:#3a7bbf;--b3:#2a5a9a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+
+/* ── HEADER ── */
+.app-header{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text)}
+.logo em{color:var(--blue);font-style:italic}
+.hstats{display:flex;gap:.9rem}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);line-height:1}
+.hs-l{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text);opacity:.5}
+
+/* ── NAV ── */
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.25rem 0 .4rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.35rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif;transition:all .15s}
+.ni-ic{font-size:1.15rem;line-height:1}
+.ni-lb{font-size:.54rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.35;transition:all .15s}
+.ni.active .ni-lb{color:var(--blue);opacity:1}
+
+/* ── SCROLL ── */
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1.1rem 1rem 1rem}
+.sc.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:300;color:var(--text);margin-bottom:1rem;line-height:1.1}
+.st em{color:var(--blue);font-style:italic}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.85rem}
+.badge{display:inline-flex;align-items:center;gap:.25rem;background:var(--bg);border:1px solid var(--rm);border-radius:20px;padding:.15rem .55rem;font-size:.62rem;font-weight:700;letter-spacing:.07em;color:var(--blue);text-transform:uppercase}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem 1.3rem;border-radius:30px;border:1.5px solid var(--blue);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--blue)}
+.btn-g:hover{background:var(--rl)}
+.btn-sm{padding:.3rem .75rem;font-size:.68rem;border-radius:20px;border:1px solid var(--rm);background:transparent;color:var(--text);cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;transition:all .15s}
+.btn-sm.on,.btn-sm:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.divider{height:1px;background:var(--rl);margin:.9rem 0}
+.ibox{background:var(--rl);border-radius:10px;padding:.75rem 1rem;font-size:.8rem;line-height:1.6;color:var(--text);margin-bottom:.9rem;display:flex;gap:.55rem;align-items:flex-start}
+.ii{font-size:.95rem;flex-shrink:0;margin-top:.05rem}
+.x-btn{width:30px;height:30px;border-radius:50%;background:var(--bg);border:1px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;flex-shrink:0}
+
+/* ── HOME ── */
+.banner{background:linear-gradient(135deg,var(--b1) 0%,var(--b3) 100%);border-radius:16px;padding:1.3rem 1.1rem;color:#fff;margin-bottom:1.1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%}
+.banner-ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.banner-s{font-size:.78rem;opacity:.85;line-height:1.5}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.8rem .5rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--blue);line-height:1}
+.sc3-l{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.45;margin-top:.15rem}
+
+/* ── MÓDULO CARDS ── */
+.mod-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.mod-card:hover:not(.locked){border-color:var(--rm);transform:translateY(-1px)}
+.mod-card.locked{opacity:.5;cursor:default}
+.mod-card.done{border-color:var(--ok)}
+.mod-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem}
+.mod-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text)}
+.mod-sub{font-size:.68rem;color:var(--text);opacity:.55;margin-top:.08rem}
+.mod-prog-wrap{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:.28rem}
+.mod-prog-fill{height:100%;border-radius:2px;transition:width .5s ease;background:var(--blue)}
+.mod-meta{display:flex;justify-content:space-between;font-size:.66rem;color:var(--text);opacity:.5;margin-top:.35rem}
+
+/* ── BADGES ── */
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.badge-item{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.7rem .4rem;text-align:center}
+.badge-item.earned{border-color:var(--blue);background:linear-gradient(135deg,var(--bg),var(--white))}
+.badge-item.locked-b{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:1.5rem;line-height:1;margin-bottom:.25rem}
+.badge-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);opacity:.7}
+
+/* ── PRE-LECCIÓN (instrucciones) ── */
+#pre-les{position:fixed;inset:0;background:var(--bg);z-index:190;display:none;flex-direction:column}
+#pre-les.open{display:flex}
+.pre-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.pre-body{flex:1;overflow-y:auto;padding:1.3rem 1rem;-webkit-overflow-scrolling:touch}
+.pre-ft{flex-shrink:0;padding:.9rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.65rem}
+.pre-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.pre-sub{font-size:.75rem;color:var(--blue);font-style:italic;margin-bottom:1.1rem}
+.instr-block{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.instr-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.instr-item{display:flex;align-items:flex-start;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--rl)}
+.instr-item:last-child{border-bottom:none}
+.instr-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--bg);border:1.5px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+.instr-txt{flex:1}
+.instr-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.15rem}
+.instr-desc{font-size:.8rem;line-height:1.55;color:var(--text);opacity:.82}
+
+/* ── LECCIÓN (lectura con bloques) ── */
+#ls{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#ls.open{display:flex}
+.ls-hd{flex-shrink:0;padding:.7rem 1rem;border-bottom:1.5px solid var(--rl);display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:var(--white)}
+.ls-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-prog-wrap{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;width:60px;flex-shrink:0}
+.ls-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.ls-body{flex:1;overflow-y:auto;padding:1.3rem 1.1rem 2rem;-webkit-overflow-scrolling:touch}
+.ls-ft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.6rem;align-items:center}
+
+/* ── BLOQUES DE CONTENIDO ── */
+.les-block{margin-bottom:1.1rem;animation:fi .2s ease}
+.lb-text{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;line-height:1.88;color:var(--text);max-width:640px}
+.lb-text p{margin-bottom:.9rem}
+.lb-text p:last-child{margin-bottom:0}
+.lb-text strong{color:var(--b3);font-weight:600}
+.lb-text em{color:var(--blue);font-style:normal;font-weight:600;font-family:'Jost',sans-serif;font-size:.88em;letter-spacing:.02em}
+.lb-text .hi{background:rgba(91,155,213,.12);border-radius:4px;padding:.05rem .25rem}
+
+.lb-section{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--blue);margin-bottom:.5rem;margin-top:.3rem;padding-top:.3rem;border-top:1.5px solid var(--rl)}
+
+.lb-case{background:var(--text);border-radius:12px;padding:.9rem 1rem;margin:.3rem 0}
+.lb-case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem;opacity:.85}
+.lb-case-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:400;line-height:1.75;color:rgba(255,255,255,.9)}
+.lb-case-text strong{color:#7dc8f7;font-style:normal}
+
+.lb-alert{background:rgba(192,85,58,.07);border:1.5px solid rgba(192,85,58,.25);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-alert-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--err);margin-bottom:.28rem}
+.lb-alert-text{font-size:.8rem;line-height:1.65;color:var(--err)}
+
+.lb-tip{background:rgba(91,155,213,.07);border:1.5px solid var(--rl);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-tip-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.28rem}
+.lb-tip-text{font-size:.8rem;line-height:1.65;color:var(--b3)}
+
+.lb-table{width:100%;border-collapse:collapse;font-size:.74rem;margin:.3rem 0;border-radius:10px;overflow:hidden;border:1.5px solid var(--rl)}
+.lb-table th{background:var(--b3);color:#fff;padding:.42rem .6rem;text-align:left;font-family:'Jost',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.04em}
+.lb-table td{padding:.38rem .6rem;border-bottom:1px solid var(--rl);line-height:1.5;color:var(--text);background:var(--white)}
+.lb-table tr:nth-child(even) td{background:rgba(91,155,213,.04)}
+.lb-table tr:last-child td{border-bottom:none}
+
+/* ── PREGUNTAS INTERCALADAS ── */
+.lb-q{background:var(--bg);border:2px solid var(--blue);border-radius:14px;padding:.95rem 1rem;margin:.4rem 0}
+.lb-q-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
+.lb-q-text{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:.75rem}
+.lb-q-opts{display:flex;flex-direction:column;gap:.42rem}
+.lb-q-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:10px;padding:.65rem .85rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.lb-q-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.lb-q-opt.q-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.lb-q-opt.q-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.lb-q-fb{font-size:.78rem;line-height:1.58;background:var(--white);border-radius:8px;padding:.6rem .8rem;margin-top:.65rem;border-left:3px solid var(--blue);display:none;color:var(--text)}
+.lb-q-fb.show{display:block}
+.lb-q-fb.fb-ok{border-left-color:var(--ok)}
+.lb-q-fb.fb-err{border-left-color:var(--err)}
+.lb-q-cont{width:100%;margin-top:.6rem;padding:.45rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;display:none}
+.lb-q-cont.show{display:block}
+
+/* ── QUIZ FINAL ── */
+#qs{position:fixed;inset:0;background:var(--bg);z-index:201;display:none;flex-direction:column}
+#qs.open{display:flex}
+.qhd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem}
+.qpw{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.qpf{height:100%;background:var(--blue);border-radius:2px;transition:width .3s ease}
+.qn{font-size:.7rem;font-weight:700;color:var(--blue);flex-shrink:0}
+.qbody{flex:1;overflow-y:auto;padding:1.4rem 1rem;-webkit-overflow-scrolling:touch}
+.q-mod-badge{display:inline-flex;background:var(--rl);border-radius:8px;padding:.3rem .65rem;font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+.qq{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.2rem}
+.qopts{display:flex;flex-direction:column;gap:.55rem}
+.qopt{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.82rem .9rem;cursor:pointer;font-size:.84rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.qopt:hover{border-color:var(--rm);background:var(--rl)}
+.qopt.cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.qopt.wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.qft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.qfb{font-size:.8rem;line-height:1.55;color:var(--text);background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin-bottom:.7rem;display:none;border-left:3px solid var(--blue)}
+.qfb.show{display:block}
+.qfb.cor-fb{border-left-color:var(--ok)}
+.qfb.wrg-fb{border-left-color:var(--err)}
+
+/* ── RESULTADOS ── */
+#res{position:fixed;inset:0;background:var(--bg);z-index:202;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.4rem;text-align:center}
+#res.open{display:flex;animation:fi .3s ease}
+.res-circle{width:108px;height:108px;border-radius:50%;border:3px solid var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem}
+.res-pct{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;line-height:1;color:var(--blue)}
+.res-pl{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.res-v{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;margin-bottom:.4rem}
+.res-s{font-size:.8rem;opacity:.7;line-height:1.6;margin-bottom:1.2rem;max-width:280px}
+.res-row{display:flex;gap:1.3rem;justify-content:center;margin-bottom:1.5rem}
+.rd{text-align:center}
+.rd-v{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--blue)}
+.rd-l{font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+
+/* ── JUEGO DE CASOS ── */
+#game-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;display:none;flex-direction:column}
+#game-overlay.open{display:flex;animation:fi .2s ease}
+.go-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem}
+.go-body{flex:1;overflow-y:auto;padding:1.1rem 1rem;-webkit-overflow-scrolling:touch}
+.go-ft{flex-shrink:0;padding:.75rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.case-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:.8rem}
+.case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem}
+.case-text{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.82;color:var(--text)}
+.game-q-label{font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
+.game-opts{display:flex;flex-direction:column;gap:.48rem;margin-bottom:.75rem}
+.game-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:11px;padding:.72rem .88rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.game-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.game-opt.g-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.game-opt.g-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.game-fb{font-size:.79rem;line-height:1.6;background:var(--bg);border-radius:8px;padding:.62rem .82rem;border-left:3px solid var(--blue);margin-bottom:.7rem;display:none}
+.game-fb.show{display:block}
+.game-fb.fb-ok{border-left-color:var(--ok)}
+.game-fb.fb-err{border-left-color:var(--err)}
+.go-stats{display:flex;gap:1rem;margin-left:auto}
+.go-stat{text-align:center}
+.go-stat-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--blue);line-height:1}
+.go-stat-l{font-size:.46rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.4}
+
+/* ── PROGRESS ── */
+.prog-bar-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}
+.pbr-label{font-size:.7rem;font-weight:500;color:var(--text);width:100px;flex-shrink:0;line-height:1.25}
+.pbr-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.pbr-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--b1),var(--b3));transition:width .6s}
+.pbr-pct{font-size:.66rem;font-weight:700;color:var(--blue);width:30px;text-align:right}
+
+/* ── MISC ── */
+.filter-bar{display:flex;gap:.4rem;margin-bottom:.85rem;overflow-x:auto;padding-bottom:.2rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.fb-chip{flex-shrink:0;padding:.24rem .6rem;border-radius:20px;border:1.5px solid var(--rm);background:transparent;color:var(--text);font-size:.64rem;font-weight:600;cursor:pointer;font-family:'Jost',sans-serif;transition:all .15s;white-space:nowrap}
+.fb-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+@keyframes popUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-35px) scale(1.25);opacity:0}}
+.xp-pop{position:fixed;pointer-events:none;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);animation:popUp .8s ease forwards;z-index:999}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="logo">Psico<em>Dx</em></div>
+  <div class="hstats">
+    <div class="hs"><div class="hs-v" id="h-les">0</div><div class="hs-l">Lecciones</div></div>
+    <div class="hs"><div class="hs-v" id="h-pts">0</div><div class="hs-l">Puntos</div></div>
+    <div class="hs"><div class="hs-v" id="h-str">0🔥</div><div class="hs-l">Racha</div></div>
+  </div>
+</div>
+
+<div class="sa">
+  <!-- HOME -->
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">Curso Intensivo · DSM-5-TR + CIE-11</div>
+      <div class="banner-t">Psicodiagnóstico <br>de <em>verdad</em></div>
+      <div class="banner-s">Lecciones profundas · Preguntas intercaladas · Casos clínicos · Sin superficialidades</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="hs-les">0</div><div class="sc3-l">Completadas</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-prec">—</div><div class="sc3-l">Precisión</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-pts">0</div><div class="sc3-l">Puntos</div></div>
+    </div>
+    <div class="ey">Módulos del curso</div>
+    <div id="home-modules"></div>
+  </div>
+
+  <!-- JUEGO -->
+  <div class="sc" id="sc-game">
+    <div class="ey">Modo Juego</div>
+    <div class="st">Diagnóstico <em>en Acción</em></div>
+    <div class="ibox"><div class="ii">🎮</div><div>Lee el caso clínico y toma la decisión diagnóstica correcta. Cada caso correcto da puntos y desbloquea niveles.</div></div>
+    <div class="banner" style="margin-bottom:.85rem">
+      <div class="banner-ey">Tu récord</div>
+      <div style="display:flex;gap:2rem;margin-top:.4rem">
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300" id="gm-pts">0</div><div style="font-size:.58rem;opacity:.7;text-transform:uppercase;letter-spacing:.1em">Puntos</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300" id="gm-cases">0</div><div style="font-size:.58rem;opacity:.7;text-transform:uppercase;letter-spacing:.1em">Casos</div></div>
+        <div><div style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300" id="gm-acc">—</div><div style="font-size:.58rem;opacity:.7;text-transform:uppercase;letter-spacing:.1em">Precisión</div></div>
+      </div>
+    </div>
+    <div class="ey" style="margin-bottom:.55rem">Niveles de dificultad</div>
+    <div id="game-levels"></div>
+    <div class="ey" style="margin-top:.8rem;margin-bottom:.5rem">Historial reciente</div>
+    <div id="game-history"></div>
+  </div>
+
+  <!-- PROGRESO -->
+  <div class="sc" id="sc-prog">
+    <div class="ey">Tu avance</div>
+    <div class="st">Progreso <em>detallado</em></div>
+    <div class="card" style="padding:.95rem 1rem" id="prog-bars"></div>
+    <div class="ey" style="margin-bottom:.6rem">Logros</div>
+    <div class="badges-grid" id="badges-grid"></div>
+  </div>
+</div>
+
+<div class="bot-nav">
+  <button class="ni active" data-tab="home"><div class="ni-ic">📚</div><div class="ni-lb">Inicio</div></button>
+  <button class="ni" data-tab="game"><div class="ni-ic">🎮</div><div class="ni-lb">Juego</div></button>
+  <button class="ni" data-tab="prog"><div class="ni-ic">📊</div><div class="ni-lb">Progreso</div></button>
+</div>
+
+<!-- PRE-LECCIÓN -->
+<div id="pre-les">
+  <div class="pre-hd">
+    <button class="x-btn" id="pre-close">←</button>
+    <div>
+      <div class="ey" id="pre-mod-label"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)" id="pre-title"></div>
+    </div>
+  </div>
+  <div class="pre-body" id="pre-body"></div>
+  <div class="pre-ft">
+    <button class="btn btn-g" style="flex:1" id="pre-back">← Volver</button>
+    <button class="btn btn-p" style="flex:1" id="pre-start">Comenzar →</button>
+  </div>
+</div>
+
+<!-- LECCIÓN -->
+<div id="ls">
+  <div class="ls-hd">
+    <button class="x-btn" id="ls-close">←</button>
+    <div class="ls-title" id="ls-title"></div>
+    <div class="ls-prog-wrap"><div class="ls-prog-fill" id="ls-prog-fill"></div></div>
+  </div>
+  <div class="ls-body" id="ls-body"></div>
+  <div class="ls-ft" id="ls-ft"></div>
+</div>
+
+<!-- QUIZ FINAL -->
+<div id="qs">
+  <div class="qhd">
+    <button class="x-btn" id="qs-close">←</button>
+    <div class="qpw"><div class="qpf" id="qpf"></div></div>
+    <div class="qn" id="qn">1/5</div>
+  </div>
+  <div class="qbody">
+    <div class="q-mod-badge" id="q-mod-badge"></div>
+    <div class="qq" id="qq"></div>
+    <div class="qopts" id="qopts"></div>
+  </div>
+  <div class="qft">
+    <div class="qfb" id="qfb"></div>
+    <button class="btn btn-p" style="width:100%;display:none" id="q-next">Siguiente →</button>
+  </div>
+</div>
+
+<!-- RESULTADOS -->
+<div id="res">
+  <div class="res-circle">
+    <div class="res-pct" id="res-pct">0%</div>
+    <div class="res-pl">Precisión</div>
+  </div>
+  <div class="res-v" id="res-v">Lección completada</div>
+  <div class="res-s" id="res-s"></div>
+  <div class="res-row">
+    <div class="rd"><div class="rd-v" id="rd-correct">0</div><div class="rd-l">Correctas</div></div>
+    <div class="rd"><div class="rd-v" id="rd-pts">0</div><div class="rd-l">Puntos</div></div>
+    <div class="rd"><div class="rd-v" id="rd-streak">0🔥</div><div class="rd-l">Racha</div></div>
+  </div>
+  <div style="display:flex;gap:.65rem;flex-direction:column;width:100%;max-width:280px">
+    <button class="btn btn-p" id="res-continue">Continuar →</button>
+    <button class="btn btn-g" id="res-retry">Reintentar</button>
+  </div>
+</div>
+
+<!-- JUEGO OVERLAY -->
+<div id="game-overlay">
+  <div class="go-hd">
+    <button class="x-btn" id="go-close">←</button>
+    <div style="flex:1">
+      <div class="ey" id="go-level-label"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text)">Juego de Diagnóstico</div>
+    </div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-v" id="go-pts-live">0</div><div class="go-stat-l">Pts</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-streak-live">0🔥</div><div class="go-stat-l">Racha</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-num">1/5</div><div class="go-stat-l">Caso</div></div>
+    </div>
+  </div>
+  <div class="go-body" id="go-body"></div>
+  <div class="go-ft" id="go-ft"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DATOS — MÓDULOS Y LECCIONES
+// ══════════════════════════════════════════
+const MODS = [
+ {id:1, ic:'🌑', name:'Trastornos Depresivos', color:'#1a3a6b',
+  lecciones:[
+   {id:'d1', title:'TDM — El diagnóstico que más se malinterpreta'},
+   {id:'d2', title:'Distimia, Doble Depresión y Diferencial'}
+  ]
+ },
+ {id:2, ic:'⚡', name:'Trastornos Bipolares', color:'#4a1a6b',
+  lecciones:[
+   {id:'b1', title:'Bipolar I — Reconocer la manía real'},
+   {id:'b2', title:'Bipolar II — El más subdiagnosticado'}
+  ]
+ },
+ {id:3, ic:'😰', name:'Trastornos de Ansiedad', color:'#1a4a2a',
+  lecciones:[
+   {id:'a1', title:'TAG y Trastorno de Pánico'},
+   {id:'a2', title:'Fobia Social, Fobias Específicas y TPAS'}
+  ]
+ },
+ {id:4, ic:'🔄', name:'TOC y Espectro', color:'#3a1a5b',
+  lecciones:[
+   {id:'o1', title:'TOC — Obsesiones, compulsiones y ERP'},
+   {id:'o2', title:'TDC, Acumulación y Tricotilomanía'}
+  ]
+ },
+ {id:5, ic:'💥', name:'Trauma y Disociación', color:'#5b2a1a',
+  lecciones:[
+   {id:'t1', title:'TEPT — Los 4 clústeres en profundidad'},
+   {id:'t2', title:'TEPT Complejo y Trastornos Disociativos'}
+  ]
+ },
+ {id:6, ic:'🌀', name:'Trastornos Psicóticos', color:'#1a5b2a',
+  lecciones:[
+   {id:'p1', title:'Síntomas positivos y negativos — lo que realmente son'},
+   {id:'p2', title:'Esquizofrenia y espectro psicótico completo'}
+  ]
+ },
+ {id:7, ic:'🎭', name:'Trastornos de Personalidad', color:'#5b1a1a',
+  lecciones:[
+   {id:'pe1', title:'Clúster B — TLP y TAP en profundidad'},
+   {id:'pe2', title:'Narcisista, Histriónico, Clústeres A y C'}
+  ]
+ },
+ {id:8, ic:'🌪️', name:'TDAH y Neurodesarrollo', color:'#1a4a5b',
+  lecciones:[
+   {id:'n1', title:'TDAH adultos — más allá de la hiperactividad'},
+   {id:'n2', title:'TEA en adultos — el diagnóstico que se pierde'}
+  ]
+ },
+ {id:9, ic:'💊', name:'Trastornos por Sustancias', color:'#2a4a1a',
+  lecciones:[
+   {id:'s1', title:'TUS — criterios, tipos y diagnóstico diferencial'},
+   {id:'s2', title:'Psicosis por sustancias vs psicosis primaria'}
+  ]
+ },
+ {id:10, ic:'⚖️', name:'Conducta Alimentaria', color:'#1a5b4a',
+  lecciones:[
+   {id:'ca1', title:'Anorexia Nerviosa — riesgo vital y diagnóstico'},
+   {id:'ca2', title:'Bulimia y Trastorno por Atracón'}
+  ]
+ },
+ {id:11, ic:'🧩', name:'Neurocognitivos y Somáticos', color:'#4a3a1a',
+  lecciones:[
+   {id:'nc1', title:'Demencia y Delirium — diferencias críticas'},
+   {id:'nc2', title:'Trastornos Somáticos y Ansiedad por Enfermedad'}
+  ]
+ },
+ {id:12, ic:'📋', name:'Evaluación e Instrumentos', color:'#1a2a5b',
+  lecciones:[
+   {id:'ev1', title:'MMPI-2 — cómo interpretarlo de verdad'},
+   {id:'ev2', title:'MCMI-IV, WAIS-IV y el informe psicológico'}
+  ]
+ }
+];
+
+// ── LECCIONES CON CONTENIDO REAL ──
+const LESSONS = {
+
+'d1':{
+ title:'TDM — El diagnóstico que más se malinterpreta',
+ mod:'Trastornos Depresivos',
+ bloques:[
+  {t:'text', content:`<p>El Trastorno Depresivo Mayor no es "estar triste". Esta confusión tiene consecuencias reales: pacientes que llevan años sufriendo sin diagnóstico porque "todo el mundo se pone triste a veces".</p>
+  <p>El TDM es un <strong>episodio</strong> — no un rasgo de personalidad. Tiene inicio, duración mínima y produce un <em>cambio real respecto al funcionamiento previo</em>. Si el paciente dice "siempre fui así", probablemente no sea TDM sino TPPD o un rasgo de personalidad.</p>
+  <p>La definición operativa: <strong>cinco o más síntomas durante al menos dos semanas consecutivas</strong>, con presencia obligatoria de al menos uno de dos síntomas cardinales: ánimo deprimido <em>o</em> anhedonia.</p>`},
+
+  {t:'section', content:'Los 9 síntomas — lo que realmente significan en consulta'},
+
+  {t:'text', content:`<p><strong>1. Ánimo deprimido</strong> la mayor parte del día, casi todos los días. Clave: el paciente lo reporta O tú lo observas (llanto, expresión facial aplanada). En niños puede manifestarse como irritabilidad.</p>
+  <p><strong>2. Anhedonia</strong> — pérdida marcada del placer o interés en casi todas las actividades. No es "no tengo ganas hoy". Es que lo que antes importaba ahora no genera nada. La paciente que adoraba cocinar para su familia y ahora el olor a comida le da lo mismo.</p>
+  <p><strong>3. Cambios de peso o apetito.</strong> Pérdida sin dieta (>5% del peso corporal en un mes) o aumento significativo. Pregunta siempre: "¿cambió respecto a antes?".</p>
+  <p><strong>4. Insomnio o hipersomnia.</strong> El patrón más típico del TDM es el <em>despertar temprano</em> (a las 3–4am sin poder volver a dormir) con ánimo peor por la mañana. La hipersomnia es más frecuente en depresión atípica y en Bipolar II.</p>
+  <p><strong>5. Agitación o retardo psicomotor</strong> observable por otros. El retardo es enlentecimiento real: habla lenta, latencia de respuesta aumentada, movimientos lentos. La agitación es inquietud incapacitante que el paciente no puede controlar.</p>
+  <p><strong>6. Fatiga o pérdida de energía</strong> casi todos los días. Diferente al cansancio por falta de sueño — es un agotamiento que no mejora con el descanso.</p>
+  <p><strong>7. Sentimientos de inutilidad o culpa excesiva.</strong> No es autocrítica razonable. Es culpa desproporcionada e irracional. Puede alcanzar intensidad delirante: "soy la causa de todos los problemas de mi familia".</p>
+  <p><strong>8. Dificultad para concentrarse o tomar decisiones.</strong> Pacientes que antes eran ejecutivos y ahora no pueden leer un párrafo completo. Esto genera mucho miedo — "¿Me estoy volviendo loco?".</p>
+  <p><strong>9. Pensamientos recurrentes de muerte o ideación suicida.</strong> Desde "desearía no despertar" hasta planes concretos. <em>Siempre se evalúa. Siempre.</em> No preguntar no previene suicidio — solo te deja sin información.</p>`},
+
+  {t:'case',
+   label:'Caso clínico real',
+   text:`<strong>Claudia, 38 años, contadora.</strong> La trae su esposo porque "no sale de la cama". Lleva 3 semanas así. Antes era "la más activa de la oficina". Ahora se despierta a las 3am, no puede volver a dormir, no come (bajó 4 kg), no puede leer ni los mensajes del celular. Dice "soy una carga para todos". Niega planes suicidas pero dice "si me durmiera y no despertara, no me importaría".
+  <br><br>Análisis: ✓ Ánimo deprimido ✓ Anhedonia ✓ Insomnio ✓ Cambio de apetito/peso ✓ Dificultad concentración ✓ Culpa excesiva ✓ Ideación de muerte pasiva = 7 síntomas en 3 semanas con cambio claro del funcionamiento previo → <strong>TDM episodio único, gravedad moderada-grave.</strong>`},
+
+  {t:'question',
+   q:'Claudia tiene 7 síntomas. ¿Cuántos son necesarios para el diagnóstico de TDM y qué condición adicional debe cumplirse?',
+   opts:['3 síntomas durante 1 semana','5 síntomas durante ≥2 semanas con al menos 1 síntoma cardinal (ánimo deprimido o anhedonia)','7 síntomas durante 1 mes','Todos los 9 síntomas durante 2 semanas'],
+   cor:1,
+   fb:'5 síntomas en ≥2 semanas, con presencia obligatoria de ánimo deprimido Y/O anhedonia. Claudia supera el umbral. El criterio de 2 semanas es el mínimo — los episodios sin tratamiento suelen durar 6 meses o más.'},
+
+  {t:'section', content:'Gravedad y especificadores — por qué importan'},
+
+  {t:'text', content:`<p>El DSM-5-TR exige especificar gravedad porque determina el tratamiento:</p>
+  <p><strong>Leve:</strong> Síntomas mínimos, disfunción leve. Psicoterapia sola puede ser suficiente.</p>
+  <p><strong>Moderado:</strong> Psicoterapia + farmacología es superior a cualquiera sola.</p>
+  <p><strong>Grave:</strong> Varios síntomas adicionales, disfunción severa. Farmacología necesaria. Evaluar hospitalización.</p>
+  <p><strong>Con características psicóticas:</strong> Delirios (culpa, ruina, nihilistas) y/o alucinaciones. Emergencia psiquiátrica. Requiere antipsicótico + antidepresivo. Nunca antidepresivo solo.</p>`},
+
+  {t:'alert',
+   label:'Error que no se puede cometer',
+   text:'La ideación suicida con plan SIEMPRE clasifica el episodio como grave, independientemente del número de síntomas. Un paciente con 5 síntomas pero con plan suicida estructurado = episodio grave con riesgo vital. No clasificar como leve porque "tiene pocos síntomas".'},
+
+  {t:'question',
+   q:'Paciente con TDM de 5 síntomas que puede ir al trabajo con dificultad, pero tiene ideación suicida con plan de hacerse daño con un arma de fuego en casa. ¿Cuál es la gravedad?',
+   opts:['Leve — tiene pocos síntomas y aún puede trabajar','Moderado — funciona pero con dificultad','Grave — la suicidalidad con plan estructurado define gravedad independientemente del número de síntomas','No se puede clasificar sin más información'],
+   cor:2,
+   fb:'La ideación suicida con plan concreto y acceso al medio es un indicador de gravedad extrema que requiere evaluación de hospitalización inmediata. El número de síntomas es secundario cuando hay riesgo vital real.'},
+
+  {t:'section', content:'Diagnóstico diferencial — la jerarquía que salva pacientes'},
+
+  {t:'text', content:`<p>Cuando alguien presenta síntomas depresivos, recorre esta jerarquía en orden:</p>
+  <p><strong>1° Causa médica u orgánica:</strong> Hipotiroidismo (TSH), anemia, déficit de B12/folato. El hipotiroidismo puede causar depresión indistinguible del TDM que desaparece al tratar la tiroides.</p>
+  <p><strong>2° Sustancias:</strong> Alcohol, cannabis crónico, benzodiacepinas, betabloqueadores, corticoides, anticonceptivos hormonales.</p>
+  <p><strong>3° Trastorno Bipolar:</strong> El error más costoso. Pregunta activamente por episodios de energía aumentada, sueño reducido sin cansancio, gastos impulsivos, grandiosidad. El paciente bipolar raramente reporta los episodios hipomaníacos espontáneamente.</p>
+  <p><strong>4° TPPD vs TDM:</strong> ¿Es episódico (TDM) o crónico sin períodos claros de eutimia (Distimia)?</p>
+  <p><strong>5° Trastorno de Adaptación:</strong> Estresante identificable, síntomas no cumplen criterios completos de TDM.</p>`},
+
+  {t:'tip',
+   label:'Clave antes de cualquier antidepresivo',
+   text:'Antes de prescribir o recomendar un ISRS, pregunta SIEMPRE: "¿Ha tenido épocas de demasiada energía, necesidad reducida de sueño sin cansancio, gasto impulsivo, o grandiosidad?" Si la respuesta es sí → posible Bipolar → nunca ISRS sin estabilizador.'},
+
+  {t:'question',
+   q:'Mariana, 33 años, perdió su trabajo hace 5 semanas. Tiene ánimo deprimido, duerme mal y se siente sin energía. No ha perdido peso, no tiene anhedonia y puede concentrarse. ¿Cuál es el diagnóstico?',
+   opts:['TDM episodio único, leve','TPPD — Distimia','Trastorno de Adaptación con ánimo deprimido','No hay diagnóstico — es reacción normal'],
+   cor:2,
+   fb:'Trastorno de Adaptación: estresante claro (pérdida de trabajo, dentro de 3 meses), síntomas generan malestar clínico, pero NO cumple criterios de TDM (solo 3 síntomas: ánimo, insomnio, fatiga — faltan anhedonia y otros). No es "normal" — requiere atención y psicoterapia. Pero no es TDM.'}
+ ],
+ quiz:[
+  {q:'¿Cuáles son los DOS síntomas cardinales del TDM, de los cuales al menos uno debe estar presente?',
+   opts:['Insomnio y pérdida de peso','Ánimo deprimido y anhedonia (pérdida de interés/placer)','Fatiga y dificultad de concentración','Culpa y ideación suicida'],
+   cor:1,
+   fb:'Los síntomas cardinales son ánimo deprimido Y/O anhedonia. Al menos uno de estos dos debe estar presente para diagnosticar TDM. Los otros 7 síntomas pueden variar — pero sin estos dos como ancla, el diagnóstico no es TDM.'},
+  {q:'¿Qué duración mínima deben tener los síntomas para cumplir criterios de TDM?',
+   opts:['1 semana','2 semanas','1 mes','3 meses'],
+   cor:1,
+   fb:'2 semanas consecutivas es el umbral mínimo. Sin embargo, los episodios sin tratamiento típicamente duran 6-9 meses. El criterio de 2 semanas sirve para identificar el trastorno temprano, no para sugerir que es breve.'},
+  {q:'¿Por qué la ideación suicida con plan concreto convierte cualquier episodio depresivo en grave?',
+   opts:['Porque el DSM lo establece así arbitrariamente','Porque indica riesgo vital inmediato que requiere intervención urgente independientemente del número de síntomas','Porque es un síntoma más grave que los otros','Solo si hay acceso al medio de suicidio'],
+   cor:1,
+   fb:'La suicidalidad con plan es un indicador de riesgo vital que superpone cualquier clasificación de gravedad por número de síntomas. El peligro real e inmediato para la vida del paciente es la variable que define la prioridad de intervención.'},
+  {q:'Un paciente con síntomas depresivos comenzó hace 6 semanas a tomar prednisona (corticoide) para una enfermedad autoinmune. ¿Cuál es el primer paso diagnóstico?',
+   opts:['Diagnosticar TDM y añadir antidepresivo','Descartar depresión inducida por corticoides antes de diagnosticar TDM primario','Derivar a psiquiatría sin necesidad de más evaluación','Iniciar psicoterapia y esperar 2 meses para decidir'],
+   cor:1,
+   fb:'Los corticoides son una causa conocida de depresión y estados mixtos. Siempre se deben descartar causas farmacológicas y orgánicas antes de diagnosticar TDM primario. La jerarquía diagnóstica: 1° orgánico/sustancias → 2° bipolar → 3° depresión primaria.'},
+  {q:'¿Cuál es el especificador más apropiado para un episodio depresivo con hipersomnia, hiperfagia, sensación de "plomo en las piernas" y mejora del ánimo cuando ocurren eventos positivos?',
+   opts:['Con características melancólicas','Con características atípicas','Con inicio en el periparto','Con patrón estacional'],
+   cor:1,
+   fb:'Las características atípicas incluyen: reactividad del ánimo (mejora con eventos positivos), hipersomnia, hiperfagia, parálisis de plomo (pesadez en extremidades) e hipersensibilidad al rechazo interpersonal crónica. Este patrón es más frecuente en Bipolar II que en TDM unipolar.'}
+ ]
+},
+
+'b1':{
+ title:'Bipolar I — Reconocer la manía real',
+ mod:'Trastornos Bipolares',
+ bloques:[
+  {t:'text', content:`<p>La manía no es "estar muy contento". Es un estado cualitativamente diferente al funcionamiento normal de la persona, que dura al menos <strong>7 días consecutivos</strong> (o menos si requiere hospitalización o hay psicosis), presente la mayor parte del día.</p>
+  <p>El criterio A exige ánimo elevado, expansivo <em>o</em> irritable, más aumento anormal de energía. Los dos pueden coexistir — la manía irritable es frecuente y a veces más difícil de reconocer que la eufórica.</p>`},
+
+  {t:'section', content:'DIG FAST — los 7 síntomas que debes dominar'},
+
+  {t:'text', content:`<p>Para cumplir criterios se necesitan <strong>≥3 síntomas</strong> (o ≥4 si el ánimo es solo irritable):</p>
+  <p><strong>D — Distractibilidad:</strong> Atención fácilmente atraída por estímulos externos sin importancia. El paciente no puede sostener un tema de conversación.</p>
+  <p><strong>I — Impulsividad</strong> (actividades placenteras con alto riesgo): Gastos descontrolados, hipersexualidad, inversiones descabelladas, promiscuidad, conducción temeraria.</p>
+  <p><strong>G — Grandiosidad:</strong> Autoestima elevada o ideas de grandeza. Puede llegar a delirios: creer ser una figura religiosa, tener poderes especiales, misión divina.</p>
+  <p><strong>F — Flight of ideas</strong> (fuga de ideas): Pensamiento acelerado, asociaciones rápidas, saltar de tema en tema. El paciente lo siente como "muchas ideas al mismo tiempo".</p>
+  <p><strong>A — Activity increased</strong> (aumento de actividad): Múltiples proyectos simultáneos, hiperactividad psicomotora, agitación.</p>
+  <p><strong>S — Sleep decreased</strong> (sueño reducido <em>sin cansancio</em>): Duerme 2-3 horas y se siente descansado. Esto es el diferenciador clave del insomnio depresivo — en manía no hay cansancio.</p>
+  <p><strong>T — Talkativeness</strong> (logorrea): Habla más de lo habitual, presión para hablar, difícil de interrumpir.</p>`},
+
+  {t:'case',
+   label:'Manía eufórica vs manía irritable',
+   text:`<strong>Manía eufórica:</strong> Carlos, 26 años. Lleva 10 días sin dormir más de 2 horas "y no me hace falta". Ha empezado 4 proyectos simultáneamente, gastó $15 millones de sus ahorros en "inversiones", habla tan rápido que es difícil seguirlo, cree que "tendrá el Nobel de Economía".
+  <br><br><strong>Manía irritable:</strong> Sandra, 31 años, ingresa traída por la policía. Estaba en la calle "organizando el tráfico". Lleva días sin dormir, discute con todo el mundo, dice que "todos son unos idiotas". Ha tenido 3 accidentes esta semana.
+  <br><br>Ambos son episodios maníacos completos. La manía irritable se confunde con agresividad o trastorno de personalidad — pero la clave es el cambio respecto al funcionamiento previo del paciente.`},
+
+  {t:'question',
+   q:'¿Por qué se necesitan 4 síntomas del grupo DIG FAST cuando el ánimo es irritable, en lugar de 3?',
+   opts:['Porque la irritabilidad es más grave que la euforia','Porque la irritabilidad es menos específica de la manía y puede verse en muchos otros trastornos — exigir 4 síntomas aumenta la especificidad diagnóstica','Porque el DSM lo establece arbitrariamente','Porque la manía irritable dura más tiempo'],
+   cor:1,
+   fb:'La irritabilidad es un síntoma inespecífico — aparece en depresión, TAG, TLP, intoxicación por sustancias, trastornos de personalidad. La euforia o expansividad son más específicas de la manía. Por eso, cuando el ánimo es solo irritable, se necesita mayor número de síntomas acompañantes para asegurar el diagnóstico.'},
+
+  {t:'alert',
+   label:'Urgencia en manía aguda',
+   text:'Un paciente maníaco puede gastar todo su patrimonio en horas, destruir relaciones en días, tomar decisiones irreversibles (renunciar al trabajo, separarse, firmar contratos), exponerse a riesgo físico real. La hospitalización no es opcional cuando hay pérdida grave del juicio. El paciente generalmente no reconoce estar enfermo — la anosognosia es parte del cuadro.'},
+
+  {t:'text', content:`<p>Hasta el <strong>50-75%</strong> de los episodios maníacos graves incluyen características psicóticas. Los delirios suelen ser congruentes con el ánimo: grandiosidad, omnipotencia, identidad especial. Cuando son incongruentes (persecución sin grandiosidad), el pronóstico empeora.</p>
+  <p>El manejo cambia con psicosis: <em>necesitas antipsicótico + estabilizador simultáneamente</em>. El litio solo tarda 5-10 días en hacer efecto — demasiado lento para la urgencia. El antipsicótico solo no estabiliza el ánimo a largo plazo.</p>
+  <p>Diferencial con esquizofrenia: en manía los síntomas psicóticos son episódicos. Entre episodios, el paciente bipolar vuelve a un funcionamiento relativamente normal. En esquizofrenia, los síntomas psicóticos son más persistentes.</p>`},
+
+  {t:'question',
+   q:'Paciente con Bipolar I conocido llega en episodio maníaco con delirios de grandiosidad. ¿Cuál es el tratamiento inicial más apropiado?',
+   opts:['Solo litio — el gold standard para manía','Solo antipsicótico atípico (olanzapina o risperidona)','Antipsicótico atípico + estabilizador (litio o valproato) simultáneamente','Antidepresivo para calmar la agitación'],
+   cor:2,
+   fb:'Manía aguda con psicosis: antipsicótico atípico (efecto rápido) + estabilizador (litio o valproato para mantenimiento). El litio solo tarda 5-10 días en hacer efecto — muy lento para la urgencia. Los antidepresivos están CONTRAINDICADOS en manía — pueden empeorar el episodio.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima de un episodio maníaco para que cumpla criterios?',
+   opts:['3 días','7 días (o menos si requiere hospitalización o hay psicosis)','2 semanas','1 mes'],
+   cor:1,
+   fb:'7 días consecutivos, o cualquier duración si el episodio requirió hospitalización o hay características psicóticas. La hospitalización o psicosis indican gravedad que supera el criterio temporal.'},
+  {q:'¿Cuál síntoma del DIG FAST es más específicamente maníaco y diferencia la manía del insomnio depresivo?',
+   opts:['Distractibilidad','Grandiosidad','Sueño reducido SIN cansancio','Fuga de ideas'],
+   cor:2,
+   fb:'Sueño reducido sin cansancio es el criterio más específico. En depresión, el insomnio va acompañado de fatiga intensa. En manía, el paciente duerme 2-3 horas y se siente lleno de energía — incluso piensa que el sueño es una pérdida de tiempo. Preguntar siempre: "¿Se sintió cansado o necesitó recuperar ese sueño?"'},
+  {q:'¿Qué distingue el Trastorno Bipolar I del Bipolar II?',
+   opts:['El Bipolar I tiene más episodios depresivos','El Bipolar I requiere al menos un episodio maníaco; el Bipolar II solo tiene hipomanía','El Bipolar II es más grave','El Bipolar I no tiene episodios depresivos'],
+   cor:1,
+   fb:'La distinción clave es la presencia de manía (Bipolar I) vs hipomanía (Bipolar II). La manía tiene mayor gravedad, puede requerir hospitalización y puede incluir psicosis. La hipomanía es menos intensa, dura menos (≥4 días) y no causa disfunción grave. Si hay un episodio maníaco completo = siempre Bipolar I.'},
+  {q:'Paciente previamente diagnosticado con TDM, tratado con 4 antidepresivos diferentes con respuesta parcial. En la entrevista, la esposa menciona que hay temporadas en que "está muy acelerado, gasta mucho y casi no duerme". ¿Qué cambio diagnóstico se debe considerar?',
+   opts:['TDM refractario — cambiar a otro antidepresivo','Trastorno Bipolar II — la esposa está describiendo hipomanía no reportada','Ciclotimia — los cambios son subclínicos','Trastorno de Personalidad Límite'],
+   cor:1,
+   fb:'Bipolar II subdiagnosticado: la respuesta parcial a múltiples antidepresivos + descripción por terceros de períodos con aceleración, gasto impulsivo y sueño reducido = señales de alerta para hipomanía. El paciente bipolar raramente reporta los episodios hipomaníacos porque los vive como sus "mejores épocas". El promedio de retraso diagnóstico del Bipolar II es 10 años.'},
+  {q:'¿Por qué los antidepresivos están contraindicados en monoterapia para el Bipolar I?',
+   opts:['Porque no funcionan en ningún tipo de depresión','Porque en un bipolar sin estabilizador pueden precipitar un episodio maníaco o inducir ciclación rápida','Porque solo sirven para TDM unipolar','Porque causan dependencia más rápido en bipolares'],
+   cor:1,
+   fb:'En bipolar sin estabilizador, los antidepresivos (especialmente AD tricíclicos, pero también ISRS) pueden: (1) precipitar un episodio maníaco o hipomaníaco, (2) inducir ciclación rápida (≥4 episodios/año), (3) producir estados mixtos con mayor riesgo suicida. Siempre deben acompañarse de estabilizador del ánimo.'}
+ ]
+},
+
+'pe1':{
+ title:'Clúster B — TLP y TAP en profundidad',
+ mod:'Trastornos de Personalidad',
+ bloques:[
+  {t:'text', content:`<p>Un trastorno de personalidad es un patrón duradero de experiencia interna y comportamiento que es <strong>omnipresente</strong> (en todos los contextos, no solo en el trabajo o en casa), <strong>inflexible</strong> (no cambia con el contexto como el comportamiento normal), tiene inicio en la adolescencia o adultez temprana, es estable en el tiempo y causa malestar o deterioro.</p>
+  <p>El <strong>Clúster B</strong> (dramático, emocional, errático) concentra los trastornos más prevalentes en hospitalización, urgencias y clínica intensiva. Los cuatro son: Antisocial, Límite, Histriónico y Narcisista.</p>`},
+
+  {t:'section', content:'Trastorno Límite de la Personalidad — los 9 criterios clínicamente'},
+
+  {t:'text', content:`<p>El TLP requiere ≥5 de 9 criterios. Más que memorizarlos, entiende qué significan cuando tienes al paciente enfrente:</p>
+  <p><strong>1. Esfuerzos frenéticos para evitar el abandono real o imaginado:</strong> Cualquier cambio del otro (llegar tarde, no responder rápido) se vive como abandono. Reacciona de forma intensa — ira, súplicas, amenazas — ante lo que para otros es trivial.</p>
+  <p><strong>2. Relaciones inestables e intensas con idealización y devaluación:</strong> La persona "perfecta" de la semana pasada es "un monstruo" esta semana. Este fenómeno se llama <em>splitting</em> — incapacidad para integrar lo bueno y lo malo de una persona simultáneamente.</p>
+  <p><strong>3. Alteración de la identidad:</strong> No saben quiénes son. Sus valores, metas, elecciones sexuales, tipo de amigos — todo cambia según con quién estén. "Soy diferente con cada persona".</p>
+  <p><strong>4. Impulsividad en ≥2 áreas dañinas:</strong> Gasto compulsivo, sexo sin protección, abuso de sustancias, conducción temeraria, atracones. No por placer — para regular el malestar emocional insoportable.</p>
+  <p><strong>5. Conductas suicidas o autolesiones recurrentes:</strong> Las autolesiones no son siempre "para llamar la atención". Muchas veces son para sentir algo cuando hay disociación, o para terminar con un dolor emocional que el paciente vive como insoportable.</p>
+  <p><strong>6. Inestabilidad afectiva reactiva:</strong> Estados de ánimo que cambian en horas (no en días como en el Bipolar). La tristeza, irritabilidad o ansiedad son intensas pero transitorias — reactivas a eventos interpersonales.</p>
+  <p><strong>7. Sensación crónica de vacío:</strong> No es depresión — es vacío. Como si no hubiera nada dentro. Lo que más les cuesta describir y lo que más los impulsa a la conducta impulsiva de llenado.</p>
+  <p><strong>8. Ira inapropiada e intensa:</strong> Explosiones desproporcionadas al estímulo. Puede dirigirse al clínico — y esa reacción emocional del clínico es información diagnóstica.</p>
+  <p><strong>9. Ideación paranoide transitoria o disociación bajo estrés:</strong> En momentos de estrés intenso — sospecha, episodios disociativos breves. Son transitorios. No es psicosis crónica.</p>`},
+
+  {t:'case',
+   label:'TLP en hospitalización — presentación típica',
+   text:`<strong>Valentina, 23 años, 4° ingreso este año.</strong> Ingresa después de ingerir 20 pastillas "porque mi novio me dijo que necesitaba espacio". En el servicio: muy amable con la enfermera del turno mañana ("eres la única que me entiende"), hostil con la del turno tarde ("todas me odian"). Le pide al médico que "no la deje ir" y 3 horas después le dice que "no le cree nada y es igual que todos".
+  <br><br><em>Splitting en vivo:</em> divide al equipo en "buenos" y "malos". El manejo requiere límites claros, consistencia de todo el equipo y evitar ser "el especial" o "el malo".`},
+
+  {t:'question',
+   q:'Valentina pasa de "amo a mi novio, es perfecto" a "lo odio, es un monstruo" en 4 horas porque llegó tarde. ¿Qué fenómeno describe esto?',
+   opts:['Ciclación rápida — es Bipolar II','Splitting o escisión — incapacidad de integrar simultáneamente lo positivo y negativo de una persona','Simulación para manipular al novio','Labilidad emocional inespecífica'],
+   cor:1,
+   fb:'Splitting: mecanismo de defensa primitivo donde el objeto es todo bueno o todo malo — no puede ser "a veces bueno, a veces falla". No es manipulación consciente — es una forma genuina de procesar la realidad. Un retraso activa el esquema de abandono → el "perfecto" se convierte instantáneamente en "monstruo". Diferencial con Bipolar: los cambios del TLP son en horas y reactivos a eventos interpersonales; los del Bipolar son en días/semanas y más autónomos del contexto.'},
+
+  {t:'section', content:'Trastorno Antisocial de la Personalidad (TAP) vs Psicopatía'},
+
+  {t:'text', content:`<p>El TAP es frecuentemente confundido con la psicopatía — pero son constructos diferentes con implicaciones distintas:</p>
+  <p><strong>TAP (DSM-5):</strong> Es un diagnóstico conductual. Se basa en comportamiento observable: ≥18 años, evidencia de Trastorno de Conducta antes de los 15 años, y ≥3 de: engaño repetido, impulsividad, irritabilidad/agresividad, irresponsabilidad, falta de remordimiento.</p>
+  <p><strong>Psicopatía (PCL-R de Hare):</strong> Es un constructo dimensional que incluye un componente <em>afectivo-interpersonal</em> que el TAP no captura: encanto superficial, grandiosidad, falta de empatía afectiva, engaño patológico, ausencia total de remordimiento genuino. No todo TAP es psicópata — muchos psicópatas funcionales no cumplen criterios de TAP.</p>
+  <p>La distinción importa clínicamente: el TAP puede mejorar con tratamiento motivacional en contextos estructurados. La psicopatía con Factor 1 alto (componente afectivo) tiene peor pronóstico terapéutico.</p>`},
+
+  {t:'alert',
+   label:'Contratransferencia en Clúster B',
+   text:'Los trastornos del Clúster B generan respuestas emocionales intensas en el clínico — pueden parecer manipuladores, dramáticos o agotadores. Esa reacción emocional del clínico es información diagnóstica, no una señal de que el paciente es "un caso difícil". El clinico que se vuelve "el especial" o el que "odia" al paciente ha perdido la neutralidad terapéutica.'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia fundamental entre el TAP y la psicopatía medida por el PCL-R?',
+   opts:['Son sinónimos — el PCL-R es solo una herramienta para diagnosticar TAP','El TAP es un diagnóstico conductual; la psicopatía incluye un componente afectivo-interpersonal (encanto, falta de empatía afectiva) que el TAP no captura','La psicopatía es más grave que el TAP siempre','El TAP solo aplica en contexto forense'],
+   cor:1,
+   fb:'El TAP es conductual — se diagnostica por comportamiento. La psicopatía mide también el componente afectivo-interpersonal: encanto superficial, grandiosidad, falta de empatía genuina, engaño patológico. Muchos psicópatas "funcionales" no han cometido delitos (no cumplen TAP). Muchos pacientes con TAP no tienen el componente afectivo de la psicopatía. La distinción importa para el pronóstico y el manejo.'}
+ ],
+ quiz:[
+  {q:'¿Cuántos criterios de los 9 deben cumplirse para diagnosticar TLP?',
+   opts:['3 de 9','5 de 9','7 de 9','Todos los 9'],
+   cor:1,
+   fb:'≥5 de 9 criterios. Los más diagnósticamente discriminantes son: inestabilidad de identidad, inestabilidad afectiva reactiva, impulsividad y conductas autolesivas/parasuicidas. Es importante recordar que el TLP es el TP más prevalente en hospitalizaciones psiquiátricas — entre el 15-25% de los pacientes hospitalizados cumplen criterios.'},
+  {q:'¿Cuál es el tratamiento psicológico con mayor evidencia para el TLP, especialmente para reducir conductas parasuicidas?',
+   opts:['Psicoanálisis clásico de alta frecuencia','TCC estándar para depresión','DBT — Dialectical Behavior Therapy de Linehan','Terapia de exposición con prevención de respuesta'],
+   cor:2,
+   fb:'DBT (Linehan, 1993) es el tratamiento con mayor evidencia para TLP, especialmente para reducir parasuicidio y hospitalizaciones. Integra habilidades de mindfulness, tolerancia al malestar, regulación emocional y efectividad interpersonal. Duración mínima: 1 año. La TFP (Kernberg) y MBT (Bateman-Fonagy) también tienen evidencia fuerte.'},
+  {q:'Una paciente con TLP en hospitalización idealiza a un médico ("eres el único que me entiende") y devalúa al resto del equipo ("todos me odian"). ¿Cuál es el manejo más apropiado?',
+   opts:['El médico debe asumir el rol de terapeuta principal aprovechando la alianza','El equipo debe ser consistente, con límites claros y sin que ningún miembro ocupe el rol de "especial" o "malo"','Confrontar directamente el comportamiento manipulador del paciente','Ignorar la idealización y la devaluación porque son parte del cuadro'],
+   cor:1,
+   fb:'El manejo del TLP en hospitalización requiere consistencia de todo el equipo. El splitting entre "buenos" y "malos" del staff es predictible y forma parte del cuadro. Si un miembro del equipo acepta ser "el especial", pierde efectividad terapéutica y puede romper la dinámica del equipo. Los límites deben ser claros, comunicados con calidez y sostenidos por todos consistentemente.'},
+  {q:'¿Qué evidencia de Trastorno de Conducta antes de los 15 años es necesaria para diagnosticar TAP?',
+   opts:['No es necesaria — el TAP se diagnostica solo por comportamiento adulto','Es un criterio obligatorio para el diagnóstico de TAP en adultos','Es opcional — refuerza el diagnóstico pero no es requerida','Solo aplica si el paciente tiene antecedentes legales'],
+   cor:1,
+   fb:'La evidencia de T. de Conducta antes de los 15 años es un criterio obligatorio para el TAP. Esto implica una historia infantil de: agresión a personas o animales, destrucción de propiedad, engaño o robo, violaciones graves de normas. Sin este antecedente, el diagnóstico de TAP no cumple criterios formales — aunque el comportamiento adulto sea antisocial.'},
+  {q:'¿Cuál es la velocidad de cambio del ánimo que diferencia el TLP del Trastorno Bipolar II?',
+   opts:['En TLP los cambios ocurren en semanas; en Bipolar II en días','En TLP los cambios ocurren en horas y son reactivos a eventos interpersonales; en Bipolar II los episodios duran días o semanas y son más autónomos del contexto','No hay diferencia en la velocidad — la distinción es cualitativa','En Bipolar II los cambios son siempre más rápidos'],
+   cor:1,
+   fb:'Esta es la distinción clínica más útil: TLP → cambios en horas, siempre hay un trigger interpersonal identificable (alguien llegó tarde, algo se dijo). Bipolar II → episodios que duran días o semanas, relativamente más autónomos del contexto inmediato (aunque el estrés puede precipitarlos). Hasta el 20% de pacientes con TLP tienen Bipolar comórbido — ambos se diagnostican y se tratan.'}
+ ]
+},
+
+'ev1':{
+ title:'MMPI-2 — Cómo interpretarlo de verdad',
+ mod:'Evaluación e Instrumentos',
+ bloques:[
+  {t:'text', content:`<p>El MMPI-2 es el instrumento de evaluación de personalidad y psicopatología más investigado del mundo — más de 15.000 publicaciones científicas. Y también uno de los más malinterpretados en la práctica.</p>
+  <p>El error más común: ir directamente a las escalas clínicas y leer la más elevada como "el diagnóstico". Eso es como leer una glucemia sin saber si el paciente comió. Las escalas clínicas <em>solo son interpretables si primero se verifican las escalas de validez</em>.</p>
+  <p>El MMPI-2 tiene 567 ítems verdadero/falso. Las puntuaciones se convierten a <strong>puntuaciones T</strong> (media=50, DS=10). T ≥65 = clínicamente elevado (percentil 92). T ≥75 = marcadamente elevado.</p>`},
+
+  {t:'section', content:'Paso 1 — Escalas de Validez: siempre primero'},
+
+  {t:'text', content:`<p><strong>VRIN</strong> (Variable Response Inconsistency): Detecta inconsistencia aleatoria — responder sin leer. T ≥80: protocolo inválido. No interpretar nada.</p>
+  <p><strong>TRIN</strong> (True Response Inconsistency): Detecta tendencia a responder siempre "verdadero" o siempre "falso". T ≥80: inválido.</p>
+  <p><strong>Escala L</strong> (Lie): Ítems de virtud poco frecuente. T ≥65: imagen favorable exagerada, defensividad consciente. Muy común en evaluaciones donde el paciente quiere "verse bien" — custodia, laboral, forense.</p>
+  <p><strong>Escala F</strong> (Infrecuencia): Ítems raramente aprobados en población normal. T 65-79: posible amplificación o angustia genuina intensa. T ≥80: exageración significativa o psicopatología muy grave real. T ≥100: simulación probable o respuesta aleatoria.</p>
+  <p><strong>Escala K</strong> (Corrección): Defensividad sutil. T ≥65 con F baja: minimización. T baja con F alta: apertura total, "cry for help".</p>
+  <p><strong>F-K Index:</strong> F raw score − K raw score. >12: posible exageración. <−12: defensividad marcada.</p>`},
+
+  {t:'alert',
+   label:'Regla de oro del MMPI-2',
+   text:'Si VRIN ≥80 o TRIN ≥80 → el protocolo es INVÁLIDO. No se interpretan las escalas clínicas. Punto. Si F ≥80 con VRIN y TRIN dentro de límites, las escalas clínicas pueden interpretarse con precaución considerando amplificación de síntomas.'},
+
+  {t:'section', content:'Paso 2 — Las 10 Escalas Clínicas'},
+
+  {t:'text', content:`<p>Las escalas clínicas se interpretan en conjunto por código de puntos — las 2-3 más elevadas:</p>
+  <p><strong>Escala 1 — Hs (Hipocondría):</strong> Quejas somáticas difusas, focalización en salud física. T ≥65: síntomas físicos múltiples.</p>
+  <p><strong>Escala 2 — D (Depresión):</strong> Estado deprimido, enlentecimiento, pesimismo. Alta en TDM pero también en cualquier estado de malestar agudo. No diagnostica depresión per se — refleja el estado al momento de la aplicación.</p>
+  <p><strong>Escala 3 — Hy (Histeria):</strong> Negación de problemas + síntomas somáticos específicos. Perfil "V de conversión" (1-3 elevadas, 2 baja) sugiere negación y somatización.</p>
+  <p><strong>Escala 4 — Pd (Desviación Psicopática):</strong> Conflictos con autoridad, impulsividad, alienación social. T ≥70: conflictos con normas. No específica de TAP.</p>
+  <p><strong>Escala 6 — Pa (Paranoia):</strong> Suspicacia, sensibilidad interpersonal. T ≥75: ideas persecutorias. Importante para espectro psicótico.</p>
+  <p><strong>Escala 7 — Pt (Psicastenia):</strong> Ansiedad, rumiación, rigidez. La más correlacionada con angustia general. Alta en TAG, TOC, perfeccionismo.</p>
+  <p><strong>Escala 8 — Sc (Esquizofrenia):</strong> Alienación, experiencias inusuales. T ≥75: posible pensamiento desorganizado. No diagnostica esquizofrenia por sí sola.</p>
+  <p><strong>Escala 9 — Ma (Hipomanía):</strong> Energía excesiva, grandiosidad. T ≥65 con Pd elevada (código 4-9): impulsividad actuadora.</p>
+  <p><strong>Escala 0 — Si (Introversión Social):</strong> Inhibición social, introversión. No es psicopatología per se.</p>`},
+
+  {t:'case',
+   label:'Interpretar un perfil real',
+   text:`<strong>Perfil: L=52, F=61, K=48, VRIN=58, TRIN=54 → Válido</strong>
+  <br>Escalas más elevadas: D=78, Pt=74, Sc=68 (código 2-7-8)
+  <br><br><strong>Código 2-7:</strong> Depresión + ansiedad intensa + rumiación. Malestar emocional significativo. Pesimismo, autocrítica, tensión. Alta probabilidad de cuadro depresivo con ansiedad prominente.
+  <br><br><strong>Con Sc=68 adicionalmente:</strong> Añade extrañamiento, posibles experiencias perceptuales inusuales o pensamiento poco convencional. No diagnostica psicosis — señala que explorar disociación o experiencias inusuales.
+  <br><br><strong>F=61</strong> indica que el paciente no está exagerando significativamente — el malestar reportado es probablemente genuino.`},
+
+  {t:'question',
+   q:'Un paciente presenta MMPI-2 con VRIN=85, F=92, Pd=88, Sc=84, Pa=79. ¿Cuál es el primer paso?',
+   opts:['Interpretar el código Pd-Sc como TAP con psicosis','VRIN=85 invalida el protocolo completo — no se interpretan las escalas clínicas','Solo considerar F=92 y concluir simulación','Promediar las escalas clínicas para un diagnóstico general'],
+   cor:1,
+   fb:'VRIN=85 supera el umbral de 80 → protocolo INVÁLIDO. No importa cuán elevadas estén las escalas clínicas — si VRIN o TRIN ≥80, la respuesta fue inconsistente o aleatoria y el perfil no es interpretable. Debe readministrarse con instrucciones claras y verificar que el paciente entendió la tarea.'}
+ ],
+ quiz:[
+  {q:'¿Por qué las escalas de validez del MMPI-2 se interpretan ANTES que las escalas clínicas?',
+   opts:['Porque son más importantes para el diagnóstico','Porque determinan si las respuestas del paciente son confiables para interpretar las escalas clínicas','Porque el DSM lo exige como requisito','Porque L, F y K son diagnósticamente más informativas que las clínicas'],
+   cor:1,
+   fb:'Las escalas clínicas solo tienen significado si el paciente respondió de forma consistente, honesta y comprensible. Las escalas de validez detectan respuesta aleatoria (VRIN, TRIN), defensividad (L, K) o exageración (F). Sin este paso, puedes estar interpretando un perfil inválido como si fuera real.'},
+  {q:'Escala F=95 con VRIN=62 y TRIN=55. ¿Cuál es la interpretación más apropiada?',
+   opts:['El protocolo es inválido — F ≥80 invalida automáticamente','El protocolo es técnicamente válido (VRIN y TRIN dentro de límites), pero F=95 indica exageración severa que infla artificialmente las escalas clínicas','El protocolo es completamente confiable porque VRIN y TRIN son normales','F=95 indica psicopatología muy grave pero no afecta la validez'],
+   cor:1,
+   fb:'VRIN=62 y TRIN=55 indican respuesta consistente (no aleatoria). Pero F=95 es una señal crítica de exageración o amplificación. El protocolo no es "inválido" automáticamente, pero las escalas clínicas están artificialmente infladas. Se interpretan con extrema precaución, considerando motivación del paciente para exagerar síntomas (contexto forense, búsqueda de beneficios, etc.).'},
+  {q:'El código de puntos 2-7 del MMPI-2 (Depresión + Psicastenia como escalas más elevadas) es más sugestivo de:',
+   opts:['Trastorno Antisocial de Personalidad','Depresión con ansiedad intensa, rumiación y angustia significativa','Esquizofrenia paranoide','Hipomanía con impulsividad'],
+   cor:1,
+   fb:'El código 2-7 es uno de los más frecuentes en clínica. Depresión (Escala 2) + Psicastenia/ansiedad (Escala 7): malestar emocional significativo, pesimismo, autocrítica intensa, rumiación, angustia. Alta correlación con diagnósticos de TDM con componente ansioso, TAG, o trastornos adaptativos graves.'},
+  {q:'Escala L=72 con F=38 en un contexto de evaluación para custodia de menores. ¿Qué indica este patrón?',
+   opts:['El paciente está amplificando síntomas para obtener beneficios','Hay defensividad consciente y presentación de imagen excesivamente favorable — el paciente está minimizando problemas','El protocolo es inválido por L elevada','Es un perfil normal sin implicaciones clínicas'],
+   cor:1,
+   fb:'L=72 (alta) + F=38 (baja): defensividad consciente. El paciente está presentando una imagen de sí mismo excesivamente positiva y virtuosa, minimizando problemas. Es el patrón clásico en evaluaciones donde el paciente quiere "verse bien" — custodia, selección laboral, evaluaciones forenses. Las escalas clínicas pueden estar artificialmente bajas.'},
+  {q:'¿Qué significa el F-K Index y cuál es su utilidad clínica?',
+   opts:['Es la suma de F y K para determinar gravedad total','Es la resta (F raw score - K raw score); >12 sugiere posible exageración; <-12 sugiere defensividad marcada','Es una escala de validez independiente que detecta simulación definitiva','Solo tiene utilidad en contextos forenses'],
+   cor:1,
+   fb:'F-K Index: puntuación raw de F menos puntuación raw de K. >12: el paciente puede estar amplificando síntomas (F alta, K baja = abriendo problemas sin defensividad). <-12: defensividad marcada (K alta, F baja = minimizando y presentando imagen favorable). Es un índice complementario a las escalas de validez individuales, útil para detectar tendencias globales de respuesta.'}
+ ]
+}
+
+}; // fin LESSONS
+
+// ── CASOS PARA EL JUEGO ──
+const GAME_LEVELS_DATA = [
+ {id:1, name:'Nivel 1 — Presentaciones Clásicas', diff:'fácil', pts_base:100, color:'var(--ok)'},
+ {id:2, name:'Nivel 2 — Comorbilidades', diff:'medio', pts_base:200, color:'var(--warn)'},
+ {id:3, name:'Nivel 3 — Alta Complejidad', diff:'difícil', pts_base:350, color:'var(--err)'}
+];
+
+const GAME_CASES = [
+ // Nivel 1
+ {id:'g1', lvl:1,
+  paciente:'Andrés, 42 años',
+  caso:'Lleva 4 semanas con ánimo deprimido la mayor parte del día, no disfruta nada (antes le encantaba el fútbol), bajó 5 kg sin dieta, se despierta a las 3am y no puede volver a dormir, se siente culpable de "ser una carga para su familia". TSH normal. Sin historia de episodios de euforia.',
+  pregunta:'¿Cuál es el diagnóstico principal?',
+  opts:['Trastorno de Adaptación con ánimo deprimido','Trastorno Depresivo Mayor, episodio único','Distimia / TPPD','Trastorno Bipolar II, fase depresiva'],
+  cor:1, fb:'TDM: ≥5 síntomas (ánimo deprimido, anhedonia, cambio de peso, insomnio, culpa = 5 síntomas) durante ≥2 semanas con disfunción y cambio respecto al funcionamiento previo. TSH normal descarta hipotiroidismo. Sin hipomanía → descarta Bipolar.'},
+
+ {id:'g2', lvl:1,
+  paciente:'Laura, 28 años',
+  caso:'Crisis repentinas de taquicardia, sudoración y sensación de "voy a morir", que duran 10 minutos y ocurren sin aviso — una la tuvo mientras dormía. Desde la primera crisis evita el metro y los centros comerciales. Ha ido a urgencias 3 veces; ECG y labs siempre normales. Ahora tiene miedo constante de que le vuelva a pasar.',
+  pregunta:'¿Cuál es el diagnóstico más apropiado?',
+  opts:['TAG — Trastorno de Ansiedad Generalizada','Cardiopatía no detectada','Trastorno de Pánico con Agorafobia','Hipocondría / Trastorno de Ansiedad por Enfermedad'],
+  cor:2, fb:'Trastorno de Pánico con Agorafobia: crisis inesperadas recurrentes (incluyendo nocturna) + ansiedad anticipatoria + evitación de múltiples situaciones. ECGs normales x3 descartan causa orgánica. La agorafobia es secundaria al pánico — el miedo es a tener una crisis, no al espacio en sí.'},
+
+ {id:'g3', lvl:1,
+  paciente:'Sebastián, 20 años',
+  caso:'Lleva 8 meses creyendo que sus vecinos transmiten mensajes en su contra por la televisión. Escucha una voz que comenta sus acciones en tercera persona. Dejó la universidad. Toxicológico en orina negativo para todas las sustancias. RM cerebral y EEG normales. Síntomas presentes desde hace 8 meses.',
+  pregunta:'¿Cuál es el diagnóstico correcto en este momento?',
+  opts:['T. Psicótico Breve — dura menos de 1 mes','T. Esquizofreniforme — entre 1 y 6 meses de duración','Esquizofrenia — 8 meses supera el criterio de 6 meses','T. Esquizoafectivo — hay síntomas afectivos'],
+  cor:2, fb:'Esquizofrenia: síntomas del Criterio A (delirios de referencia + alucinaciones auditivas comentadoras) + disfunción funcional + duración de 8 meses que supera el umbral de 6 meses. Causas orgánicas y por sustancias descartadas. El T. Esquizofreniforme aplica para 1-6 meses — 8 meses ya es esquizofrenia.'},
+
+ // Nivel 2
+ {id:'g4', lvl:2,
+  paciente:'Rosa, 39 años',
+  caso:'Cuarto episodio depresivo en 7 años, todos tratados con antidepresivos con "respuesta parcial". Su esposo refiere que entre episodios tiene semanas en que "está con demasiada energía, habla mucho, duerme 4 horas y no le importa, gasta impulsivamente — son sus temporadas buenas". Nunca hospitalizaciones ni psicosis en esas épocas. Ahora tiene ideación de muerte pasiva.',
+  pregunta:'¿Qué revisión diagnóstica es urgente antes de ajustar el antidepresivo?',
+  opts:['Continuar con el antidepresivo actual y subir la dosis','Descartar Trastorno Bipolar II — las "temporadas buenas" describen hipomanía no reportada','Cambiar a otro ISRS — la respuesta parcial indica intolerancia al fármaco','Agregar un antipsicótico al antidepresivo actual'],
+  cor:1, fb:'Bipolar II subdiagnosticado: las "temporadas buenas" con energía aumentada, sueño reducido sin cansancio y gasto impulsivo son hipomanía. La respuesta parcial a múltiples antidepresivos es la señal de alerta clásica. Dar otro antidepresivo sin estabilizador puede inducir ciclación rápida. El tratamiento correcto es retirar o no escalar el AD + iniciar estabilizador.'},
+
+ {id:'g5', lvl:2,
+  paciente:'Mateo, 33 años',
+  caso:'Pensamientos intrusivos que lo aterran: teme haber atropellado a alguien cada vez que conduce (revisa el periódico para confirmar), regresa a casa 6-7 veces a verificar si apagó el gas, y tiene pensamientos de hacerle daño a su bebé que lo llenan de culpa y horror. Dice "soy un monstruo". Estos rituales le toman 2-3 horas al día. Se niega a estar solo con el bebé.',
+  pregunta:'Sobre los pensamientos de hacerle daño al bebé, ¿qué indica la culpa y el horror que siente Mateo?',
+  opts:['Alto riesgo real — separar inmediatamente al padre del bebé','Son pensamientos egodistónicos — el horror y la culpa indican que NO quiere actuar; esto es TOC con harm OCD, no intención real','Son ideación homicida que requiere evaluación forense urgente','No se puede determinar sin más evaluación'],
+  cor:1, fb:'En TOC con harm OCD, el paciente TEME sus propios pensamientos, los considera horrorosos, y los evita — exactamente lo opuesto de la intención real. La angustia extrema y la culpa son la señal diagnóstica clave de que son obsesiones egodistónicas. El riesgo real de violencia en TOC es muy bajo. El error más dañino es tratar las obsesiones de daño como ideación real.'},
+
+ // Nivel 3
+ {id:'g6', lvl:3,
+  paciente:'Efraín, 48 años, excombatiente',
+  caso:'6 meses con pesadillas recurrentes de combate, evita noticias y fuegos artificiales (lo llevan al suelo), insomnio severo, hipervigilancia. Bebe aguardiente a diario "para dormir". Tiene arma en casa. En entrevista: vigilante, sobresaltado, llora al mencionar compañeros muertos. Su esposa dice que "no es el mismo de antes".',
+  pregunta:'¿Cuál es la combinación diagnóstica y cuál es la PRIMERA intervención prioritaria?',
+  opts:['Solo TUS por alcohol — el TEPT es una reacción normal al combate','TEPT + TUS alcohol — primera intervención: retirar acceso al arma y desintoxicación alcohólica supervisada ANTES de iniciar tratamiento del TEPT','TEPT aislado — iniciar EMDR inmediatamente','T. de Adaptación + TUS — psicoterapia ambulatoria semanal'],
+  cor:1, fb:'TEPT completo + TUA grave (alcohol como automedicación). La combinación TEPT-TUA multiplica el riesgo suicida. ANTES de cualquier tratamiento del trauma: (1) retirar acceso al arma — riesgo vital inmediato, (2) desintoxicación alcohólica supervisada médicamente (la abstinencia abrupta puede causar convulsiones). Iniciar EMDR con TUA activo es contraindicado — el alcohol bloquea el procesamiento del trauma.'}
+];
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+const SK='psicodx_bb_v1';
+let ST=JSON.parse(localStorage.getItem(SK)||'null')||{
+  done:{}, pts:0, streak:0, lastDate:null,
+  correct:0, total:0,
+  game:{pts:0, cases:0, correct:0, total:0, streak:0, unlocked:1, history:[]}
+};
+function save(){localStorage.setItem(SK,JSON.stringify(ST));}
+
+// lesson runtime
+let curLesId=null, curBlocks=[], curBlockIdx=0, qAnswered=false;
+// quiz runtime
+let qLesId=null, qIdx=0, qCorrect=0, qTotal=0, qAnsweredQ=false;
+// game runtime
+let gCases=[], gIdx=0, gPts=0, gStreak=0, gCorrect=0, gAnswered=false;
+
+// ══════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════
+function refreshHome(){
+  document.getElementById('h-les').textContent=Object.keys(ST.done).length;
+  document.getElementById('h-pts').textContent=ST.pts;
+  document.getElementById('h-str').textContent=(ST.streak||0)+'🔥';
+  document.getElementById('hs-les').textContent=Object.keys(ST.done).length;
+  const acc=ST.total?Math.round(ST.correct/ST.total*100)+'%':'—';
+  document.getElementById('hs-prec').textContent=acc;
+  document.getElementById('hs-pts').textContent=ST.pts;
+
+  const el=document.getElementById('home-modules');
+  el.innerHTML='';
+  MODS.forEach((mod,mi)=>{
+    const done=mod.lecciones.filter(l=>ST.done[l.id]).length;
+    const total=mod.lecciones.length;
+    const prevUnlocked=mi===0||MODS[mi-1].lecciones.every(l=>ST.done[l.id]);
+    const locked=!prevUnlocked&&done===0;
+    const pct=Math.round(done/total*100);
+    const isDone=done===total;
+    el.innerHTML+=`<div class="mod-card${locked?' locked':''}${isDone?' done':''}" data-mid="${mod.id}">
+      <div class="mod-header">
+        <div class="mod-icon" style="background:${mod.color}22;color:${mod.color}">${mod.ic}</div>
+        <div class="mod-info">
+          <div class="mod-title">${mod.name}</div>
+          <div class="mod-sub">${total} lección${total>1?'es':''} · ${locked?'Bloqueado':isDone?'Completado':done+'/'+total+' completadas'}</div>
+          <div class="mod-prog-wrap"><div class="mod-prog-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div class="mod-meta">
+        <span>${mod.lecciones.map(l=>LESSONS[l.id]?'':'⚫').join('')||'✓ Disponible'}</span>
+        <span>${isDone?'✓ Completo':locked?'🔒':'→ Continuar'}</span>
+      </div>
+    </div>`;
+  });
+
+  document.querySelectorAll('.mod-card:not(.locked)').forEach(card=>{
+    card.addEventListener('click',function(){openMod(parseInt(this.dataset.mid));});
+  });
+}
+
+// ── ABRIR MÓDULO (lista de lecciones) ──
+function openMod(mid){
+  const mod=MODS.find(m=>m.id===mid);
+  const pre=document.getElementById('pre-les');
+  document.getElementById('pre-mod-label').textContent=mod.name;
+  document.getElementById('pre-title').textContent='Selecciona una lección';
+  const body=document.getElementById('pre-body');
+  body.innerHTML=`<div class="ibox"><div class="ii">${mod.ic}</div><div><strong>${mod.name}</strong><br>Lecciones con contenido profundo, ejemplos clínicos reales y preguntas intercaladas. Al terminar cada lección hay un quiz de evaluación.</div></div>
+  ${mod.lecciones.map((l,i)=>{
+    const done=ST.done[l.id];
+    const hasLesson=!!LESSONS[l.id];
+    const prevDone=i===0||ST.done[mod.lecciones[i-1].id];
+    const locked=!prevDone&&!done;
+    return `<div class="mod-card${locked||!hasLesson?' locked':''}" style="margin-bottom:.6rem" data-lid="${l.id}">
+      <div class="mod-header" style="margin-bottom:0">
+        <div class="mod-icon" style="background:${mod.color}22;color:${mod.color};font-size:.9rem;font-weight:700">${i+1}</div>
+        <div class="mod-info">
+          <div class="mod-title" style="font-size:.9rem">${l.title}</div>
+          <div class="mod-sub">${done?'✓ Completada':locked?'Completa la anterior primero':!hasLesson?'Próximamente':'Disponible'}</div>
+        </div>
+        <div style="font-size:.75rem;color:${done?'var(--ok)':locked||!hasLesson?'var(--text)':'var(--blue)'};opacity:${locked||!hasLesson?.4:1}">${done?'✓':locked||!hasLesson?'🔒':'→'}</div>
+      </div>
+    </div>`;
+  }).join('')}`;
+
+  body.querySelectorAll('.mod-card:not(.locked)').forEach(card=>{
+    card.addEventListener('click',function(){
+      const lid=this.dataset.lid;
+      if(lid&&LESSONS[lid]) openPreLesson(lid);
+    });
+  });
+  document.getElementById('pre-back').onclick=()=>pre.classList.remove('open');
+  document.getElementById('pre-start').onclick=()=>{
+    const firstAvail=mod.lecciones.find(l=>LESSONS[l.id]&&!ST.done[l.id])||mod.lecciones.find(l=>LESSONS[l.id]);
+    if(firstAvail) openPreLesson(firstAvail.id);
+  };
+  pre.classList.add('open');
+}
+
+// ── PRE-LECCIÓN ──
+function openPreLesson(lesId){
+  const les=LESSONS[lesId];
+  document.getElementById('pre-mod-label').textContent=les.mod;
+  document.getElementById('pre-title').textContent=les.title;
+  document.getElementById('pre-body').innerHTML=`
+    <div class="instr-block">
+      <div class="instr-title">¿Cómo funciona esta lección?</div>
+      <div class="instr-item">
+        <div class="instr-ic">📖</div>
+        <div class="instr-txt"><div class="instr-label">Lectura profunda</div><div class="instr-desc">Contenido real como una clase magistral, con ejemplos clínicos de hospitalización.</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">🎯</div>
+        <div class="instr-txt"><div class="instr-label">Preguntas intercaladas</div><div class="instr-desc">Durante la lectura aparecen preguntas. Respóndelas antes de continuar.</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">📝</div>
+        <div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">${les.quiz.length} preguntas de evaluación al terminar la lección.</div></div>
+      </div>
+    </div>
+    <div class="ibox"><div class="ii">💡</div><div>Tómate el tiempo necesario. La comprensión profunda es el objetivo, no la velocidad.</div></div>
+  `;
+  document.getElementById('pre-start').onclick=()=>startLesson(lesId);
+  document.getElementById('pre-les').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+//  LECCIÓN — BLOQUES SECUENCIALES
+// ══════════════════════════════════════════
+function startLesson(lesId){
+  const les=LESSONS[lesId];
+  curLesId=lesId;
+  curBlocks=les.bloques;
+  curBlockIdx=0;
+  qAnswered=false;
+
+  document.getElementById('ls-title').textContent=les.title;
+  document.getElementById('ls-prog-fill').style.width='0%';
+  document.getElementById('ls-body').innerHTML='';
+  document.getElementById('ls-ft').innerHTML='';
+  document.getElementById('pre-les').classList.remove('open');
+  document.getElementById('ls').classList.add('open');
+
+  renderBlock();
+}
+
+function updateLsProgress(){
+  const pct=Math.round(curBlockIdx/curBlocks.length*100);
+  document.getElementById('ls-prog-fill').style.width=pct+'%';
+}
+
+function renderBlock(){
+  if(curBlockIdx>=curBlocks.length){
+    startQuiz(curLesId);
+    return;
+  }
+  const b=curBlocks[curBlockIdx];
+  const body=document.getElementById('ls-body');
+  const ft=document.getElementById('ls-ft');
+  updateLsProgress();
+
+  let html='';
+  if(b.t==='text'){
+    html=`<div class="les-block"><div class="lb-text">${b.content}</div></div>`;
+  } else if(b.t==='section'){
+    html=`<div class="les-block"><div class="lb-section">${b.content}</div></div>`;
+  } else if(b.t==='case'){
+    html=`<div class="les-block"><div class="lb-case"><div class="lb-case-label">${b.label||'Caso clínico'}</div><div class="lb-case-text">${b.text}</div></div></div>`;
+  } else if(b.t==='alert'){
+    html=`<div class="les-block"><div class="lb-alert"><div class="lb-alert-label">⚠️ ${b.label||'Alerta'}</div><div class="lb-alert-text">${b.text}</div></div></div>`;
+  } else if(b.t==='tip'){
+    html=`<div class="les-block"><div class="lb-tip"><div class="lb-tip-label">💡 ${b.label||'Clave clínica'}</div><div class="lb-tip-text">${b.text}</div></div></div>`;
+  } else if(b.t==='table'){
+    html=`<div class="les-block"><table class="lb-table"><thead><tr>${b.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  } else if(b.t==='question'){
+    const qid='lq'+curBlockIdx;
+    html=`<div class="les-block"><div class="lb-q" id="${qid}">
+      <div class="lb-q-label">🎯 Pregunta — Comprueba tu comprensión</div>
+      <div class="lb-q-text">${b.q}</div>
+      <div class="lb-q-opts" id="${qid}-opts">${b.opts.map((o,i)=>`<button class="lb-q-opt" data-i="${i}">${o}</button>`).join('')}</div>
+      <div class="lb-q-fb" id="${qid}-fb"></div>
+      <button class="lb-q-cont" id="${qid}-cont">Continuar →</button>
+    </div></div>`;
+  }
+
+  // append
+  const wrap=document.createElement('div');
+  wrap.innerHTML=html;
+  body.appendChild(wrap.firstElementChild);
+  setTimeout(()=>body.scrollTop=body.scrollHeight,80);
+
+  if(b.t==='question'){
+    qAnswered=false;
+    ft.innerHTML='';
+    const qid='lq'+curBlockIdx;
+    document.querySelectorAll(`#${qid}-opts .lb-q-opt`).forEach(btn=>{
+      btn.addEventListener('click',function(){
+        if(qAnswered)return;
+        qAnswered=true;
+        const chosen=parseInt(this.dataset.i);
+        const ok=chosen===b.cor;
+        document.querySelectorAll(`#${qid}-opts .lb-q-opt`).forEach(b2=>b2.disabled=true);
+        document.querySelector(`#${qid}-opts [data-i="${b.cor}"]`).classList.add('q-cor');
+        if(!ok) this.classList.add('q-wrg');
+        const fb=document.getElementById(`${qid}-fb`);
+        fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+b.fb;
+        fb.className=`lb-q-fb show${ok?' fb-ok':' fb-err'}`;
+        ST.total=(ST.total||0)+1;
+        if(ok){ST.correct=(ST.correct||0)+1;ST.pts=(ST.pts||0)+30;popXP('+30');}
+        save();
+        document.getElementById(`${qid}-cont`).classList.add('show');
+        setTimeout(()=>body.scrollTop=body.scrollHeight,120);
+      });
+    });
+    document.getElementById(`${qid}-cont`).addEventListener('click',()=>{
+      curBlockIdx++;
+      qAnswered=false;
+      renderBlock();
+      setTimeout(()=>body.scrollTop=body.scrollHeight,100);
+    });
+  } else {
+    const isLast=curBlockIdx>=curBlocks.length-1;
+    ft.innerHTML=`<button class="btn btn-p" id="ls-next" style="width:100%">${isLast?'Ir al Quiz Final →':'Continuar →'}</button>`;
+    document.getElementById('ls-next').addEventListener('click',()=>{
+      curBlockIdx++;
+      renderBlock();
+      setTimeout(()=>body.scrollTop=body.scrollHeight,100);
+    });
+  }
+}
+
+// ══════════════════════════════════════════
+//  QUIZ FINAL
+// ══════════════════════════════════════════
+function startQuiz(lesId){
+  const les=LESSONS[lesId];
+  qLesId=lesId;
+  qIdx=0; qCorrect=0; qTotal=les.quiz.length; qAnsweredQ=false;
+  document.getElementById('ls').classList.remove('open');
+  document.getElementById('q-mod-badge').textContent=les.mod+' — '+les.title;
+  renderQuizQ();
+  document.getElementById('qs').classList.add('open');
+}
+
+function renderQuizQ(){
+  const les=LESSONS[qLesId];
+  const q=les.quiz[qIdx];
+  document.getElementById('qpf').style.width=(qIdx/qTotal*100)+'%';
+  document.getElementById('qn').textContent=(qIdx+1)+'/'+qTotal;
+  document.getElementById('qq').textContent=q.q;
+  document.getElementById('qopts').innerHTML=q.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${o}</button>`).join('');
+  document.getElementById('qfb').className='qfb';
+  document.getElementById('qfb').textContent='';
+  document.getElementById('q-next').style.display='none';
+  qAnsweredQ=false;
+
+  document.querySelectorAll('.qopt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      if(qAnsweredQ)return;
+      qAnsweredQ=true;
+      const chosen=parseInt(this.dataset.i);
+      const ok=chosen===q.cor;
+      document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+      document.querySelector(`.qopt[data-i="${q.cor}"]`).classList.add('cor');
+      if(!ok) this.classList.add('wrg');
+      const fb=document.getElementById('qfb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+q.fb;
+      fb.className='qfb show '+(ok?'cor-fb':'wrg-fb');
+      if(ok){qCorrect++;ST.pts=(ST.pts||0)+50;ST.correct=(ST.correct||0)+1;popXP('+50');}
+      ST.total=(ST.total||0)+1;
+      save();
+      document.getElementById('q-next').style.display='block';
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('q-next').addEventListener('click',()=>{
+    qIdx++;
+    if(qIdx>=qTotal){showResults();return;}
+    renderQuizQ();
+  });
+});
+
+function showResults(){
+  document.getElementById('qs').classList.remove('open');
+  const pct=Math.round(qCorrect/qTotal*100);
+  const ptsEarned=qCorrect*50+200;
+  // mark done
+  if(!ST.done[qLesId]){
+    ST.done[qLesId]={score:pct,date:new Date().toISOString()};
+    ST.pts=(ST.pts||0)+200;
+    const today=new Date().toDateString();
+    if(ST.lastDate!==today){
+      const y=new Date();y.setDate(y.getDate()-1);
+      ST.streak=ST.lastDate===y.toDateString()?(ST.streak||0)+1:1;
+      ST.lastDate=today;
+    }
+  }
+  save();
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-v').textContent=pct>=80?'¡Lección dominada!':pct>=60?'Buen avance':'Repasa los conceptos';
+  document.getElementById('res-s').textContent=pct>=80?'Excelente comprensión clínica. Continúa con la siguiente lección.':pct>=60?'Revisa los conceptos fallidos en la lección antes de continuar.':'Te recomiendo releer la lección y reintentar el quiz.';
+  document.getElementById('rd-correct').textContent=qCorrect+'/'+qTotal;
+  document.getElementById('rd-pts').textContent='+'+ptsEarned;
+  document.getElementById('rd-streak').textContent=(ST.streak||0)+'🔥';
+  document.getElementById('res').classList.add('open');
+  refreshHome();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('res-continue').addEventListener('click',()=>{
+    document.getElementById('res').classList.remove('open');
+    document.getElementById('pre-les').classList.remove('open');
+  });
+  document.getElementById('res-retry').addEventListener('click',()=>{
+    document.getElementById('res').classList.remove('open');
+    startQuiz(qLesId);
+  });
+});
+
+// ══════════════════════════════════════════
+//  JUEGO DE CASOS
+// ══════════════════════════════════════════
+function renderGameHome(){
+  const g=ST.game;
+  document.getElementById('gm-pts').textContent=g.pts||0;
+  document.getElementById('gm-cases').textContent=g.cases||0;
+  document.getElementById('gm-acc').textContent=g.total?Math.round(g.correct/g.total*100)+'%':'—';
+
+  const ll=document.getElementById('game-levels');
+  ll.innerHTML='';
+  GAME_LEVELS_DATA.forEach(lv=>{
+    const locked=lv.id>(g.unlocked||1);
+    ll.innerHTML+=`<div class="mod-card${locked?' locked':''}" data-glv="${lv.id}" style="margin-bottom:.6rem">
+      <div class="mod-header" style="margin-bottom:0">
+        <div class="mod-icon" style="background:${locked?'var(--bg)':lv.color+'22'};color:${locked?'var(--text)':lv.color}">${locked?'🔒':lv.id}</div>
+        <div class="mod-info">
+          <div class="mod-title">${lv.name}</div>
+          <div class="mod-sub">${lv.diff} · ${lv.pts_base} pts por caso correcto · ${locked?'Obtén 70% en nivel anterior':'Disponible'}</div>
+        </div>
+        <div style="font-size:.75rem;color:${locked?'var(--text)':'var(--blue)'};opacity:${locked?.4:1}">${locked?'🔒':'→'}</div>
+      </div>
+    </div>`;
+  });
+  document.querySelectorAll('[data-glv]:not(.locked)').forEach(card=>{
+    card.addEventListener('click',function(){startGame(parseInt(this.dataset.glv));});
+  });
+
+  const hl=document.getElementById('game-history');
+  if(!g.history||!g.history.length){hl.innerHTML='<div style="font-size:.78rem;opacity:.5;text-align:center;padding:.5rem">Sin partidas aún</div>';return;}
+  hl.innerHTML=g.history.slice(-5).reverse().map(h=>`<div style="display:flex;justify-content:space-between;padding:.3rem 0;border-bottom:1px solid var(--rl);font-size:.76rem">
+    <span>Nivel ${h.lvl} · ${h.correct}/${h.total} correctos</span>
+    <span style="font-weight:700;color:var(--blue)">+${h.pts} pts</span>
+  </div>`).join('');
+}
+
+function startGame(lvl){
+  gCases=GAME_CASES.filter(c=>c.lvl===lvl).sort(()=>Math.random()-.5).slice(0,3);
+  gIdx=0; gPts=0; gStreak=0; gCorrect=0; gAnswered=false;
+  document.getElementById('go-level-label').textContent='Nivel '+lvl+' — '+GAME_LEVELS_DATA.find(l=>l.id===lvl).diff;
+  document.getElementById('go-pts-live').textContent='0';
+  document.getElementById('go-streak-live').textContent='0🔥';
+  document.getElementById('go-num').textContent='1/'+gCases.length;
+  document.getElementById('game-overlay').classList.add('open');
+  renderGameCase();
+}
+
+function renderGameCase(){
+  const c=gCases[gIdx];
+  gAnswered=false;
+  document.getElementById('go-num').textContent=(gIdx+1)+'/'+gCases.length;
+  document.getElementById('go-body').innerHTML=`
+    <div class="case-card">
+      <div class="case-label">👤 ${c.paciente}</div>
+      <div class="case-text">${c.caso}</div>
+    </div>
+    <div class="game-q-label">${c.pregunta}</div>
+    <div class="game-opts" id="game-opts">
+      ${c.opts.map((o,i)=>`<button class="game-opt" data-i="${i}">${o}</button>`).join('')}
+    </div>
+    <div class="game-fb" id="game-fb"></div>
+  `;
+  document.getElementById('go-ft').innerHTML='';
+
+  document.querySelectorAll('.game-opt').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      if(gAnswered)return;
+      gAnswered=true;
+      const chosen=parseInt(this.dataset.i);
+      const ok=chosen===c.cor;
+      document.querySelectorAll('.game-opt').forEach(b=>b.disabled=true);
+      document.querySelector(`.game-opt[data-i="${c.cor}"]`).classList.add('g-cor');
+      if(!ok) this.classList.add('g-wrg');
+      const fb=document.getElementById('game-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+c.fb;
+      fb.className='game-fb show '+(ok?'fb-ok':'fb-err');
+      const lvl=GAME_LEVELS_DATA.find(l=>l.id===c.lvl);
+      if(ok){gPts+=lvl.pts_base;gStreak++;gCorrect++;popXP('+'+lvl.pts_base);}
+      else{gStreak=0;}
+      document.getElementById('go-pts-live').textContent=gPts;
+      document.getElementById('go-streak-live').textContent=gStreak+'🔥';
+      const hasNext=gIdx<gCases.length-1;
+      document.getElementById('go-ft').innerHTML=hasNext
+        ?`<button class="btn btn-p" id="go-next" style="width:100%">Siguiente caso →</button>`
+        :`<button class="btn btn-p" id="go-finish" style="width:100%">Ver resultados</button>`;
+      if(hasNext) document.getElementById('go-next').addEventListener('click',()=>{gIdx++;renderGameCase();});
+      else document.getElementById('go-finish').addEventListener('click',finishGame);
+    });
+  });
+}
+
+function finishGame(){
+  const lvl=GAME_CASES.find(c=>c.id===gCases[0].id).lvl;
+  const g=ST.game;
+  g.pts=(g.pts||0)+gPts;
+  g.cases=(g.cases||0)+gCases.length;
+  g.correct=(g.correct||0)+gCorrect;
+  g.total=(g.total||0)+gCases.length;
+  g.history=g.history||[];
+  g.history.push({lvl,pts:gPts,correct:gCorrect,total:gCases.length});
+  const pct=Math.round(gCorrect/gCases.length*100);
+  if(pct>=70&&lvl<3) g.unlocked=Math.max(g.unlocked||1,lvl+1);
+  ST.pts=(ST.pts||0)+gPts;
+  save();
+  document.getElementById('go-body').innerHTML=`
+    <div style="text-align:center;padding:1.5rem 1rem">
+      <div style="font-size:2.8rem;margin-bottom:.5rem">${pct>=80?'🎯':pct>=60?'💡':'📚'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:.3rem">${pct>=80?'¡Excelente diagnóstico!':'Ronda completada'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--blue);margin:.3rem 0">+${gPts}</div>
+      <div style="font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin-bottom:.7rem">puntos</div>
+      <div style="font-size:.8rem;opacity:.65;line-height:1.6;margin-bottom:1rem">${gCorrect} de ${gCases.length} casos correctos${pct>=70&&lvl<3?'<br><strong style="color:var(--ok)">🔓 Nivel '+(lvl+1)+' desbloqueado</strong>':''}</div>
+    </div>
+  `;
+  document.getElementById('go-ft').innerHTML=`
+    <div style="display:flex;gap:.55rem">
+      <button class="btn btn-g" id="go-exit" style="flex:1">← Salir</button>
+      <button class="btn btn-p" id="go-repeat" style="flex:1">Repetir nivel</button>
+    </div>`;
+  document.getElementById('go-exit').addEventListener('click',()=>{
+    document.getElementById('game-overlay').classList.remove('open');
+    renderGameHome();
+  });
+  document.getElementById('go-repeat').addEventListener('click',()=>startGame(lvl));
+  renderGameHome();
+}
+
+// ══════════════════════════════════════════
+//  PROGRESO
+// ══════════════════════════════════════════
+function renderProg(){
+  const el=document.getElementById('prog-bars');
+  el.innerHTML='<div class="ey" style="margin-bottom:.55rem">Progreso por módulo</div>';
+  MODS.forEach(mod=>{
+    const done=mod.lecciones.filter(l=>ST.done[l.id]).length;
+    const pct=Math.round(done/mod.lecciones.length*100);
+    el.innerHTML+=`<div class="prog-bar-row">
+      <div class="pbr-label">${mod.ic} ${mod.name.split(' ').slice(0,2).join(' ')}</div>
+      <div class="pbr-wrap"><div class="pbr-fill" style="width:${pct}%"></div></div>
+      <div class="pbr-pct">${pct}%</div>
+    </div>`;
+  });
+
+  const BADGES=[
+    {ic:'🎯',name:'Primera',earned:Object.keys(ST.done).length>=1},
+    {ic:'⚡',name:'Racha 3',earned:(ST.streak||0)>=3},
+    {ic:'📚',name:'5 Lecciones',earned:Object.keys(ST.done).length>=5},
+    {ic:'🏆',name:'10 Lecciones',earned:Object.keys(ST.done).length>=10},
+    {ic:'💯',name:'Precisión 90%',earned:ST.total>=5&&ST.correct/ST.total>=.9},
+    {ic:'🎮',name:'50 Pts Juego',earned:(ST.game.pts||0)>=50},
+    {ic:'🔓',name:'Nivel 2',earned:(ST.game.unlocked||1)>=2},
+    {ic:'⭐',name:'Maestría',earned:Object.keys(ST.done).length>=MODS.reduce((a,m)=>a+m.lecciones.length,0)}
+  ];
+  document.getElementById('badges-grid').innerHTML=BADGES.map(b=>`<div class="badge-item ${b.earned?'earned':'locked-b'}">
+    <div class="badge-icon">${b.ic}</div>
+    <div class="badge-name">${b.name}</div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  NAV + XP POP + INIT
+// ══════════════════════════════════════════
+function nav(tab){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+tab).classList.add('active');
+  if(tab==='home') refreshHome();
+  if(tab==='game') renderGameHome();
+  if(tab==='prog') renderProg();
+}
+
+function popXP(txt){
+  const el=document.createElement('div');
+  el.className='xp-pop';
+  el.textContent=txt;
+  el.style.cssText=`left:${35+Math.random()*30}%;top:${25+Math.random()*20}%`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  // nav
+  document.querySelectorAll('[data-tab]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+      btn.classList.add('active');
+      nav(btn.dataset.tab);
+    });
+  });
+  // overlays close
+  document.getElementById('pre-close').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('ls-close').addEventListener('click',()=>{document.getElementById('ls').classList.remove('open');});
+  document.getElementById('qs-close').addEventListener('click',()=>{document.getElementById('qs').classList.remove('open');document.getElementById('ls').classList.remove('open');});
+  document.getElementById('go-close').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  refreshHome();
+});
+</script>
+</body>
+</html>

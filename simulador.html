@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PsicoDx · Simulador Clínico</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5b9bd5;--bg:#daeaf8;--text:#0d2a4a;--white:#f4f9ff;
+  --rl:rgba(91,155,213,.18);--rm:rgba(91,155,213,.4);--rd:#3a7bbf;
+  --ok:#3a9e6f;--err:#c0553a;--warn:#c49a3a;
+  --b1:#5b9bd5;--b2:#3a7bbf;--b3:#1a4a8a;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+.hdr{flex-shrink:0;background:var(--b3);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:#fff}
+.logo span{color:#7dc8f7}
+.hdr-stats{display:flex;gap:.85rem;align-items:center}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#7dc8f7;line-height:1}
+.hs-l{font-size:.44rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.key-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:.22rem .65rem;font-family:'Jost',sans-serif;font-size:.6rem;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;letter-spacing:.05em;transition:all .2s}
+.key-btn.ok{color:#7dc8f7;border-color:rgba(125,200,247,.4)}
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.22rem 0 .35rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.12rem;padding:.32rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif;transition:all .15s}
+.ni-ic{font-size:1.1rem;line-height:1}
+.ni-lb{font-size:.5rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.3}
+.ni.active .ni-lb{color:var(--blue);opacity:1}
+.ni.active .ni-ic{transform:scale(1.1)}
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1rem 1rem 1.5rem}
+.sc.active{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ey{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:300;color:var(--text);margin-bottom:.9rem;line-height:1.15}
+.st em{color:var(--blue);font-style:italic}
+.ibox{background:var(--rl);border-radius:10px;padding:.7rem .95rem;font-size:.78rem;line-height:1.6;color:var(--text);margin-bottom:.85rem;display:flex;gap:.5rem;align-items:flex-start}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;padding:.55rem 1.2rem;border-radius:30px;border:1.5px solid var(--blue);font-family:'Jost',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.05em;text-transform:uppercase}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--blue)}
+.btn-g:hover{background:var(--rl)}
+.x-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:.88rem;cursor:pointer;flex-shrink:0;color:#fff}
+.banner{background:linear-gradient(135deg,var(--b2),var(--b3));border-radius:16px;padding:1.2rem 1.1rem;color:#fff;margin-bottom:1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-15px;top:-15px;width:85px;height:85px;background:rgba(255,255,255,.07);border-radius:50%}
+.banner-ey{font-size:.56rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#7dc8f7;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;line-height:1.15;margin-bottom:.4rem}
+.banner-t em{color:#7dc8f7;font-style:italic}
+.banner-s{font-size:.75rem;opacity:.82;line-height:1.55}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.75rem .4rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--blue);line-height:1}
+.sc3-l{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.4;margin-top:.12rem}
+.case-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:.9rem 1rem;margin-bottom:.65rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.75rem}
+.case-card:hover:not(.locked){border-color:var(--rm);transform:translateY(-1px)}
+.case-card.locked{opacity:.38;cursor:default}
+.case-card.done{border-color:var(--ok);background:rgba(58,158,111,.04)}
+.case-ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.case-info{flex:1;min-width:0}
+.case-name{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:600;color:var(--text)}
+.case-sub{font-size:.65rem;color:var(--text);opacity:.5;margin-top:.08rem}
+.diff-pill{font-size:.58rem;font-weight:700;padding:.12rem .42rem;border-radius:8px;flex-shrink:0}
+.dp-easy{background:rgba(58,158,111,.12);color:var(--ok)}
+.dp-med{background:rgba(196,154,58,.14);color:var(--warn)}
+.dp-hard{background:rgba(192,85,58,.12);color:var(--err)}
+#key-modal{position:fixed;inset:0;background:rgba(10,30,60,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem}
+#key-modal.open{display:flex;animation:fi .2s ease}
+.key-box{background:var(--white);border-radius:18px;padding:1.4rem 1.2rem;width:100%;max-width:340px}
+.key-box-title{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+.key-box-sub{font-size:.75rem;color:var(--text);opacity:.6;line-height:1.55;margin-bottom:1rem}
+.key-input{width:100%;border:1.5px solid var(--rm);border-radius:10px;padding:.65rem .85rem;font-family:'Jost',sans-serif;font-size:.78rem;color:var(--text);background:var(--bg);outline:none;margin-bottom:.75rem;transition:border .2s}
+.key-input:focus{border-color:var(--blue)}
+.key-note{font-size:.68rem;color:var(--text);opacity:.5;line-height:1.5;margin-bottom:1rem;background:var(--rl);border-radius:8px;padding:.55rem .75rem}
+#sim-overlay{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#sim-overlay.open{display:flex;animation:fi .2s ease}
+.sim-hd{flex-shrink:0;background:var(--b3);padding:.65rem 1rem;display:flex;align-items:center;gap:.65rem}
+.sim-hd-info{flex:1;min-width:0}
+.sim-hd-name{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sim-hd-sub{font-size:.6rem;color:rgba(125,200,247,.8);margin-top:.05rem}
+.sim-counter{flex-shrink:0;text-align:right}
+.sim-counter-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:#7dc8f7;line-height:1}
+.sim-counter-l{font-size:.44rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.chat-wrap{flex:1;overflow-y:auto;padding:.85rem .9rem 1rem;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:.65rem}
+.msg{display:flex;gap:.5rem;align-items:flex-end;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.msg-patient{flex-direction:row}
+.msg-clinician{flex-direction:row-reverse}
+.msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;margin-bottom:2px}
+.av-pat{background:#e8f4e8;border:1.5px solid rgba(58,158,111,.3)}
+.av-cli{background:var(--rl);border:1.5px solid var(--rm)}
+.msg-bubble{max-width:78%;padding:.65rem .82rem;border-radius:14px;font-size:.83rem;line-height:1.62;position:relative}
+.bubble-pat{background:#f0faf0;border:1.5px solid rgba(58,158,111,.2);color:#1a3a1a;border-bottom-left-radius:4px}
+.bubble-cli{background:var(--b3);color:#fff;border-bottom-right-radius:4px}
+.bubble-sys{background:var(--rl);color:var(--text);font-size:.74rem;font-style:italic;border-radius:10px;max-width:90%;padding:.55rem .8rem;opacity:.8;text-align:center}
+.msg-sys{justify-content:center}
+.typing{display:flex;gap:4px;padding:.65rem .82rem;background:#f0faf0;border:1.5px solid rgba(58,158,111,.2);border-radius:14px;border-bottom-left-radius:4px;width:52px}
+.typing span{width:7px;height:7px;border-radius:50%;background:rgba(58,158,111,.5);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.dx-bar{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);padding:.55rem .85rem;display:flex;gap:.45rem;align-items:center}
+.dx-btn{flex:1;padding:.45rem;border-radius:20px;border:1.5px solid var(--rm);background:transparent;color:var(--text);font-family:'Jost',sans-serif;font-size:.68rem;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.05em}
+.dx-btn:hover{border-color:var(--blue);color:var(--blue)}
+.dx-btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.chat-input-wrap{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);padding:.65rem .85rem;display:flex;gap:.55rem;align-items:flex-end}
+.chat-textarea{flex:1;border:1.5px solid var(--rm);border-radius:12px;padding:.55rem .75rem;font-family:'Jost',sans-serif;font-size:.82rem;color:var(--text);background:var(--bg);outline:none;resize:none;max-height:100px;min-height:38px;transition:border .2s;line-height:1.5}
+.chat-textarea:focus{border-color:var(--blue)}
+.chat-textarea::placeholder{opacity:.45;font-size:.78rem}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--blue);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:all .2s;color:#fff}
+.send-btn:hover{background:var(--rd)}
+.send-btn:disabled{background:var(--rl);cursor:default}
+#dx-overlay{position:fixed;inset:0;background:rgba(10,30,60,.75);z-index:300;display:none;align-items:flex-end;justify-content:center}
+#dx-overlay.open{display:flex;animation:fi .2s ease}
+.dx-sheet{background:var(--white);border-radius:20px 20px 0 0;padding:1.3rem 1.1rem 2rem;width:100%;max-width:480px}
+.dx-sheet-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--text);margin-bottom:.3rem}
+.dx-sheet-sub{font-size:.74rem;color:var(--text);opacity:.55;margin-bottom:1rem;line-height:1.5}
+.dx-opts{display:flex;flex-direction:column;gap:.45rem;margin-bottom:.85rem}
+.dx-opt{background:var(--bg);border:1.5px solid var(--rl);border-radius:11px;padding:.7rem .9rem;cursor:pointer;font-size:.82rem;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.dx-opt:hover{border-color:var(--rm);background:var(--rl)}
+.dx-opt.selected{border-color:var(--blue);background:rgba(91,155,213,.1);font-weight:600}
+#result-overlay{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.3rem;text-align:center;overflow-y:auto}
+#result-overlay.open{display:flex;animation:fi .3s ease}
+.res-icon{font-size:3rem;margin-bottom:.65rem}
+.res-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--text);margin-bottom:.25rem}
+.res-score{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--blue);line-height:1;margin:.3rem 0 .1rem}
+.res-score-l{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.45;margin-bottom:.8rem}
+.res-feedback{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:1.2rem;text-align:left;font-size:.81rem;line-height:1.7;color:var(--text);max-width:340px;width:100%}
+.res-feedback strong{color:var(--blue)}
+.res-btns{display:flex;gap:.6rem;flex-direction:column;width:100%;max-width:280px}
+.prog-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.5rem}
+.pr-label{font-size:.7rem;font-weight:500;width:90px;flex-shrink:0;line-height:1.3;color:var(--text)}
+.pr-bar{flex:1;height:6px;background:var(--rl);border-radius:3px;overflow:hidden}
+.pr-fill{height:100%;background:linear-gradient(90deg,var(--b1),var(--b2));border-radius:3px;transition:width .6s}
+.pr-pct{font-size:.65rem;font-weight:700;color:var(--blue);width:28px;text-align:right}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--rl);font-size:.78rem}
+.hist-item:last-child{border-bottom:none}
+.card-p{padding:.95rem 1rem}
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.8rem}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">Psico<span>Dx</span> · Simulador</div>
+  <div class="hdr-stats">
+    <div class="hs"><div class="hs-v" id="h-casos">0</div><div class="hs-l">Casos</div></div>
+    <div class="hs"><div class="hs-v" id="h-prec">--</div><div class="hs-l">Precisión</div></div>
+    <button class="key-btn" id="key-btn-hdr">🔑 API Key</button>
+  </div>
+</div>
+
+<div class="sa">
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">Práctica Clínica Simulada · IA Real</div>
+      <div class="banner-t">Entrevista al <em>paciente</em></div>
+      <div class="banner-s">La IA responde como un paciente real. Haz tus preguntas, construye la hipótesis y propón el diagnóstico.</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="hs-casos">0</div><div class="sc3-l">Casos</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-prec">--</div><div class="sc3-l">Precisión</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-pregs">0</div><div class="sc3-l">Preguntas</div></div>
+    </div>
+    <div class="ibox"><div style="font-size:.88rem;flex-shrink:0">💡</div><div>Escribe tus preguntas libremente — como en una entrevista real. Cuando tengas suficiente información, propón tu diagnóstico. Menos preguntas para llegar al correcto = mejor puntuación.</div></div>
+    <div class="ey" style="margin-bottom:.6rem">Casos disponibles</div>
+    <div id="cases-list"></div>
+  </div>
+
+  <div class="sc" id="sc-prog">
+    <div class="ey">Tu desempeño</div>
+    <div class="st">Progreso <em>clínico</em></div>
+    <div class="card card-p" id="prog-content"></div>
+    <div class="ey" style="margin-bottom:.55rem;margin-top:.3rem">Historial de casos</div>
+    <div class="card card-p" id="hist-content"></div>
+  </div>
+</div>
+
+<div class="bot-nav">
+  <button class="ni active" data-tab="home"><div class="ni-ic">🏠</div><div class="ni-lb">Inicio</div></button>
+  <button class="ni" data-tab="prog"><div class="ni-ic">📊</div><div class="ni-lb">Progreso</div></button>
+</div>
+
+<!-- API KEY MODAL -->
+<div id="key-modal">
+  <div class="key-box">
+    <div class="key-box-title">Tu API Key de Anthropic</div>
+    <div class="key-box-sub">Se guarda solo en este dispositivo (localStorage). Nunca sale a ningún servidor externo.</div>
+    <input type="password" class="key-input" id="key-input" placeholder="sk-ant-api03-...">
+    <div class="key-note">🔒 Solo visible en tu navegador. Obtenerla: console.anthropic.com → API Keys → Create Key</div>
+    <div style="display:flex;gap:.55rem">
+      <button class="btn btn-g" style="flex:1" id="key-cancel">Cancelar</button>
+      <button class="btn btn-p" style="flex:1" id="key-save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULADOR -->
+<div id="sim-overlay">
+  <div class="sim-hd">
+    <button class="x-btn" id="sim-close">←</button>
+    <div class="sim-hd-info">
+      <div class="sim-hd-name" id="sim-pat-name">Paciente</div>
+      <div class="sim-hd-sub" id="sim-pat-sub"></div>
+    </div>
+    <div class="sim-counter">
+      <div class="sim-counter-v" id="sim-q-count">0</div>
+      <div class="sim-counter-l">Preguntas</div>
+    </div>
+  </div>
+  <div class="chat-wrap" id="chat-wrap"></div>
+  <div class="dx-bar">
+    <button class="dx-btn" id="hint-btn">💡 Pista</button>
+    <button class="dx-btn dx-btn-primary" id="dx-open-btn">Proponer diagnóstico →</button>
+  </div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-textarea" id="chat-input" placeholder="Escribe tu pregunta al paciente..." rows="1"></textarea>
+    <button class="send-btn" id="send-btn">➤</button>
+  </div>
+</div>
+
+<!-- DX OVERLAY -->
+<div id="dx-overlay">
+  <div class="dx-sheet">
+    <div class="dx-sheet-title">¿Cuál es tu diagnóstico?</div>
+    <div class="dx-sheet-sub">Selecciona el diagnóstico principal más apropiado según la entrevista.</div>
+    <div class="dx-opts" id="dx-opts"></div>
+    <div style="display:flex;gap:.55rem">
+      <button class="btn btn-g" style="flex:1" id="dx-cancel">← Seguir preguntando</button>
+      <button class="btn btn-p" style="flex:1" id="dx-confirm">Confirmar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div id="result-overlay">
+  <div class="res-icon" id="res-icon">🎯</div>
+  <div class="res-title" id="res-title">Diagnóstico evaluado</div>
+  <div class="res-score" id="res-score">85</div>
+  <div class="res-score-l">PUNTUACIÓN</div>
+  <div class="res-feedback" id="res-feedback"></div>
+  <div class="res-btns">
+    <button class="btn btn-p" id="res-next">Siguiente caso →</button>
+    <button class="btn btn-g" id="res-home">← Volver al inicio</button>
+  </div>
+</div>
+
+<script>
+const CASES=[
+{id:'c1',diff:'easy',diffLabel:'Básico',ic:'🌑',color:'#1a3a6b',
+ nombre:'María González',edad:38,
+ presentacion:'Mujer traída por su esposo a urgencias.',
+ motivo:'Mi esposo dice que llevo semanas sin salir de la cama. Yo no sé... me siento muy mal.',
+ dx_correcto:'Trastorno Depresivo Mayor',
+ dx_opciones:['Trastorno Depresivo Mayor','Trastorno de Adaptación','Trastorno Bipolar II','Distimia / TPPD','Trastorno de Ansiedad Generalizada'],
+ sistema:`Eres María González, 38 años, contadora. Estás en urgencias. Tu esposo te trajo porque llevas 3 semanas sin poder levantarte.
+HISTORIA (responde SOLO lo que pregunten, no lo reveles todo):
+- Ánimo deprimido casi todo el día, 3 semanas
+- Ya no disfrutas nada — antes adorabas cocinar, ahora nada
+- Te despiertas a las 3am y no puedes volver a dormir
+- Bajaste 4 kg sin querer
+- Te sientes culpable, "soy una carga para todos"
+- A veces piensas "si no despertara, no me importaría" — sin planes concretos
+- No puedes concentrarte
+- TSH normal hace un mes
+- NUNCA has tenido épocas de mucha energía, grandiosidad o sin necesidad de dormir
+- No tomas medicamentos ni drogas
+RESPONDE como persona real en crisis, no como listado. Máximo 2-3 oraciones por respuesta. Usa lenguaje cotidiano.`,
+ pistas:['Pregunta por el sueño — ¿se despierta de madrugada?','Explora si ha tenido épocas de "demasiada energía" — crucial para descartar Bipolar','Pregunta directamente por ideación suicida'],
+ evaluacion:'TDM: 7 síntomas en 3 semanas (ánimo deprimido + anhedonia + insomnio + cambio de peso + culpa + dificultad de concentración + ideación de muerte pasiva). TSH normal descarta tiroides. Sin hipomanía descarta Bipolar.'
+},
+{id:'c2',diff:'easy',diffLabel:'Básico',ic:'😰',color:'#1a4a2a',
+ nombre:'Carlos Medina',edad:28,
+ presentacion:'Hombre que consulta convencido de tener problema cardíaco.',
+ motivo:'Doctora, yo creo que tengo el corazón malo. Me han hecho tres electrocardiogramas y dicen que estoy bien, pero yo sé que algo está mal.',
+ dx_correcto:'Trastorno de Pánico',
+ dx_opciones:['Trastorno de Pánico con Agorafobia','Trastorno de Ansiedad Generalizada','Hipocondría','Cardiopatía no detectada','Trastorno de Ansiedad Social'],
+ sistema:`Eres Carlos Medina, 28 años, ingeniero. Estás en consulta convencido de que tu problema es físico.
+HISTORIA:
+- Hace 4 meses primera crisis: corazón acelerado, sudoración, sensación de morir, manos adormecidas, duró 10 minutos
+- UNA crisis ocurrió mientras dormías a las 2am — eso te aterró
+- 6-7 crisis en total
+- Urgencias x3 — ECG siempre normal
+- Ahora evitas el metro y centros comerciales "por precaución"
+- Miedo constante de que te vuelva a pasar
+- NO tienes preocupaciones generalizadas — solo tu salud cardíaca
+- No has tenido episodios de euforia ni depresión
+RESPONDE: eres escéptico con la psicóloga, describes los síntomas físicos con detalle. Máximo 2-3 oraciones.`,
+ pistas:['Pregunta si alguna crisis ocurrió mientras dormía — muy específico del pánico','¿Qué situaciones evita ahora que antes no evitaba?','¿Se preocupa por muchas cosas o solo por su salud?'],
+ evaluacion:'Trastorno de Pánico con Agorafobia: crisis inesperadas recurrentes (incluyendo nocturna) + ansiedad anticipatoria + evitación de múltiples situaciones. ECG normal x3 descarta orgánico. La crisis nocturna diferencia el pánico de la ansiedad situacional.'
+},
+{id:'c3',diff:'easy',diffLabel:'Básico',ic:'🔄',color:'#3a1a5b',
+ nombre:'Jimena Vargas',edad:31,
+ presentacion:'Maestra de primaria remitida por médico general.',
+ motivo:'Tengo pensamientos que me vuelven loca. Son horribles y no puedo pararlos.',
+ dx_correcto:'TOC',
+ dx_opciones:['TOC — Trastorno Obsesivo-Compulsivo','Psicosis incipiente','Trastorno de Ansiedad Generalizada','Trastorno Depresivo Mayor','Trastorno de Personalidad'],
+ sistema:`Eres Jimena Vargas, 31 años, maestra. Tienes mucha vergüenza de lo que te pasa.
+HISTORIA:
+- Pensamientos intrusivos de hacerle daño a tus estudiantes — te horrorizan, no los quieres
+- Miedo de dejar el gas abierto — revisas 8-10 veces antes de salir
+- Ritual de lavado de manos cuando tocas algo "sucio"
+- Todo te consume 3-4 horas al día
+- Sabes que los pensamientos son absurdos — te dan asco y horror
+- No escuchas voces ni ves cosas
+- Dejaste de trabajar hace 1 mes
+- No tienes historia de manía ni hipomanía
+RESPONDE: tienes vergüenza, cuesta revelar los pensamientos de daño. Cuando te preguntan directamente, eventualmente lo confiesas con angustia. Máximo 2-3 oraciones.`,
+ pistas:['Pregunta si los pensamientos le producen horror o atracción — eso diferencia obsesión de intención','¿Cuánto tiempo al día consumen los pensamientos y rituales?','Pregunta si escucha voces para descartar psicosis'],
+ evaluacion:'TOC: obsesiones (pensamientos de daño egodistónicos + miedo al gas) + compulsiones (revisión, lavado ritual) que consumen >3h/día con disfunción. Los pensamientos son EGODISTÓNICOS — producen horror. Esto diferencia harm OCD de ideación violenta real.'
+},
+{id:'c4',diff:'med',diffLabel:'Intermedio',ic:'⚡',color:'#4a1a6b',
+ nombre:'Rosa Bermúdez',edad:41,
+ presentacion:'Cuarto episodio depresivo en 7 años.',
+ motivo:'Doctora, ya no aguanto más. Esto es el cuarto episodio de depresión y nada funciona.',
+ dx_correcto:'Trastorno Bipolar II',
+ dx_opciones:['Trastorno Depresivo Mayor recurrente','Trastorno Bipolar II','Trastorno Bipolar I','Ciclotimia','Trastorno de Personalidad Límite'],
+ sistema:`Eres Rosa Bermúdez, 41 años, administradora. Llevas 7 años con diagnóstico de "depresión" que nunca termina de mejorar.
+HISTORIA:
+- Cuarto episodio depresivo, 6 semanas. Hipersomnia (10-12h), hiperfagia, anhedonia, fatiga
+- 3 antidepresivos distintos — siempre funcionan "unas semanas" y dejan de funcionar o te ponen "rara"
+- Entre episodios tienes períodos de 4-8 días: duermes 4h sin cansarte, mil ideas, muy productiva, gastas más, hablas mucho
+- Tu esposo dice que en esas épocas "estás acelerada y diferente"
+- NUNCA hospitalización ni psicosis en esas épocas
+- Madre con "cambios de humor severos" sin diagnóstico
+- Ideación de muerte pasiva actualmente
+RESPONDE: describes las épocas buenas como positivas, no como problema. Frustrada porque "nunca mejoras del todo". Máximo 2-3 oraciones.`,
+ pistas:['Pregunta específicamente por épocas de "demasiada energía" — el bipolar no las reporta espontáneamente','¿Cómo fue la respuesta a los antidepresivos anteriores?','Historia familiar de cambios de humor o psiquiatría'],
+ evaluacion:'Bipolar II: hipomanía (4-8 días, sin hospitalización/psicosis, cambio observable) + episodios depresivos con características atípicas (hipersomnia, hiperfagia). Respuesta parcial a múltiples AD = señal de alerta clásica. Error: añadir otro antidepresivo sin estabilizador.'
+},
+{id:'c5',diff:'med',diffLabel:'Intermedio',ic:'🎭',color:'#5b1a1a',
+ nombre:'Valentina Ospina',edad:24,
+ presentacion:'Tercer ingreso este año por sobredosis.',
+ motivo:'No quería morirme. Solo quería que parara. Mi novio me dijo que necesitaba espacio y yo no podía más.',
+ dx_correcto:'Trastorno Límite de la Personalidad',
+ dx_opciones:['Trastorno Límite de la Personalidad','Trastorno Depresivo Mayor','Trastorno Bipolar II','TEPT','Trastorno Histriónico de la Personalidad'],
+ sistema:`Eres Valentina Ospina, 24 años, estudiante. Estás hospitalizada después de una sobredosis.
+HISTORIA:
+- Tercer ingreso este año por autolesiones/sobredosis
+- Relaciones muy intensas que "siempre terminan mal" — idealización/devaluación
+- No sabes quién eres ni qué quieres — "cambio según con quién esté"
+- Te haces cortes cuando "no puedes más"
+- Episodios donde te "desconectas" bajo estrés
+- Vacío crónico — "no hay nada adentro"
+- Tus cambios de ánimo son en HORAS, reactivos a lo interpersonal
+- Abuso emocional crónico de tu madre en la infancia
+- Sin episodios de euforia de días o semanas
+- Sin alucinaciones ni delirios
+RESPONDE: intensa emocionalmente, describes el vacío y las autolesiones con naturalidad. Puedes ponerte a la defensiva si sientes que te juzgan. Máximo 2-3 oraciones.`,
+ pistas:['¿Los cambios de ánimo son en horas o en días/semanas? — diferencia TLP de Bipolar','Explora la identidad: ¿sabe quién es, qué valores tiene?','Patrón de relaciones: ¿idealización seguida de devaluación?'],
+ evaluacion:'TLP: ≥5 criterios (miedo abandono, relaciones inestables, identidad difusa, impulsividad, autolesiones recurrentes, inestabilidad afectiva en horas, vacío, disociación transitoria). Cambios en HORAS reactivos a interpersonal diferencia TLP del Bipolar (días/semanas más autónomo).'
+},
+{id:'c6',diff:'hard',diffLabel:'Avanzado',ic:'🌀',color:'#1a5b2a',
+ nombre:'Sebastián Ríos',edad:19,
+ presentacion:'Primer episodio psicótico, traído por su madre.',
+ motivo:'No me pasa nada. Son ellos los que tienen el problema. Yo veo lo que ellos no pueden ver.',
+ dx_correcto:'T. Esquizofreniforme / Psicosis por Cannabis',
+ dx_opciones:['Esquizofrenia','T. Esquizofreniforme / Psicosis inducida por cannabis','Trastorno Bipolar I con psicosis','T. Psicótico Breve','Trastorno Delirante'],
+ sistema:`Eres Sebastián Ríos, 19 años. Crees que no necesitas ayuda.
+HISTORIA:
+- 3 meses creyendo que hay mensajes ocultos en la TV dirigidos a ti
+- Vecinos te vigilan y hablan de ti
+- Escuchas una voz que dice "ya saben lo que hiciste"
+- Antes sociable y estudiabas — ahora no sales del cuarto
+- Cannabis diario 2 años — hace 3 meses empezaste con marihuana "mucho más fuerte"
+- Toxicológico: THC positivo
+- Los síntomas empezaron al cambiar a la marihuana nueva
+- Sin períodos de euforia/grandiosidad
+- Sin historia familiar de psicosis (que sepas)
+RESPONDE: no crees estar enfermo, describes las creencias como absolutas. Defiendes la marihuana. Algo suspicaz con la entrevistadora. Máximo 2-3 oraciones.`,
+ pistas:['¿Cuándo exactamente empezaron los síntomas — coincide con el cambio de marihuana?','Con 3 meses de duración, ¿es Psicótico Breve (<1m), Esquizofreniforme (1-6m) o Esquizofrenia (>6m)?','El toxicológico es positivo — ¿los síntomas remitirían con abstinencia?'],
+ evaluacion:'Diagnóstico ambiguo: Psicosis por Cannabis vs T. Esquizofreniforme. THC positivo + síntomas iniciados con cannabis de alta potencia = primera hipótesis inducida. Pero 3 meses = Esquizofreniforme. Requiere 4 semanas de abstinencia para distinguir. El diagnóstico correcto reconoce esta ambigüedad.'
+},
+{id:'c7',diff:'hard',diffLabel:'Avanzado',ic:'💥',color:'#5b2a1a',
+ nombre:'Efraín Montoya',edad:48,
+ presentacion:'Excombatiente traído por su esposa.',
+ motivo:'Yo estoy bien. Ella es la que se preocupa. A mí lo que me pasa es que no puedo dormir bien.',
+ dx_correcto:'TEPT + Trastorno por Uso de Alcohol',
+ dx_opciones:['TEPT + Trastorno por Uso de Alcohol','Solo TEPT','Trastorno Depresivo Mayor','Trastorno de Adaptación','Solo Trastorno por Uso de Alcohol'],
+ sistema:`Eres Efraín Montoya, 48 años, excombatiente desmovilizado. Eres hombre de pocas palabras.
+HISTORIA:
+- 12 años en el conflicto armado — viste cosas que no quieres recordar
+- 6 meses con pesadillas casi todas las noches sobre lo que pasó
+- Evitas noticias, disparos, fuegos artificiales — te ponen muy mal
+- Siempre alerta, te sobresaltas con ruidos
+- Bebes aguardiente todas las noches "para dormir" — entre media y una botella
+- Antes no bebías tanto
+- Tienes arma de fuego en casa
+- Ya no quieres salir
+- "Ya no soy el mismo"
+- Sin episodios de euforia ni grandiosidad
+RESPONDE: reservado, minimizas. Sobre el conflicto: "eso ya pasó". El alcohol lo normalizas: "todo el mundo toma para dormir". El arma la mencionas sin darle importancia. Máximo 2 oraciones.`,
+ pistas:['Pregunta por pesadillas recurrentes — puede no identificarlas como síntoma','El arma en casa + alcohol + TEPT = evaluar riesgo suicida directamente','¿Qué hace para "no pensar"? — revela conductas de evitación'],
+ evaluacion:'TEPT (pesadillas, evitación de estímulos, hipervigilancia, sobresalto) + TUA grave (consumo diario como automedicación). Comorbilidad TEPT-TUA multiplica riesgo suicida. PRIORIDAD: (1) retirar arma, (2) desintoxicación alcohólica supervisada (abstinencia brusca = riesgo de convulsiones), (3) luego TEPT.'
+}
+];
+
+const SK='psicodx_sim_v2';
+let ST=JSON.parse(localStorage.getItem(SK)||'null')||{casos:0,correct:0,total:0,totalPregs:0,history:[],done:{}};
+function save(){localStorage.setItem(SK,JSON.stringify(ST));}
+
+let curCase=null,chatHistory=[],qCount=0,selectedDx=null;
+
+function getKey(){return localStorage.getItem('ant_key_sim')||'';}
+function setKey(k){localStorage.setItem('ant_key_sim',k);}
+function hasKey(){return !!getKey();}
+function updateKeyBtn(){
+  const b=document.getElementById('key-btn-hdr');
+  if(hasKey()){b.textContent='🔑 Clave ✓';b.classList.add('ok');}
+  else{b.textContent='🔑 API Key';b.classList.remove('ok');}
+}
+
+function renderHome(){
+  document.getElementById('h-casos').textContent=ST.casos;
+  document.getElementById('h-prec').textContent=ST.total?Math.round(ST.correct/ST.total*100)+'%':'--';
+  document.getElementById('hs-casos').textContent=ST.casos;
+  document.getElementById('hs-prec').textContent=ST.total?Math.round(ST.correct/ST.total*100)+'%':'--';
+  document.getElementById('hs-pregs').textContent=ST.totalPregs||0;
+  const el=document.getElementById('cases-list');
+  el.innerHTML='';
+  const groups=[{label:'Básico',diff:'easy'},{label:'Intermedio',diff:'med'},{label:'Avanzado',diff:'hard'}];
+  groups.forEach(g=>{
+    const gc=CASES.filter(c=>c.diff===g.diff);
+    const anyEasyDone=CASES.filter(c=>c.diff==='easy').some(c=>ST.done[c.id]);
+    const anyMedDone=CASES.filter(c=>c.diff==='med').some(c=>ST.done[c.id]);
+    el.innerHTML+=`<div class="ey" style="margin-bottom:.5rem;margin-top:.4rem">${g.label}</div>`;
+    gc.forEach(c=>{
+      const done=!!ST.done[c.id];
+      const locked=(c.diff==='med'&&!anyEasyDone)||(c.diff==='hard'&&!anyMedDone);
+      const dp=c.diff==='easy'?'dp-easy':c.diff==='med'?'dp-med':'dp-hard';
+      el.innerHTML+=`<div class="case-card${locked?' locked':''}${done?' done':''}" data-cid="${c.id}">
+        <div class="case-ic" style="background:${c.color}22;color:${c.color}">${c.ic}</div>
+        <div class="case-info">
+          <div class="case-name">${c.nombre}</div>
+          <div class="case-sub">${c.edad} años · ${done?'Completado ✓':locked?'Completa uno anterior primero':'Disponible'}</div>
+        </div>
+        <div class="diff-pill ${dp}">${c.diffLabel}</div>
+      </div>`;
+    });
+  });
+  document.querySelectorAll('.case-card:not(.locked)').forEach(card=>{
+    card.addEventListener('click',function(){startCase(this.dataset.cid);});
+  });
+}
+
+function startCase(cid){
+  if(!hasKey()){openKeyModal();return;}
+  curCase=CASES.find(c=>c.id===cid);
+  chatHistory=[];qCount=0;selectedDx=null;
+  document.getElementById('sim-pat-name').textContent=curCase.nombre;
+  document.getElementById('sim-pat-sub').textContent=curCase.edad+' años · '+curCase.presentacion;
+  document.getElementById('sim-q-count').textContent='0';
+  document.getElementById('chat-wrap').innerHTML='';
+  document.getElementById('chat-input').value='';
+  document.getElementById('sim-overlay').classList.add('open');
+  addSysMsg('Entrevista iniciada. El paciente está frente a ti.');
+  setTimeout(()=>addPatMsg(curCase.motivo),600);
+}
+
+function addSysMsg(t){
+  const w=document.getElementById('chat-wrap');
+  const d=document.createElement('div');
+  d.className='msg msg-sys';
+  d.innerHTML=`<div class="msg-bubble bubble-sys">${t}</div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function addPatMsg(t){
+  const w=document.getElementById('chat-wrap');
+  const d=document.createElement('div');
+  d.className='msg msg-patient';
+  d.innerHTML=`<div class="msg-avatar av-pat">👤</div><div class="msg-bubble bubble-pat">${t}</div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function addCliMsg(t){
+  const w=document.getElementById('chat-wrap');
+  const d=document.createElement('div');
+  d.className='msg msg-clinician';
+  d.innerHTML=`<div class="msg-bubble bubble-cli">${t}</div><div class="msg-avatar av-cli">🩺</div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function showTyping(){
+  const w=document.getElementById('chat-wrap');
+  const d=document.createElement('div');
+  d.className='msg msg-patient';d.id='typ';
+  d.innerHTML=`<div class="msg-avatar av-pat">👤</div><div class="typing"><span></span><span></span><span></span></div>`;
+  w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function hideTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-input');
+  const txt=inp.value.trim();
+  if(!txt||!curCase)return;
+  inp.value='';inp.style.height='38px';
+  qCount++;
+  document.getElementById('sim-q-count').textContent=qCount;
+  addCliMsg(txt);
+  chatHistory.push({role:'user',content:txt});
+  document.getElementById('send-btn').disabled=true;
+  showTyping();
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:250,system:curCase.sistema,messages:chatHistory})
+    });
+    const data=await r.json();
+    hideTyping();
+    if(data.error){addSysMsg('Error API: '+data.error.message);document.getElementById('send-btn').disabled=false;return;}
+    const resp=data.content[0].text;
+    chatHistory.push({role:'assistant',content:resp});
+    addPatMsg(resp);
+  }catch(e){hideTyping();addSysMsg('Error de conexión. Verifica tu API key.');}
+  document.getElementById('send-btn').disabled=false;
+}
+
+function openDxSheet(){
+  const el=document.getElementById('dx-opts');
+  el.innerHTML=curCase.dx_opciones.map(dx=>`<button class="dx-opt" data-dx="${dx}">${dx}</button>`).join('');
+  selectedDx=null;
+  el.querySelectorAll('.dx-opt').forEach(b=>{
+    b.addEventListener('click',function(){
+      el.querySelectorAll('.dx-opt').forEach(x=>x.classList.remove('selected'));
+      this.classList.add('selected');selectedDx=this.dataset.dx;
+    });
+  });
+  document.getElementById('dx-overlay').classList.add('open');
+}
+
+async function confirmDx(){
+  if(!selectedDx)return;
+  document.getElementById('dx-overlay').classList.remove('open');
+  const correct=selectedDx===curCase.dx_correcto;
+  const score=calcScore(correct,qCount);
+  showTyping();
+  let feedback=curCase.evaluacion;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',max_tokens:350,
+        system:'Eres un supervisor clínico experto. Evalúa brevemente (3-4 oraciones) el desempeño diagnóstico. Sé directo y constructivo.',
+        messages:[{role:'user',content:`Caso: ${curCase.nombre}. Dx correcto: ${curCase.dx_correcto}. Dx propuesto: ${selectedDx}. Preguntas: ${qCount}. Evaluación: ${curCase.evaluacion}. ¿Acertó? ¿Qué exploró bien? ¿Qué le faltó?`}]
+      })
+    });
+    const data=await r.json();
+    feedback=data.content?.[0]?.text||curCase.evaluacion;
+  }catch(e){}
+  hideTyping();
+  ST.casos=(ST.casos||0)+1;ST.total=(ST.total||0)+1;
+  ST.totalPregs=(ST.totalPregs||0)+qCount;
+  if(correct)ST.correct=(ST.correct||0)+1;
+  if(!ST.done[curCase.id])ST.done[curCase.id]={correct,score,date:new Date().toISOString()};
+  ST.history=ST.history||[];
+  ST.history.push({cid:curCase.id,nombre:curCase.nombre,dxPropuesto:selectedDx,dxCorrecto:curCase.dx_correcto,correct,score,pregs:qCount,date:new Date().toISOString()});
+  save();
+  document.getElementById('res-icon').textContent=correct?'🎯':score>=60?'💡':'📚';
+  document.getElementById('res-title').textContent=correct?'Diagnóstico correcto!':'Diagnóstico incorrecto';
+  document.getElementById('res-score').textContent=score;
+  document.getElementById('res-feedback').innerHTML=`<strong>Tu diagnóstico:</strong> ${selectedDx}<br><strong>Correcto:</strong> ${curCase.dx_correcto}<br><strong>Preguntas:</strong> ${qCount}<br><br>${feedback}`;
+  document.getElementById('result-overlay').classList.add('open');
+  renderHome();
+}
+
+function calcScore(correct,pregs){
+  if(!correct)return Math.max(20,60-pregs*2);
+  if(pregs<=5)return 100;if(pregs<=8)return 90;if(pregs<=12)return 80;if(pregs<=18)return 70;return 60;
+}
+
+function renderProg(){
+  const el=document.getElementById('prog-content');
+  const acc=ST.total?Math.round(ST.correct/ST.total*100):0;
+  const avg=ST.casos?Math.round((ST.totalPregs||0)/ST.casos):0;
+  const diffs=[{l:'Básico',d:'easy'},{l:'Intermedio',d:'med'},{l:'Avanzado',d:'hard'}];
+  el.innerHTML=`<div class="ey" style="margin-bottom:.6rem">Estadísticas globales</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem">
+    <div class="sc3" style="border-radius:10px"><div class="sc3-n">${ST.casos}</div><div class="sc3-l">Casos</div></div>
+    <div class="sc3" style="border-radius:10px"><div class="sc3-n">${acc}%</div><div class="sc3-l">Precisión</div></div>
+    <div class="sc3" style="border-radius:10px"><div class="sc3-n">${avg}</div><div class="sc3-l">Pregs/caso</div></div>
+    <div class="sc3" style="border-radius:10px"><div class="sc3-n">${ST.totalPregs||0}</div><div class="sc3-l">Total pregs</div></div>
+  </div>
+  <div class="ey" style="margin-bottom:.5rem">Por dificultad</div>
+  ${diffs.map(d=>{const dc=CASES.filter(c=>c.diff===d.d);const dn=dc.filter(c=>ST.done[c.id]&&ST.done[c.id].correct).length;const p=Math.round(dn/dc.length*100);return`<div class="prog-row"><div class="pr-label">${d.l}</div><div class="pr-bar"><div class="pr-fill" style="width:${p}%"></div></div><div class="pr-pct">${dn}/${dc.length}</div></div>`;}).join('')}`;
+  const hl=document.getElementById('hist-content');
+  if(!ST.history||!ST.history.length){hl.innerHTML='<div style="font-size:.78rem;opacity:.45;text-align:center;padding:.5rem">Sin casos realizados aún</div>';return;}
+  hl.innerHTML=`<div class="ey" style="margin-bottom:.5rem">Últimos casos</div>`+
+  ST.history.slice(-8).reverse().map(h=>`<div class="hist-item">
+    <div><div style="font-size:.8rem;font-weight:600">${h.nombre}</div><div style="font-size:.66rem;opacity:.5">${h.dxPropuesto}</div></div>
+    <div style="text-align:right"><div style="font-size:.88rem;font-weight:700;color:${h.correct?'var(--ok)':'var(--err)'}">${h.score}pts</div><div style="font-size:.62rem;opacity:.45">${h.pregs} pregs</div></div>
+  </div>`).join('');
+}
+
+function openKeyModal(){
+  document.getElementById('key-input').value=getKey();
+  document.getElementById('key-modal').classList.add('open');
+}
+
+function nav(tab){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+tab).classList.add('active');
+  if(tab==='home')renderHome();
+  if(tab==='prog')renderProg();
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+      btn.classList.add('active');nav(btn.dataset.tab);
+    });
+  });
+  document.getElementById('key-btn-hdr').addEventListener('click',openKeyModal);
+  document.getElementById('key-cancel').addEventListener('click',()=>document.getElementById('key-modal').classList.remove('open'));
+  document.getElementById('key-save').addEventListener('click',()=>{
+    const k=document.getElementById('key-input').value.trim();
+    if(k){setKey(k);updateKeyBtn();}
+    document.getElementById('key-modal').classList.remove('open');
+  });
+  document.getElementById('sim-close').addEventListener('click',()=>document.getElementById('sim-overlay').classList.remove('open'));
+  document.getElementById('send-btn').addEventListener('click',sendMsg);
+  document.getElementById('chat-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}});
+  document.getElementById('chat-input').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';});
+  document.getElementById('hint-btn').addEventListener('click',()=>{
+    if(!curCase)return;
+    const h=curCase.pistas[Math.min(Math.floor(qCount/3),curCase.pistas.length-1)];
+    addSysMsg('💡 Pista: '+h);
+    document.getElementById('chat-wrap').scrollTop=document.getElementById('chat-wrap').scrollHeight;
+  });
+  document.getElementById('dx-open-btn').addEventListener('click',openDxSheet);
+  document.getElementById('dx-cancel').addEventListener('click',()=>document.getElementById('dx-overlay').classList.remove('open'));
+  document.getElementById('dx-confirm').addEventListener('click',confirmDx);
+  document.getElementById('res-next').addEventListener('click',()=>{document.getElementById('result-overlay').classList.remove('open');document.getElementById('sim-overlay').classList.remove('open');renderHome();});
+  document.getElementById('res-home').addEventListener('click',()=>{document.getElementById('result-overlay').classList.remove('open');document.getElementById('sim-overlay').classList.remove('open');renderHome();});
+  updateKeyBtn();renderHome();
+});
+</script>
+</body>
+</html>
