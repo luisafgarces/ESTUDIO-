@@ -980,18 +980,20 @@ function showResults(){
   document.getElementById('res-score').textContent=pct+'%';
   document.getElementById('res-sub').textContent=qCorrect+' de '+qTotal+' correctas. '+msg;
   document.getElementById('res-sc').classList.add('open');
-  // Save
-  if(!ST.completed.includes(qSes.id)||pct>(ST.scores[qSes.id]||0)){
-    if(!ST.completed.includes(qSes.id))ST.completed.push(qSes.id);
+  // Save — siempre marcar completada, guardar mejor puntaje
+  if(!ST.completed.includes(qSes.id)) ST.completed.push(qSes.id);
+  if(pct>(ST.scores[qSes.id]||0)){
     ST.scores[qSes.id]=pct;
     ST.pts=(ST.pts||0)+Math.round(pct/10)*10;
-    const today=new Date().toDateString();
-    if(ST.lastDate!==today){const y=new Date();y.setDate(y.getDate()-1);ST.streak=ST.lastDate===y.toDateString()?(ST.streak||0)+1:1;ST.lastDate=today;}
-    ST.history.push({sesId:qSes.id,score:pct,date:new Date().toISOString()});
-    checkBadges();
-    save();
-    refreshHome();
   }
+  const today=new Date().toDateString();
+  if(ST.lastDate!==today){const y=new Date();y.setDate(y.getDate()-1);ST.streak=ST.lastDate===y.toDateString()?(ST.streak||0)+1:1;ST.lastDate=today;}
+  if(!ST.history.find(h=>h.sesId===qSes.id&&h.score===pct)){
+    ST.history.push({sesId:qSes.id,score:pct,date:new Date().toISOString()});
+  }
+  checkBadges();
+  save();
+  refreshHome();
 }
 function closeResults(){document.getElementById('res-sc').classList.remove('open');}
 function retryQuiz(){document.getElementById('res-sc').classList.remove('open');startQuiz(qSes.id);}
