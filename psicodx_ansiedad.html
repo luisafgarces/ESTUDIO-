@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PsicoDx · Ansiedad</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5b9bd5;--bg:#daeaf8;--text:#0d2a4a;--white:#f4f9ff;
+  --rl:rgba(91,155,213,.18);--rm:rgba(91,155,213,.45);--rd:#3a7bbf;
+  --ok:#3a9e6f;--err:#c0553a;--warn:#c49a3a;
+  --b1:#5b9bd5;--b2:#3a7bbf;--b3:#2a5a9a;
+  --cie:#3a7bbf;--dsm:#5b4fa8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+.app-header{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text)}
+.logo em{color:var(--blue);font-style:italic}
+.hstats{display:flex;gap:.9rem}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);line-height:1}
+.hs-l{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text);opacity:.5}
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.25rem 0 .4rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.35rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif}
+.ni-ic{font-size:1.15rem;line-height:1}
+.ni-lb{font-size:.54rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.35}
+.ni.active .ni-lb{color:var(--blue);opacity:1}
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1.1rem 1rem 1rem}
+.sc.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:300;color:var(--text);margin-bottom:1rem;line-height:1.1}
+.st em{color:var(--blue);font-style:italic}
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.85rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem 1.3rem;border-radius:30px;border:1.5px solid var(--blue);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--blue)}
+.ibox{background:var(--rl);border-radius:10px;padding:.75rem 1rem;font-size:.8rem;line-height:1.6;color:var(--text);margin-bottom:.9rem;display:flex;gap:.55rem;align-items:flex-start}
+.banner{background:linear-gradient(135deg,var(--b1) 0%,var(--b3) 100%);border-radius:16px;padding:1.3rem 1.1rem;color:#fff;margin-bottom:1.1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%}
+.banner-ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.banner-s{font-size:.78rem;opacity:.85;line-height:1.5}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.8rem .5rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--blue);line-height:1}
+.sc3-l{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.45;margin-top:.15rem}
+.mod-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.mod-card:hover{border-color:var(--rm);transform:translateY(-1px)}
+.mod-card.done{border-color:var(--ok)}
+.mod-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem}
+.mod-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text)}
+.mod-sub{font-size:.68rem;color:var(--text);opacity:.55;margin-top:.08rem}
+.mod-prog-wrap{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:.28rem}
+.mod-prog-fill{height:100%;border-radius:2px;transition:width .5s ease;background:var(--blue)}
+.mod-meta{display:flex;justify-content:space-between;font-size:.66rem;color:var(--text);opacity:.5;margin-top:.35rem}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.badge-item{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.7rem .4rem;text-align:center}
+.badge-item.earned{border-color:var(--blue);background:linear-gradient(135deg,var(--bg),var(--white))}
+.badge-item.locked-b{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:1.5rem;line-height:1;margin-bottom:.25rem}
+.badge-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);opacity:.7}
+#pre-les{position:fixed;inset:0;background:var(--bg);z-index:190;display:none;flex-direction:column}
+#pre-les.open{display:flex}
+.pre-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.pre-body{flex:1;overflow-y:auto;padding:1.3rem 1rem}
+.pre-ft{flex-shrink:0;padding:.9rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.65rem}
+.pre-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.pre-sub{font-size:.75rem;color:var(--blue);font-style:italic;margin-bottom:1.1rem}
+.instr-block{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.instr-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.instr-item{display:flex;align-items:flex-start;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--rl)}
+.instr-item:last-child{border-bottom:none}
+.instr-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--bg);border:1.5px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+.instr-txt{flex:1}
+.instr-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.15rem}
+.instr-desc{font-size:.8rem;line-height:1.55;color:var(--text);opacity:.82}
+#ls{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#ls.open{display:flex}
+.ls-hd{flex-shrink:0;padding:.7rem 1rem;border-bottom:1.5px solid var(--rl);display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:var(--white)}
+.ls-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-prog-wrap{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;width:60px;flex-shrink:0}
+.ls-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.ls-body{flex:1;overflow-y:auto;padding:1.3rem 1.1rem 2rem}
+.ls-ft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.6rem}
+.les-block{margin-bottom:1.1rem;animation:fi .2s ease}
+.lb-text{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;line-height:1.88;color:var(--text)}
+.lb-text p{margin-bottom:.9rem}
+.lb-text p:last-child{margin-bottom:0}
+.lb-text strong{color:var(--b3);font-weight:600}
+.lb-text em{color:var(--blue);font-style:normal;font-weight:600;font-family:'Jost',sans-serif;font-size:.88em;letter-spacing:.02em}
+.lb-section{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--blue);margin-bottom:.5rem;margin-top:.3rem;padding-top:.3rem;border-top:1.5px solid var(--rl)}
+.lb-case{background:var(--text);border-radius:12px;padding:.9rem 1rem;margin:.3rem 0}
+.lb-case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem;opacity:.85}
+.lb-case-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:400;line-height:1.75;color:rgba(255,255,255,.9)}
+.lb-case-text strong{color:#7dc8f7}
+.lb-alert{background:rgba(192,85,58,.07);border:1.5px solid rgba(192,85,58,.25);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-alert-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--err);margin-bottom:.28rem}
+.lb-alert-text{font-size:.8rem;line-height:1.65;color:var(--err)}
+.lb-tip{background:rgba(91,155,213,.07);border:1.5px solid var(--rl);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-tip-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.28rem}
+.lb-tip-text{font-size:.8rem;line-height:1.65;color:var(--b3)}
+.lb-table{width:100%;border-collapse:collapse;font-size:.74rem;margin:.3rem 0;border-radius:10px;overflow:hidden;border:1.5px solid var(--rl)}
+.lb-table th{background:var(--b3);color:#fff;padding:.42rem .6rem;text-align:left;font-family:'Jost',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.04em}
+.lb-table td{padding:.38rem .6rem;border-bottom:1px solid var(--rl);line-height:1.5;color:var(--text);background:var(--white)}
+.lb-table tr:nth-child(even) td{background:rgba(91,155,213,.04)}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-q{background:var(--bg);border:2px solid var(--blue);border-radius:14px;padding:.95rem 1rem;margin:.4rem 0}
+.lb-q-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem}
+.lb-q-text{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:.75rem}
+.lb-q-opts{display:flex;flex-direction:column;gap:.42rem}
+.lb-q-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:10px;padding:.65rem .85rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.lb-q-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.lb-q-opt.q-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.lb-q-opt.q-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.lb-q-fb{font-size:.78rem;line-height:1.58;background:var(--white);border-radius:8px;padding:.6rem .8rem;margin-top:.65rem;border-left:3px solid var(--blue);display:none;color:var(--text)}
+.lb-q-fb.show{display:block}
+.lb-q-fb.fb-ok{border-left-color:var(--ok)}
+.lb-q-fb.fb-err{border-left-color:var(--err)}
+.lb-q-cont{width:100%;margin-top:.6rem;padding:.45rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;display:none}
+.lb-q-cont.show{display:block}
+.compare-box{border-radius:12px;overflow:hidden;margin:.3rem 0;border:1.5px solid var(--rl)}
+.compare-hd{display:grid;grid-template-columns:1fr 1fr}
+.compare-hd-cie{background:var(--cie);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-hd-dsm{background:var(--dsm);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-body{display:grid;grid-template-columns:1fr 1fr}
+.compare-col{padding:.7rem .75rem;font-size:.77rem;line-height:1.6;color:var(--text);background:var(--white)}
+.compare-col:first-child{border-right:1px solid var(--rl)}
+.compare-col ul{padding-left:1rem;margin:0}
+.compare-col ul li{margin-bottom:.3rem}
+.compare-col strong{color:var(--b3);font-weight:600}
+#qs{position:fixed;inset:0;background:var(--bg);z-index:201;display:none;flex-direction:column}
+#qs.open{display:flex}
+.qhd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem}
+.qpw{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.qpf{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.qn{font-size:.7rem;font-weight:700;color:var(--blue);flex-shrink:0}
+.qbody{flex:1;overflow-y:auto;padding:1.4rem 1rem}
+.q-mod-badge{display:inline-flex;background:var(--rl);border-radius:8px;padding:.3rem .65rem;font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+.qq{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.2rem}
+.qopts{display:flex;flex-direction:column;gap:.55rem}
+.qopt{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.82rem .9rem;cursor:pointer;font-size:.84rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.qopt:hover{border-color:var(--rm);background:var(--rl)}
+.qopt.cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.qopt.wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.qft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.qfb{font-size:.8rem;line-height:1.55;color:var(--text);background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin-bottom:.7rem;display:none;border-left:3px solid var(--blue)}
+.qfb.show{display:block}
+.qfb.cor-fb{border-left-color:var(--ok)}
+.qfb.wrg-fb{border-left-color:var(--err)}
+#res{position:fixed;inset:0;background:var(--bg);z-index:202;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.4rem;text-align:center}
+#res.open{display:flex;animation:fi .3s ease}
+.res-circle{width:108px;height:108px;border-radius:50%;border:3px solid var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem}
+.res-pct{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;line-height:1;color:var(--blue)}
+.res-pl{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.res-v{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;margin-bottom:.4rem}
+.res-s{font-size:.8rem;opacity:.7;line-height:1.6;margin-bottom:1.2rem;max-width:280px}
+.res-row{display:flex;gap:1.3rem;justify-content:center;margin-bottom:1.5rem}
+.rd{text-align:center}
+.rd-v{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--blue)}
+.rd-l{font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+#game-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;display:none;flex-direction:column}
+#game-overlay.open{display:flex;animation:fi .2s ease}
+.go-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem}
+.go-body{flex:1;overflow-y:auto;padding:1.1rem 1rem}
+.go-ft{flex-shrink:0;padding:.75rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.case-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:.8rem}
+.case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem}
+.case-text{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.82;color:var(--text)}
+.game-q-label{font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
+.game-opts{display:flex;flex-direction:column;gap:.48rem;margin-bottom:.75rem}
+.game-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:11px;padding:.72rem .88rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.game-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.game-opt.g-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.game-opt.g-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.game-fb{font-size:.79rem;line-height:1.6;background:var(--bg);border-radius:8px;padding:.62rem .82rem;border-left:3px solid var(--blue);margin-bottom:.7rem;display:none}
+.game-fb.show{display:block}
+.game-fb.fb-ok{border-left-color:var(--ok)}
+.game-fb.fb-err{border-left-color:var(--err)}
+.go-stats{display:flex;gap:1rem;margin-left:auto}
+.go-stat{text-align:center}
+.go-stat-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--blue);line-height:1}
+.go-stat-l{font-size:.46rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.4}
+.prog-bar-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}
+.pbr-label{font-size:.7rem;font-weight:500;color:var(--text);width:100px;flex-shrink:0;line-height:1.25}
+.pbr-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.pbr-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--b1),var(--b3));transition:width .6s}
+.pbr-pct{font-size:.66rem;font-weight:700;color:var(--blue);width:30px;text-align:right}
+@keyframes popUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-35px) scale(1.25);opacity:0}}
+.xp-pop{position:fixed;pointer-events:none;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);animation:popUp .8s ease forwards;z-index:999}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="logo">Psico<em>Dx</em></div>
+  <div class="hstats">
+    <div class="hs"><div class="hs-v" id="h-les">0</div><div class="hs-l">Lecciones</div></div>
+    <div class="hs"><div class="hs-v" id="h-pts">0</div><div class="hs-l">Puntos</div></div>
+    <div class="hs"><div class="hs-v" id="h-str">0🔥</div><div class="hs-l">Racha</div></div>
+  </div>
+</div>
+<div class="sa">
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">Módulo 4 · CIE-11 + DSM-5-TR</div>
+      <div class="banner-t">Trastornos de <em>Ansiedad</em></div>
+      <div class="banner-s">TAG · Pánico · Agorafobia · Fobia Social · Fobias Específicas · Ansiedad por Separación · Mutismo</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="hs-les">0</div><div class="sc3-l">Completadas</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-prec">—</div><div class="sc3-l">Precisión</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-pts">0</div><div class="sc3-l">Puntos</div></div>
+    </div>
+    <div class="ey">Lecciones del módulo</div>
+    <div id="home-modules"></div>
+  </div>
+  <div class="sc" id="sc-game">
+    <div class="ey">Modo Juego</div>
+    <div class="st">Diagnóstico <em>en Acción</em></div>
+    <div class="ibox"><span style="font-size:.95rem;flex-shrink:0">🎮</span><span>Casos de ansiedad. Identifica el diagnóstico correcto según el foco del miedo, la duración y el patrón de evitación. Desbloquea niveles con ≥70%.</span></div>
+    <div id="game-home-content"></div>
+  </div>
+  <div class="sc" id="sc-prog">
+    <div class="ey">Tu progreso</div>
+    <div class="st">Avance por <em>Lección</em></div>
+    <div class="card" style="padding:1rem 1.1rem"><div id="prog-bars"></div></div>
+    <div class="ey" style="margin-bottom:.5rem;margin-top:.5rem">Logros</div>
+    <div class="badges-grid" id="badges-grid"></div>
+  </div>
+</div>
+<div class="bot-nav">
+  <button class="ni active" data-tab="home"><span class="ni-ic">🏠</span><span class="ni-lb">Inicio</span></button>
+  <button class="ni" data-tab="game"><span class="ni-ic">🎮</span><span class="ni-lb">Juego</span></button>
+  <button class="ni" data-tab="prog"><span class="ni-ic">📊</span><span class="ni-lb">Progreso</span></button>
+</div>
+<div id="pre-les">
+  <div class="pre-hd">
+    <button id="pre-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="flex:1"><div class="ey">Antes de comenzar</div><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)" id="pre-mod-name"></div></div>
+  </div>
+  <div class="pre-body">
+    <div class="pre-title" id="pre-title"></div>
+    <div class="pre-sub" id="pre-sub"></div>
+    <div class="instr-block">
+      <div class="instr-title">¿Cómo funciona esta lección?</div>
+      <div class="instr-item"><div class="instr-ic">📖</div><div class="instr-txt"><div class="instr-label">Lectura clínica profunda</div><div class="instr-desc">Criterios completos con razonamiento diagnóstico real.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">📊</div><div class="instr-txt"><div class="instr-label">Comparación CIE-11 vs DSM-5</div><div class="instr-desc">Diferencias que impactan la práctica clínica.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">⚡</div><div class="instr-txt"><div class="instr-label">Preguntas intercaladas</div><div class="instr-desc">Feedback inmediato con explicación clínica.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">🏆</div><div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">5 preguntas · ≥80% = maestría.</div></div></div>
+    </div>
+    <div id="pre-info"></div>
+  </div>
+  <div class="pre-ft">
+    <button class="btn btn-g" id="pre-close2" style="flex:1">Volver</button>
+    <button class="btn btn-p" id="pre-start" style="flex:2">Comenzar →</button>
+  </div>
+</div>
+<div id="ls">
+  <div class="ls-hd">
+    <button id="ls-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="ls-title" id="ls-title"></div>
+    <div class="ls-prog-wrap"><div class="ls-prog-fill" id="ls-prog" style="width:0%"></div></div>
+  </div>
+  <div class="ls-body" id="ls-body"></div>
+  <div class="ls-ft">
+    <button class="btn btn-g" id="ls-prev" style="flex:1">← Anterior</button>
+    <button class="btn btn-p" id="ls-next" style="flex:2">Siguiente →</button>
+  </div>
+</div>
+<div id="qs">
+  <div class="qhd">
+    <button id="qs-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="qpw"><div class="qpf" id="q-prog" style="width:0%"></div></div>
+    <div class="qn" id="q-n">1/5</div>
+  </div>
+  <div class="qbody" id="q-body"></div>
+  <div class="qft">
+    <div class="qfb" id="q-fb"></div>
+    <button class="btn btn-p" id="q-next" style="width:100%;display:none">Siguiente →</button>
+  </div>
+</div>
+<div id="res">
+  <div class="res-circle"><div class="res-pct" id="res-pct">0%</div><div class="res-pl">precisión</div></div>
+  <div class="res-v" id="res-v">Bien</div>
+  <div class="res-s" id="res-s"></div>
+  <div class="res-row">
+    <div class="rd"><div class="rd-v" id="res-cor">0</div><div class="rd-l">Correctas</div></div>
+    <div class="rd"><div class="rd-v" id="res-pts">+0</div><div class="rd-l">Puntos</div></div>
+    <div class="rd"><div class="rd-v" id="res-time">0s</div><div class="rd-l">Tiempo</div></div>
+  </div>
+  <div style="display:flex;gap:.65rem;width:100%;max-width:320px">
+    <button class="btn btn-g" id="res-home" style="flex:1">Inicio</button>
+    <button class="btn btn-p" id="res-repeat" style="flex:1">Repetir quiz</button>
+  </div>
+</div>
+<div id="game-overlay">
+  <div class="go-hd">
+    <button id="go-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text)" id="go-title">Juego</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-v" id="go-pts-live">0</div><div class="go-stat-l">pts</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-streak-live">0🔥</div><div class="go-stat-l">racha</div></div>
+    </div>
+  </div>
+  <div class="go-body" id="go-body"></div>
+  <div class="go-ft" id="go-ft"></div>
+</div>
+
+<script>
+const LECCIONES = {
+
+'ax1':{
+ title:'Trastorno de Ansiedad Generalizada',
+ mod:'Trastornos de Ansiedad',
+ sub:'CIE-11 (6B00) vs DSM-5 (300.02) — Los 6 síntomas somáticos y el criterio de preocupación',
+ bloques:[
+  {t:'text', content:`<p>El <strong>Trastorno de Ansiedad Generalizada (TAG)</strong> es el trastorno de ansiedad más frecuente en adultos y uno de los más subdiagnosticados porque sus síntomas son difusos y raramente el paciente llega diciendo "tengo ansiedad". Llega diciendo que "no puede dormir", que "siempre está preocupado", que "se cansa de nada" o con síntomas somáticos inexplicables.</p>
+  <p>El núcleo del TAG es la <strong>preocupación excesiva e incontrolable</strong> sobre múltiples temas — no solo uno específico. Si la preocupación es solo sobre un tema (enfermar, quedar en ridículo, separarse de alguien), pensar en otros diagnósticos.</p>`},
+
+  {t:'section', content:'Criterios DSM-5 (300.02)'},
+
+  {t:'text', content:`<p><strong>Criterio A:</strong> Ansiedad y preocupación excesivas (anticipación aprensiva) sobre una serie de actividades o eventos (trabajo, rendimiento escolar, etc.), que se producen durante más días de los que han estado ausentes durante un mínimo de <strong>6 meses</strong>.</p>
+  <p><strong>Criterio B:</strong> Al individuo le es difícil controlar la preocupación — el paciente reconoce que se preocupa más de lo necesario pero no puede parar.</p>
+  <p><strong>Criterio C — Los 6 síntomas somáticos/cognitivos</strong> (≥3 en adultos; ≥1 en niños):</p>
+  <p><strong>1. Inquietud o sensación de estar atrapado o con los nervios de punta.</strong><br>
+  <strong>2. Fácilmente fatigado.</strong><br>
+  <strong>3. Dificultad para concentrarse o quedarse con la mente en blanco.</strong><br>
+  <strong>4. Irritabilidad.</strong><br>
+  <strong>5. Tensión muscular.</strong><br>
+  <strong>6. Problemas de sueño</strong> (dificultad para dormirse o para continuar durmiendo, o sueño inquieto e insatisfactorio).</p>
+  <p><strong>Criterio D:</strong> La ansiedad, la preocupación o los síntomas físicos causan malestar clínicamente significativo o deterioro en el funcionamiento.</p>
+  <p><strong>Criterio E:</strong> La alteración no se atribuye a los efectos fisiológicos de una sustancia o a otra afección médica.</p>
+  <p><strong>Criterio F:</strong> La alteración no se explica mejor por otro trastorno mental.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Código:</strong> 6B00</li>
+    <li><strong>Síntoma central:</strong> Preocupación excesiva y persistente sobre múltiples áreas de la vida diaria</li>
+    <li><strong>Duración:</strong> Varios meses (no especifica los 6 meses del DSM-5 — más flexible)</li>
+    <li><strong>Síntomas somáticos:</strong> Lista similar: tensión muscular, irritabilidad, fatiga, dificultad de concentración, inquietud, sueño alterado</li>
+    <li><strong>Sin umbral numérico</strong> de síntomas somáticos como el DSM-5 (≥3)</li>
+    <li><strong>Énfasis en la incontrolabilidad</strong> de la preocupación como criterio central</li>
+    <li><strong>Puede coexistir</strong> con trastorno depresivo — ambos diagnósticos cuando corresponde</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Código:</strong> 300.02</li>
+    <li><strong>Duración:</strong> ≥6 meses — criterio estricto</li>
+    <li><strong>Síntomas somáticos:</strong> ≥3 de 6 en adultos; ≥1 de 6 en niños</li>
+    <li><strong>Criterio B explícito:</strong> Dificultad para controlar la preocupación</li>
+    <li><strong>Cambio DSM-5:</strong> Eliminó el criterio de que la ansiedad no debía ocurrir exclusivamente durante un trastorno del ánimo</li>
+    <li><strong>El TAG puede coexistir</strong> con EDM — el DSM-5 permite diagnóstico dual</li>
+   </ul>`},
+
+  {t:'case',
+   label:'TAG en hospitalización — presentación somática',
+   text:`<strong>Rosa, 55 años, hospitalizada por cefalea crónica.</strong> El neurólogo descarta causa orgánica y solicita valoración psicológica. Rosa dice que "siempre ha sido muy nerviosa". Desde hace más de 1 año, se preocupa todos los días por la salud de sus hijos, el dinero, el trabajo de su esposo, el vecindario, la comida, el futuro. "No puedo apagar la cabeza." Duerme mal, tiene tensión en la nuca y los hombros constantemente, se fatiga con facilidad, se irrita con facilidad. Ha consultado a 5 especialistas por síntomas somáticos.
+  <br><br><em>TAG con presentación somática:</em> La cefalea tensional crónica, la fatiga inexplicable y los síntomas gastrointestinales son frecuentemente la presentación del TAG en atención médica. La preocupación múltiple y la incontrolabilidad son las claves diagnósticas.`},
+
+  {t:'question',
+   q:'¿Cuántos síntomas somáticos/cognitivos del Criterio C se requieren en adultos para el diagnóstico de TAG según el DSM-5?',
+   opts:['≥1 de 6 síntomas — igual que en niños','≥3 de 6 síntomas en adultos (vs ≥1 en niños)','≥5 de 6 síntomas','Todos los 6 síntomas deben estar presentes'],
+   cor:1,
+   fb:'≥3 de 6 síntomas somáticos/cognitivos en adultos; ≥1 de 6 en niños y adolescentes. Los 6 síntomas son: inquietud/nervios de punta, fatiga fácil, dificultad de concentración/mente en blanco, irritabilidad, tensión muscular, problemas de sueño. La diferencia en el umbral niños/adultos refleja que los niños expresan la ansiedad generalizada principalmente con menos síntomas somáticos pero igual deterioro funcional.'},
+
+  {t:'section', content:'Diagnóstico diferencial — Lo que más se confunde con TAG'},
+
+  {t:'text', content:`<p><strong>TAG vs Depresión Mayor:</strong> Las preocupaciones en el TAG son sobre el futuro ("¿qué pasará si...?") — orientadas al futuro. En la depresión, los pensamientos ruminativos son sobre el pasado ("debí haber hecho...", "todo fue mi culpa"). La irritabilidad y la fatiga aparecen en ambos. El TAG puede ser comórbido con la depresión (comorbilidad en ~60% de los casos).</p>
+  <p><strong>TAG vs Ansiedad Normal:</strong> La ansiedad normal es proporcional al estímulo, temporal y controlable. En el TAG la preocupación es desproporcionada, persistente y el paciente no puede pararla aunque lo intente.</p>
+  <p><strong>TAG vs TOC:</strong> En el TOC las obsesiones son pensamientos intrusivos egodistónicos específicos; en el TAG las preocupaciones son sobre situaciones cotidianas reales y el paciente las siente como "propias" (egosintónicas), aunque excesivas.</p>
+  <p><strong>TAG vs Trastorno de Pánico:</strong> En el pánico la ansiedad es episódica e intensa (crisis). En el TAG es crónica y difusa. Pueden coexistir.</p>`},
+
+  {t:'tip',
+   label:'La pregunta clave para el TAG',
+   text:'"¿Se preocupa por muchas cosas diferentes, no solo por una?" y "¿Puede parar de preocuparse cuando quiere?" — Si la respuesta a ambas es sí y no respectivamente, y lleva más de 6 meses, pensar en TAG. La incontrolabilidad de la preocupación es el criterio fenomenológico más discriminativo.'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia entre las preocupaciones del TAG y las obsesiones del TOC?',
+   opts:['No hay diferencia — son el mismo fenómeno con diferente nombre','En TAG las preocupaciones son sobre situaciones cotidianas reales y se viven como excesivas pero "propias" (egosintónicas); en TOC las obsesiones son pensamientos intrusivos sobre temas específicos (contaminación, daño, simetría), se viven como ajenos (egodistónicos) y generan compulsiones para neutralizarlas','En TAG siempre hay síntomas somáticos; en TOC no','Las obsesiones del TOC duran más tiempo que las preocupaciones del TAG'],
+   cor:1,
+   fb:'La distinción egosintónico/egodistónico es clave. En TAG: "me preocupo demasiado por el dinero, lo sé, pero es mi forma de ser — son mis preocupaciones". En TOC: "tengo pensamientos horribles que no quiero tener — no soy yo, son intrusos, tengo que hacer algo para neutralizarlos". El TAG tiene preocupaciones múltiples sobre la vida real; el TOC tiene obsesiones sobre temas específicos que generan rituales compulsivos para reducir la angustia.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima requerida para el diagnóstico de TAG según el DSM-5?',
+   opts:['1 mes','3 meses','6 meses de preocupación excesiva más días de los que ha estado ausente','1 año'],
+   cor:2,
+   fb:'6 meses es el criterio de duración del DSM-5 para TAG — más días presentes que ausentes. La CIE-11 es más flexible: dice "varios meses" sin especificar el umbral exacto de 6. Este criterio de duración diferencia el TAG de la ansiedad situacional o adaptativa, que generalmente se resuelve en semanas.'},
+  {q:'¿Cuál de los 6 síntomas del Criterio C del TAG es el que más frecuentemente se presenta en la consulta médica general como motivo de consulta principal?',
+   opts:['Irritabilidad','Dificultad para concentrarse','Tensión muscular y fatiga — frecuentemente se presentan como cefalea tensional, dolor cervical, dolor muscular difuso o cansancio crónico inexplicable','Inquietud subjetiva'],
+   cor:2,
+   fb:'La tensión muscular crónica (cefalea tensional, dolor cervical, dolor lumbar, bruxismo) y la fatiga son los síntomas somáticos del TAG que más frecuentemente llevan al paciente a consultar a médicos especialistas antes de llegar al psicólogo o psiquiatra. Reconocer el TAG detrás de la "cefalea crónica inexplicable" o el "dolor muscular difuso" es una competencia crítica en el entorno hospitalario.'},
+  {q:'Un paciente de 40 años lleva 8 meses preocupándose "por todo" — trabajo, salud, familia, dinero. No puede controlar las preocupaciones. Tiene tensión muscular, duerme mal e irritabilidad. ¿Cuántos síntomas del Criterio C tiene y cumple criterios de TAG?',
+   opts:['Tiene 2 síntomas — no cumple el umbral de 3','Tiene 3 síntomas (tensión muscular, insomnio, irritabilidad) — cumple ≥3 + preocupación incontrolable por ≥6 meses = TAG','Tiene 4 síntomas pero la duración no cumple','No cumple TAG porque no menciona fatiga ni concentración'],
+   cor:1,
+   fb:'3 síntomas del Criterio C: tensión muscular (5), problemas de sueño (6), irritabilidad (4). ≥3 de 6 cumplido. Más: preocupación excesiva sobre múltiples temas (A), dificultad para controlar la preocupación (B), durante 8 meses (≥6 meses). TAG cumplido. La preocupación por "todo" — múltiple y difusa — es la pista diagnóstica central.'},
+  {q:'¿Qué tratamiento tiene mayor evidencia combinada (psicológico + farmacológico) para el TAG?',
+   opts:['Psicoanálisis + benzodiacepinas a largo plazo','TCC (Terapia Cognitivo-Conductual) + ISRS o IRSN como primera línea farmacológica; las benzodiacepinas son de segunda línea y uso limitado por riesgo de dependencia','Solo farmacológico — los IMAO son primera línea','Solo TCC sin fármacos'],
+   cor:1,
+   fb:'Primera línea: TCC (especialmente técnicas de reestructuración cognitiva, relajación muscular progresiva y exposición a la preocupación) + ISRS (sertralina, escitalopram) o IRSN (venlafaxina, duloxetina). Las benzodiacepinas: alivio rápido pero riesgo de dependencia y rebote — segunda línea, uso limitado en el tiempo. La buspirona es una alternativa no adictiva aunque con inicio de acción más lento. La TCC sola tiene tasas de respuesta del 60-70%.'},
+  {q:'¿Por qué el TAG frecuentemente se diagnostica tardíamente o se confunde con depresión?',
+   opts:['Porque el TAG no tiene síntomas afectivos','Porque comparte síntomas con la depresión (fatiga, irritabilidad, insomnio, dificultad de concentración) y el 60% de pacientes con TAG tienen depresión comórbida — la comorbilidad enturbia el diagnóstico principal; además los pacientes raramente llegan al psicólogo primero sino al médico general con síntomas somáticos','Porque el TAG solo aparece en mujeres','Porque las preguntas de ansiedad no están en las entrevistas estándar de hospitalización'],
+   cor:1,
+   fb:'El diagnóstico tardío del TAG tiene múltiples razones: (1) Síntomas solapados con depresión, (2) presentación somática que dirige al médico general o especialista, (3) el paciente normaliza la preocupación ("siempre fui así"), (4) el clínico diagnostica solo la depresión cuando hay comorbilidad. La prevalencia de comorbilidad TAG-Depresión es ~60% — tratar ambos mejora el pronóstico de los dos.'}
+ ]
+},
+
+'ax2':{
+ title:'Trastorno de Pánico y Agorafobia',
+ mod:'Trastornos de Ansiedad',
+ sub:'CIE-11 (6B01·6B02) vs DSM-5 (300.01·300.22) — Crisis, anticipación y evitación',
+ bloques:[
+  {t:'text', content:`<p>El <strong>Trastorno de Pánico</strong> se caracteriza por crisis de pánico recurrentes e inesperadas. Una crisis de pánico es una oleada repentina de miedo intenso o malestar intenso que alcanza su máxima expresión en minutos. Lo fundamental: son <em>inesperadas</em> — no hay estímulo desencadenante claro, o si lo hay, la reacción es desproporcionada.</p>
+  <p>Un punto crucial: las crisis de pánico <strong>no son un diagnóstico por sí mismas</strong> — son síntomas que pueden aparecer en múltiples trastornos (fobia social, TEPT, depresión). Lo que define el Trastorno de Pánico es la preocupación persistente por tener más crisis y los cambios de comportamiento para evitarlas.</p>`},
+
+  {t:'section', content:'Crisis de Pánico — Los 13 síntomas'},
+
+  {t:'text', content:`<p>Una crisis de pánico incluye ≥4 de estos 13 síntomas, con inicio abrupto y pico en minutos:</p>
+  <p><strong>Somáticos:</strong><br>
+  1. Palpitaciones, sacudidas del corazón o aceleración de la frecuencia cardíaca.<br>
+  2. Sudoración.<br>
+  3. Temblores o sacudidas.<br>
+  4. Sensación de dificultad para respirar o de asfixia.<br>
+  5. Sensación de ahogo.<br>
+  6. Dolor o molestias en el tórax.<br>
+  7. Náuseas o malestar abdominal.<br>
+  8. Sensación de mareo, inestabilidad, aturdimiento o desmayo.<br>
+  9. Escalofríos o sensaciones de calor.</p>
+  <p><strong>Cognitivos/perceptivos:</strong><br>
+  10. Parestesias (entumecimiento u hormigueo).<br>
+  11. Desrealización (sensación de irrealidad) o despersonalización (estar separado de uno mismo).<br>
+  12. Miedo a perder el control o de "volverse loco".<br>
+  13. Miedo a morir.</p>
+  <p><strong>Nota clínica:</strong> Las crisis de pánico con ≥4 síntomas se llaman "completas". Las que tienen <4 síntomas se llaman "síntomas limitados" — son igualmente incapacitantes pero más frecuentes y menos dramáticas.</p>`},
+
+  {t:'section', content:'Trastorno de Pánico — Criterios completos'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6B01 / DSM-5: 300.01</strong></p>
+  <p><strong>Criterio A:</strong> Crisis de pánico inesperadas recurrentes.</p>
+  <p><strong>Criterio B:</strong> Al menos una de las crisis ha sido seguida durante ≥1 mes de ≥1 de los siguientes:<br>
+  (1) <em>Preocupación o ansiedad persistente</em> sobre la posibilidad de tener más crisis o sus consecuencias ("voy a tener un infarto", "me voy a volver loco", "voy a perder el control").<br>
+  (2) <em>Cambio significativo de comportamiento</em> relacionado con las crisis (evitar ejercicio, sitios públicos, conducir, estar solo).</p>
+  <p><strong>Criterio C:</strong> No se explica por sustancias, otra afección médica, ni otro trastorno mental.</p>
+  <p><strong>La lógica del ciclo del pánico:</strong><br>
+  Sensación física → Interpretación catastrófica ("me voy a morir") → Ansiedad aumentada → Más síntomas físicos → Más catastrofización → Crisis completa. El miedo al miedo (ansiedad anticipatoria) es lo que mantiene el trastorno.</p>`},
+
+  {t:'case',
+   label:'Trastorno de Pánico — Primera consulta en urgencias',
+   text:`<strong>Hernando, 38 años.</strong> Llega a urgencias por "infarto". Palpitaciones, sudoración, sensación de ahogo, hormigueo en manos, miedo a morir. EKG y enzimas normales. Es el tercer episodio en 6 semanas. Después del primero, dejó de hacer ejercicio ("puede dispararme el corazón"). Después del segundo, dejó de manejar solo. Ahora no quiere salir de casa sin su esposa porque "¿qué pasa si me da en la calle?"
+  <br><br><em>Trastorno de Pánico con evitación agorafóbica emergente:</em> La ruta urgencias → cardiología → psicología es la más frecuente. El problema no es la crisis en sí — es el cambio de comportamiento que reduce la calidad de vida. El médico de urgencias que explica qué es una crisis de pánico y da psicoeducación en ese momento puede cambiar el curso del trastorno.`},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia entre una "crisis de pánico" y el "Trastorno de Pánico"?',
+   opts:['Son sinónimos — toda crisis de pánico es trastorno de pánico','Una crisis de pánico es un episodio sintomático que puede ocurrir en muchos contextos; el Trastorno de Pánico requiere crisis inesperadas recurrentes + ≥1 mes de preocupación persistente o cambio de comportamiento relacionado con las crisis','El trastorno de pánico solo tiene crisis durante el sueño','La diferencia es solo de frecuencia — más de 3 crisis es trastorno'],
+   cor:1,
+   fb:'Las crisis de pánico son síntomas que pueden aparecer en fobia social (en situaciones sociales), TEPT (al rememorar el trauma), fobia específica (al exponerse al estímulo), depresión, o incluso en personas sin ningún trastorno ("crisis situacionales limitadas"). El Trastorno de Pánico requiere crisis inesperadas (sin estímulo claro) + el componente cognitivo y conductual post-crisis: preocupación persistente y/o cambio de comportamiento.'},
+
+  {t:'section', content:'Agorafobia — El diagnóstico independiente'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6B02 / DSM-5: 300.22</strong></p>
+  <p>Una de las diferencias más importantes entre DSM-IV y DSM-5/CIE-11: la <strong>agorafobia es ahora un diagnóstico independiente</strong>, no un especificador del Trastorno de Pánico. Puede existir sin crisis de pánico.</p>
+  <p><strong>Criterio A:</strong> Miedo o ansiedad intensa acerca de ≥2 de las 5 situaciones agorafóbicas:<br>
+  1. Uso del transporte público (automóviles, autobuses, trenes, barcos, aviones).<br>
+  2. Estar en espacios abiertos (aparcamientos, mercados, puentes).<br>
+  3. Estar en sitios cerrados (tiendas, teatros, cines).<br>
+  4. Hacer cola o estar en medio de una multitud.<br>
+  5. Estar fuera de casa solo.</p>
+  <p><strong>Criterio B:</strong> El individuo teme o evita estas situaciones por pensamientos de que escapar podría ser difícil o que no podría disponer de ayuda si desarrollara síntomas de pánico u otros síntomas incapacitantes.</p>
+  <p><strong>Criterio C:</strong> Las situaciones agorafóbicas casi siempre provocan miedo o ansiedad.</p>
+  <p><strong>Criterio D:</strong> Las situaciones agorafóbicas se evitan activamente, se soportan con ansiedad intensa o solo se soportan con la presencia de un acompañante.</p>
+  <p><strong>Criterio E:</strong> El miedo o ansiedad es desproporcionado al peligro real y al contexto sociocultural.</p>
+  <p><strong>Criterio F:</strong> El miedo, ansiedad o evitación persiste durante ≥6 meses.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Trastorno de pánico (6B01):</strong> Crisis inesperadas recurrentes + ansiedad anticipatoria y/o cambios conductuales</li>
+    <li><strong>Agorafobia (6B02):</strong> Diagnóstico independiente — puede ocurrir sin pánico</li>
+    <li><strong>CIE-11 enfatiza</strong> el miedo a no poder escapar o recibir ayuda como criterio central de la agorafobia</li>
+    <li>Ambos pueden codiagnósticarse si coexisten</li>
+    <li><strong>Duración:</strong> La CIE-11 no especifica los 6 meses como criterio rígido</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Trastorno de pánico (300.01):</strong> Crisis inesperadas + criterio B de consecuencias</li>
+    <li><strong>Agorafobia (300.22):</strong> Diagnóstico independiente — cambio desde DSM-IV donde era especificador del pánico</li>
+    <li><strong>Requiere ≥2 situaciones</strong> de las 5 para agorafobia</li>
+    <li><strong>Duración ≥6 meses</strong> para agorafobia</li>
+    <li>Si coexisten pánico + agorafobia → dos diagnósticos separados</li>
+   </ul>`},
+
+  {t:'question',
+   q:'¿Cuál fue el cambio más importante del DSM-5 respecto a la agorafobia en comparación con el DSM-IV?',
+   opts:['El DSM-5 eliminó la agorafobia como diagnóstico','La agorafobia pasó de ser un especificador del Trastorno de Pánico a ser un diagnóstico independiente — puede diagnosticarse sin crisis de pánico','El DSM-5 redujo el número de situaciones requeridas de 5 a 2','La agorafobia en el DSM-5 solo aplica a espacios abiertos'],
+   cor:1,
+   fb:'En el DSM-IV, la agorafobia solo existía como especificador: "Trastorno de Pánico con Agorafobia" o "Agorafobia sin historia de Trastorno de Pánico" (esta última era raramente usada). El DSM-5 y la CIE-11 reconocen que la agorafobia puede existir de forma independiente — hay pacientes que evitan situaciones agorafóbicas sin haber tenido nunca una crisis de pánico completa. Este cambio tiene implicaciones diagnósticas y terapéuticas importantes.'}
+ ],
+ quiz:[
+  {q:'¿Cuántos síntomas se requieren para que una crisis se considere una "crisis de pánico completa" según el DSM-5?',
+   opts:['≥2 síntomas con pico en minutos','≥4 de 13 síntomas con inicio abrupto y pico en minutos','≥6 síntomas de los 13','Todos los síntomas somáticos deben estar presentes'],
+   cor:1,
+   fb:'≥4 de 13 síntomas, con inicio abrupto y pico en minutos. Las crisis con <4 síntomas se llaman "síntomas limitados de pánico" — igual de incapacitantes pero no cumplen criterios de crisis completa. Los 13 síntomas incluyen 9 somáticos (palpitaciones, sudoración, temblor, disnea, ahogo, dolor torácico, náuseas, mareo, escalofríos/calor, parestesias) y 4 cognitivos/perceptivos (desrealización, despersonalización, miedo a perder el control, miedo a morir).'},
+  {q:'¿Qué hace que el Trastorno de Pánico sea crónico y no solo un episodio agudo?',
+   opts:['La frecuencia de las crisis — más de 3 por semana','El miedo al miedo: la ansiedad anticipatoria y los cambios de comportamiento (evitación) para prevenir futuras crisis. Esta retroalimentación mantiene el trastorno aunque las crisis se vuelvan menos frecuentes','La intensidad de los síntomas somáticos','La comorbilidad con depresión'],
+   cor:1,
+   fb:'El ciclo del pánico: crisis → interpretación catastrófica → ansiedad anticipatoria ("¿cuándo volverá?") → cambios de comportamiento (evitación de lugares, actividades, situaciones) → reducción a corto plazo de la ansiedad (refuerzo negativo) → mantenimiento del miedo a largo plazo. La evitación es el mecanismo de mantenimiento central. Por eso la exposición (ir a esas situaciones temidas) es el componente más efectivo del tratamiento.'},
+  {q:'¿En cuántas de las 5 situaciones agorafóbicas debe haber miedo/evitación para diagnosticar agorafobia según el DSM-5?',
+   opts:['En las 5 situaciones','En ≥3 de 5','En ≥2 de 5 situaciones','En al menos 1 situación principal'],
+   cor:2,
+   fb:'≥2 de las 5 situaciones agorafóbicas: (1) transporte público, (2) espacios abiertos, (3) espacios cerrados/tiendas/cines, (4) colas/multitudes, (5) fuera de casa solo. El miedo central es a no poder escapar o recibir ayuda si hay síntomas incapacitantes. La evitación de ≥2 situaciones durante ≥6 meses con deterioro funcional = agorafobia.'},
+  {q:'¿Cuál es el tratamiento psicológico con mayor evidencia para el Trastorno de Pánico?',
+   opts:['Psicoanálisis — trabajar el origen infantil de la ansiedad','Relajación sola — aprender a controlar los síntomas somáticos','TCC con exposición interoceptiva — exposición a las sensaciones físicas temidas + reestructuración cognitiva de las interpretaciones catastróficas + exposición situacional','Hipnoterapia para reducir la sensibilidad al miedo'],
+   cor:2,
+   fb:'TCC con exposición interoceptiva es el tratamiento con mayor evidencia. La exposición interoceptiva es específica para el pánico: inducir deliberadamente sensaciones físicas temidas (girar en una silla para mareo, respirar rápido para hiperventilación, saltar para palpitaciones) para desensibilizar el miedo a esas sensaciones. Más reestructuración cognitiva de las interpretaciones catastróficas ("las palpitaciones no son un infarto"). Tasa de remisión: 70-90%. Farmacológicamente: ISRS o clonazepam son primera línea, no benzodiacepinas de acción corta (alprazolam) que generan dependencia.'},
+  {q:'Paciente que evita el centro comercial, el transporte público y estar sola en casa por miedo a "que me pase algo y no haya nadie que me ayude". Nunca ha tenido una crisis de pánico completa. ¿Qué diagnóstico es más apropiado?',
+   opts:['No puede diagnosticarse porque no hay crisis de pánico — la agorafobia requiere pánico previo','Trastorno de Pánico sin agorafobia — las crisis deben ser el diagnóstico principal','Agorafobia — diagnóstico independiente que no requiere crisis de pánico previas (cambio DSM-5 y CIE-11). Evitación de ≥2 situaciones por miedo a no poder escapar o recibir ayuda','Fobia específica múltiple — cada situación es una fobia separada'],
+   cor:2,
+   fb:'Agorafobia como diagnóstico independiente: evita transporte público (1), espacios cerrados/centro comercial (3), fuera de casa sola (5) — 3 de 5 situaciones. Sin crisis de pánico previas — esto es perfectamente compatible con el diagnóstico desde DSM-5 y CIE-11. La agorafobia ya no requiere historia de pánico. El miedo central ("que me pase algo y no haya nadie que me ayude") es el contenido cognitivo típico de la agorafobia.'}
+ ]
+},
+
+'ax3':{
+ title:'Fobia Social · Fobias Específicas · Ansiedad por Separación · Mutismo',
+ mod:'Trastornos de Ansiedad',
+ sub:'CIE-11 (6B04·6B03·6B05·6B06) vs DSM-5 (300.23·300.29·309.21·313.23)',
+ bloques:[
+  {t:'text', content:`<p>Este bloque cubre los trastornos de ansiedad centrados en <strong>estímulos específicos o situaciones delimitadas</strong>: el miedo a la evaluación social (fobia social), el miedo a objetos o situaciones concretas (fobias específicas), el miedo a la separación de las figuras de apego (ansiedad por separación) y el mutismo selectivo. Comparten la estructura básica: miedo desproporcionado → evitación → deterioro funcional.</p>`},
+
+  {t:'section', content:'Trastorno de Ansiedad Social (Fobia Social)'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6B04 / DSM-5: 300.23</strong></p>
+  <p><strong>Criterio A:</strong> Miedo o ansiedad intensa en una o más situaciones sociales en las que el individuo está expuesto al posible examen por parte de otras personas. Ejemplos: interacciones sociales (conversaciones, reuniones), ser observado (comer, beber), actuar delante de otros (dar un discurso, hacer una presentación).</p>
+  <p><strong>Criterio B:</strong> El individuo tiene miedo de actuar de cierta manera o de mostrar síntomas de ansiedad que se valoren negativamente (que le humillen, le avergüencen, le lleven al rechazo o insulten a otros).</p>
+  <p><strong>Criterio C:</strong> Las situaciones sociales casi siempre provocan miedo o ansiedad. En niños: puede expresarse como llanto, rabietas, quedarse paralizado, aferrarse, encogerse o el fracaso de hablar en situaciones sociales.</p>
+  <p><strong>Criterio D:</strong> Las situaciones sociales se evitan o se soportan con miedo o ansiedad intensos.</p>
+  <p><strong>Criterio E:</strong> El miedo o ansiedad es desproporcionado a la amenaza real y al contexto sociocultural.</p>
+  <p><strong>Criterio F:</strong> El miedo, la ansiedad o la evitación son persistentes, durante ≥6 meses.</p>
+  <p><strong>Especificador DSM-5:</strong> <em>Solo de actuación</em> — el miedo se limita a hablar o actuar en público. Este subtipo tiene mejor respuesta a betabloqueantes (propranolol) para situaciones específicas.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Código:</strong> 6B04</li>
+    <li><strong>Duración:</strong> Varios meses (sin el umbral rígido de 6 meses del DSM-5)</li>
+    <li><strong>El foco del miedo</strong> es la evaluación negativa por otros — igual que DSM-5</li>
+    <li><strong>CIE-11 no tiene</strong> el especificador "solo de actuación" de forma tan explícita</li>
+    <li><strong>Énfasis</strong> en que el miedo es desproporcionado al riesgo real teniendo en cuenta el contexto cultural</li>
+    <li><strong>Puede codiagnósticarse</strong> con trastorno de personalidad evitativa (alta comorbilidad)</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Código:</strong> 300.23</li>
+    <li><strong>Duración:</strong> ≥6 meses</li>
+    <li><strong>Especificador:</strong> "Solo de actuación" — hablar o actuar en público</li>
+    <li><strong>Criterio cultural explícito:</strong> El miedo es desproporcionado al contexto sociocultural</li>
+    <li><strong>Alta comorbilidad</strong> con depresión, abuso de alcohol (automedicación), trastorno de personalidad evitativa</li>
+    <li><strong>Diferencial con timidez normal:</strong> La timidez no causa deterioro funcional significativo ni evitación generalizada</li>
+   </ul>`},
+
+  {t:'case',
+   label:'Fobia Social — El diagnóstico detrás del "fracaso escolar"',
+   text:`<strong>Sebastián, 19 años, universitario.</strong> Reprobó 4 materias este semestre. Al explorar: no es por falta de capacidad — sus calificaciones en tareas escritas son excelentes. El problema: "cuando tengo que hablar en clase me bloqueo", no puede hacer exposiciones, no participa aunque sepa la respuesta, evita el comedor universitario por miedo a "que me vean comer solo y piensen que no tengo amigos". No ha podido conseguir pasantía porque "no soy capaz de la entrevista". Desde los 14 años.
+  <br><br><em>Fobia Social con inicio en adolescencia temprana</em> — el pico de inicio es 13-15 años. La evitación de situaciones académicas y laborales hace que parezca "pereza" o "falta de motivación". El miedo al juicio negativo es el núcleo, no la timidez. Sin tratamiento, la evitación se generaliza y el deterioro funcional aumenta progresivamente.`},
+
+  {t:'section', content:'Fobias Específicas — Tipos y criterios'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6B03 / DSM-5: 300.29</strong></p>
+  <p><strong>Criterios esenciales:</strong><br>
+  A. Miedo o ansiedad intensa por un objeto o situación específica.<br>
+  B. El objeto o situación fóbica casi siempre provoca miedo o ansiedad inmediata.<br>
+  C. El objeto o situación fóbica se evita activamente o se soporta con ansiedad intensa.<br>
+  D. El miedo o ansiedad es desproporcionado al peligro real.<br>
+  E. El miedo, ansiedad o evitación es persistente, habitualmente ≥6 meses.<br>
+  F. Causa malestar clínicamente significativo o deterioro funcional.</p>
+  <p><strong>Tipos de fobias específicas (DSM-5):</strong><br>
+  — <em>Animal:</em> Arañas, insectos, perros, serpientes, ratones.<br>
+  — <em>Entorno natural:</em> Alturas, tormentas, agua.<br>
+  — <em>Sangre-inyección-daño:</em> Ver sangre, recibir inyecciones, procedimientos médicos. <strong>Único tipo con respuesta vasovagal</strong> — puede producir síncope (diferente a todos los demás donde el SNA produce taquicardia, no bradicardia).<br>
+  — <em>Situacional:</em> Aviones, ascensores, lugares cerrados.<br>
+  — <em>Otro:</em> Vómito, ruidos fuertes, figuras disfrazadas.</p>
+  <p><strong>Clínicamente importante — Fobia a sangre-inyección:</strong> Es la única fobia donde el paciente puede desmayarse (síncope vasovagal). El tratamiento incluye la técnica de "tensión aplicada" (tensar músculos de piernas y abdomen) para prevenir el síncope durante la exposición.</p>`},
+
+  {t:'section', content:'Ansiedad por Separación y Mutismo Selectivo'},
+
+  {t:'text', content:`<p><strong>Ansiedad por Separación — CIE-11: 6B05 / DSM-5: 309.21</strong></p>
+  <p>Cambio importante en DSM-5 y CIE-11: la ansiedad por separación ya no es exclusiva de la infancia — puede diagnosticarse en <strong>adultos</strong>.</p>
+  <p><strong>Criterios esenciales:</strong><br>
+  — Miedo o ansiedad excesivos e inapropiados para el nivel de desarrollo, relativos a la separación de aquellas personas a las que el individuo está vinculado.<br>
+  — ≥3 de 8 síntomas: malestar excesivo al separarse, preocupación persistente por perder a las figuras de apego, preocupación por que un evento les separe (accidente, enfermedad), reluctancia a salir por miedo a la separación, miedo excesivo a estar solo, reluctancia a dormir fuera de casa o sin la figura de apego, pesadillas con temas de separación, síntomas físicos al separarse.<br>
+  — Duración: ≥4 semanas en niños; ≥6 meses en adultos.<br>
+  — Deterioro funcional significativo.</p>
+  <p><strong>En adultos:</strong> Se manifiesta como incapacidad para vivir solo, ansiedad intensa cuando la pareja o padres viajan, incapacidad de trabajar fuera de casa. Frecuentemente subdiagnosticado en adultos porque se confunde con "dependencia emocional" o trastorno de personalidad.</p>
+  <p><strong>Mutismo Selectivo — CIE-11: 6B06 / DSM-5: 313.23</strong></p>
+  <p>— Incapacidad consistente de hablar en situaciones sociales específicas donde se espera que hable (escuela), aunque hable en otras situaciones (casa).<br>
+  — Interferencia con el rendimiento escolar o social.<br>
+  — Duración ≥1 mes (no el primer mes de escuela).<br>
+  — No se explica por falta de conocimiento del lenguaje hablado en la situación.<br>
+  — No se explica mejor por otro trastorno (TEA, psicosis, trastorno del lenguaje).<br>
+  — El mutismo selectivo está ahora en el bloque de <strong>trastornos de ansiedad</strong> (no de comunicación) en ambos sistemas — evidencia de que es una manifestación de ansiedad social severa en niños.</p>`},
+
+  {t:'table',
+   headers:['Trastorno','Foco del miedo','Duración mínima','Especificidades'],
+   rows:[
+    ['TAG','Múltiples preocupaciones','6 meses','≥3 síntomas somáticos en adultos'],
+    ['Trastorno de Pánico','Crisis inesperadas — miedo al miedo','≥1 mes post-crisis','13 síntomas posibles por crisis'],
+    ['Agorafobia','No poder escapar/recibir ayuda','6 meses','≥2 de 5 situaciones · independiente del pánico'],
+    ['Fobia Social','Evaluación negativa por otros','6 meses','Especificador: solo de actuación'],
+    ['Fobia Específica','Objeto/situación concreto','6 meses','5 tipos · fobia sangre → síncope vasovagal'],
+    ['Ansiedad por Separación','Separación de figuras de apego','4 sem (niños) / 6 meses (adultos)','Ahora se diagnostica en adultos'],
+    ['Mutismo Selectivo','Hablar en situaciones específicas','1 mes','En bloque de ansiedad, no de comunicación'],
+   ]},
+
+  {t:'question',
+   q:'¿Cuál es la característica única de la fobia específica de tipo sangre-inyección-daño que la diferencia de todos los demás trastornos de ansiedad?',
+   opts:['Es la más frecuente de todas las fobias','La respuesta autonómica es vasovagal (bradicardia + hipotensión → síncope) en lugar de la respuesta simpática habitual (taquicardia + hipertensión) de los otros trastornos de ansiedad','Solo se trata con medicación, no con exposición','No causa evitación — el paciente puede confrontar el estímulo'],
+   cor:1,
+   fb:'La fobia sangre-inyección-daño es la única fobia con respuesta vasovagal: al ver sangre o recibir inyecciones hay una activación simpática inicial seguida de activación parasimpática intensa → bradicardia, hipotensión, palidez y posible síncope. Todos los demás trastornos de ansiedad producen taquicardia y elevación de la presión. El tratamiento incluye la técnica de "tensión aplicada" (contraer músculos de extremidades) para evitar el síncope durante la exposición.'},
+
+  {t:'question',
+   q:'¿Cuál es el cambio más importante respecto a la ansiedad por separación en el DSM-5 y CIE-11 comparado con el DSM-IV?',
+   opts:['Se eliminó como diagnóstico en niños','Se amplió el diagnóstico para incluir adultos — ya no es exclusivo de la infancia/niñez','Se redujo la duración requerida a 2 semanas','Se fusionó con el mutismo selectivo'],
+   cor:1,
+   fb:'El DSM-IV clasificaba la ansiedad por separación exclusivamente como un trastorno de la infancia. El DSM-5 y la CIE-11 reconocen que puede ocurrir en adultos — el 6.6% de los adultos tienen ansiedad por separación clínicamente significativa. En adultos se presenta como ansiedad intensa al separarse de pareja, padres o hijos. La duración mínima también varía: 4 semanas en niños, 6 meses en adultos.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es el foco central del miedo en la fobia social que la diferencia del pánico?',
+   opts:['El miedo a síntomas físicos internos como palpitaciones y mareo','El miedo a la evaluación negativa por parte de otros — actuar de forma humillante o vergonzosa en situaciones sociales','El miedo a no poder escapar de una situación','El miedo a perder a una figura de apego'],
+   cor:1,
+   fb:'El núcleo de la fobia social es el miedo a la evaluación negativa: "voy a quedar en ridículo", "van a pensar que soy raro", "me voy a trabar y todos lo verán". El pánico tiene miedo a los síntomas físicos y sus consecuencias ("me voy a morir/desmayar"). La agorafobia tiene miedo a no poder escapar. La ansiedad por separación tiene miedo a perder la figura de apego. El foco específico del miedo es la clave diagnóstica diferencial.'},
+  {q:'¿En qué tipo de fobia específica el tratamiento incluye la técnica de "tensión aplicada" y por qué?',
+   opts:['Fobia a alturas — para estabilizar el equilibrio','Fobia a aviones — para controlar la hiperventilación','Fobia sangre-inyección-daño — para prevenir el síncope vasovagal durante la exposición','Fobia a animales — para inhibir la respuesta de huida'],
+   cor:2,
+   fb:'La técnica de tensión aplicada (Öst) se usa específicamente en fobia sangre-inyección-daño porque es la única fobia con riesgo de síncope vasovagal. La técnica: tensar músculos de extremidades durante 15-20 segundos, relajar, repetir — eleva la presión arterial y previene el desmayo durante la exposición graduada. Sin esta técnica, la exposición puede provocar síncope, lo que refuerza el miedo en lugar de desensibilizarlo.'},
+  {q:'Niño de 7 años que habla normalmente en casa y con familiares cercanos, pero en el colegio y con personas desconocidas no emite ninguna palabra desde hace 3 meses. No hay problemas del lenguaje ni del desarrollo. ¿Cuál es el diagnóstico más probable?',
+   opts:['Trastorno del lenguaje — no puede hablar en ciertas situaciones','TEA — la falta de comunicación es un síntoma central','Mutismo Selectivo — incapacidad de hablar en situaciones sociales específicas a pesar de poder hacerlo en otras, durante ≥1 mes, clasificado en el bloque de trastornos de ansiedad','Trastorno de la personalidad esquizoide — prefiere el silencio'],
+   cor:2,
+   fb:'Mutismo Selectivo: habla en casa/familia (descarta trastorno del lenguaje), no habla en el colegio/con desconocidos (selectivo), durante 3 meses (≥1 mes, excluyendo el primer mes de escuela). El diferencial con TEA: en TEA hay déficits en comunicación social y CRR presentes en todos los contextos, no solo al hablar con desconocidos. El mutismo selectivo es ansiedad social severa en niños — el tratamiento es TCC adaptada para niños con exposición gradual al habla.'},
+  {q:'¿Cuál es el tratamiento farmacológico de primera línea para la fobia social, especialmente para la presentación generalizada?',
+   opts:['Benzodiacepinas a diario — reducen la ansiedad social de forma sostenida','Antipsicóticos atípicos — reducen la sensibilidad social','ISRS (sertralina, paroxetina, escitalopram) o IRSN (venlafaxina) — son la primera línea farmacológica; los betabloqueantes (propranolol) son útiles para el subtipo de solo actuación en situaciones específicas','Bupropión — activa la dopamina y mejora la socialización'],
+   cor:2,
+   fb:'ISRS e IRSN son la primera línea farmacológica para fobia social generalizada (las mismas sustancias que para el TAG y el pánico). Los betabloqueantes (propranolol 10-40mg, toma única antes del evento) son específicamente útiles para el subtipo "solo de actuación" — reducen los síntomas físicos (temblor, taquicardia) en situaciones como discursos o presentaciones, sin efecto sobre la ansiedad cognitiva. Las benzodiacepinas pueden usarse a corto plazo pero tienen riesgo de dependencia.'},
+  {q:'¿Cuál es el criterio que diferencia la fobia social de la timidez normal?',
+   opts:['La timidez siempre tiene síntomas físicos; la fobia social no','La fobia social causa deterioro funcional significativo o malestar marcado; la timidez es una característica del temperamento que no impide el funcionamiento normal en las áreas relevantes para el individuo','La timidez solo ocurre con desconocidos; la fobia social con cualquier persona','La fobia social siempre requiere medicación; la timidez no'],
+   cor:1,
+   fb:'El criterio de deterioro funcional es el que diferencia los rasgos temperamentales normales de los trastornos. La timidez es prevalente (~40% de la población se describe como tímida) y no necesariamente genera deterioro. La fobia social sí — impide conseguir trabajo, mantener relaciones, estudiar, acceder a servicios de salud. El DSM-5 es explícito: el miedo debe causar "malestar clínicamente significativo o deterioro social, laboral u otras áreas importantes de la actividad".'}
+ ]
+},
+
+'ax4':{
+ title:'Diagnóstico Diferencial de los Trastornos de Ansiedad',
+ mod:'Trastornos de Ansiedad',
+ sub:'Entre sí · vs Depresión · vs OCD · vs TEPT · Ansiedad médica · Tratamientos',
+ bloques:[
+  {t:'text', content:`<p>Los trastornos de ansiedad son los más frecuentes en clínica y los que más se confunden entre sí, con la depresión y con condiciones médicas. Esta lección integra los criterios diferenciales más importantes que un clínico debe dominar para no errar el diagnóstico — y por tanto el tratamiento.</p>`},
+
+  {t:'section', content:'La pregunta clave: ¿Cuál es el foco del miedo?'},
+
+  {t:'text', content:`<p>El diferencial entre los trastornos de ansiedad se hace principalmente por el <strong>contenido y el foco del miedo</strong>, no por la intensidad de la ansiedad. Todos cursan con ansiedad — la diferencia está en <em>a qué</em> le tienen miedo.</p>`},
+
+  {t:'table',
+   headers:['Trastorno','Foco del miedo / preocupación','Situación desencadenante'],
+   rows:[
+    ['TAG','Múltiples preocupaciones cotidianas (trabajo, salud, familia, dinero)','Crónico, difuso, sin estímulo específico'],
+    ['Trastorno de Pánico','Las propias sensaciones físicas y sus consecuencias ("voy a morir/perder el control")','Crisis inesperadas — sin estímulo claro'],
+    ['Agorafobia','No poder escapar o recibir ayuda en ciertas situaciones','Situaciones agorafóbicas específicas (≥2 de 5)'],
+    ['Fobia Social','Evaluación negativa / humillación por otros','Situaciones sociales o de actuación'],
+    ['Fobia Específica','Objeto o situación concreta','Exposición al estímulo fóbico específico'],
+    ['Ansiedad por Separación','Perder a las figuras de apego','Separación real o anticipada'],
+    ['TOC','Pensamientos intrusivos egodistónicos','Obsesiones → compulsiones'],
+    ['TEPT','Reviviscencia del trauma','Recordatorios del evento traumático'],
+   ]},
+
+  {t:'section', content:'Ansiedad vs Depresión — La comorbilidad más frecuente'},
+
+  {t:'text', content:`<p>La comorbilidad ansiedad-depresión es la más frecuente en psicopatología — entre el 50-60% de pacientes con un trastorno depresivo tienen un trastorno de ansiedad comórbido y viceversa. Hay que diagnosticar y tratar ambos.</p>
+  <p><strong>Rasgos que orientan al diagnóstico primario:</strong><br>
+  — <em>Ansiedad primaria:</em> Los síntomas ansiosos precedieron a los depresivos, el ánimo mejora cuando la ansiedad se controla, las preocupaciones son sobre el futuro ("¿qué pasará si...?").<br>
+  — <em>Depresión primaria:</em> Los síntomas depresivos precedieron, la ansiedad es reactiva a la depresión, los pensamientos son sobre el pasado ("lo arruiné todo", "no valgo nada").<br>
+  — En la práctica, la cronología del inicio es la clave: ¿Qué apareció primero?</p>
+  <p><strong>Síntomas que aparecen en ambos (no discriminan):</strong> insomnio, fatiga, dificultad de concentración, irritabilidad. No sirven para el diferencial.</p>
+  <p><strong>Síntomas más específicos de depresión:</strong> Anhedonia, ánimo deprimido, ideación de muerte, sentimientos de inutilidad, enlentecimiento psicomotor.</p>
+  <p><strong>Síntomas más específicos de ansiedad:</strong> Tensión muscular, preocupación incontrolable, evitación fóbica, crisis de pánico, hipervigilancia.</p>`},
+
+  {t:'section', content:'Ansiedad por condición médica — Siempre descartar primero'},
+
+  {t:'text', content:`<p>Antes de diagnosticar cualquier trastorno de ansiedad, hay que descartar causas médicas. Condiciones que frecuentemente producen ansiedad:</p>
+  <p><strong>Endocrinas:</strong> Hipertiroidismo (taquicardia, temblor, sudoración, ansiedad — puede imitar TAG o pánico exactamente), feocromocitoma (crisis de hipertensión + palpitaciones + sudoración = crisis de pánico), hipoglucemia, síndrome de Cushing.</p>
+  <p><strong>Cardiovasculares:</strong> Arritmias (taquicardia supraventricular paroxística — crisis similares al pánico), prolapso de válvula mitral (palpitaciones).</p>
+  <p><strong>Neurológicas:</strong> Epilepsia del lóbulo temporal (auras de miedo intenso), vértigo posicional benigno (mareo + ansiedad).</p>
+  <p><strong>Respiratorias:</strong> Asma, EPOC (disnea → ansiedad → más disnea).</p>
+  <p><strong>Sustancias:</strong> Cafeína en exceso, abstinencia de alcohol o benzodiacepinas, estimulantes, cannabis de alta potencia.</p>
+  <p><strong>Pista clínica:</strong> Inicio en >45 años sin antecedentes, síntomas principalmente físicos sin componente cognitivo (sin preocupaciones, sin miedo a consecuencias), hallazgos en laboratorio → pensar en causa médica primero.</p>`},
+
+  {t:'alert',
+   label:'El error más frecuente — Dar benzodiacepinas como primera línea',
+   text:'Las benzodiacepinas alivian la ansiedad rápidamente pero NO tratan el trastorno subyacente. Uso prolongado → tolerancia → dependencia → abstinencia. En el trastorno de pánico, el alprazolam puede generar dependencia grave en semanas. La primera línea farmacológica para todos los trastornos de ansiedad es ISRS o IRSN. Las benzodiacepinas: segunda línea, uso a corto plazo (máximo 4 semanas), o para situaciones específicas. La TCC tiene la misma eficacia que los fármacos a corto plazo y mejor mantenimiento a largo plazo.'},
+
+  {t:'section', content:'Tratamientos con evidencia por trastorno'},
+
+  {t:'text', content:`<p><strong>TAG:</strong> TCC (reestructuración cognitiva + relajación + exposición a la preocupación) + ISRS/IRSN. Buspirona como alternativa no adictiva.</p>
+  <p><strong>Trastorno de Pánico:</strong> TCC con exposición interoceptiva + ISRS. El clonazepam puede usarse a corto plazo. NO alprazolam a largo plazo.</p>
+  <p><strong>Agorafobia:</strong> Exposición en vivo (la más efectiva) + ISRS si hay pánico comórbido. Sin exposición, los fármacos no resuelven la evitación.</p>
+  <p><strong>Fobia Social:</strong> TCC (exposición + reestructuración) + ISRS/IRSN. Betabloqueantes para el subtipo de actuación en situaciones específicas.</p>
+  <p><strong>Fobias Específicas:</strong> Exposición en vivo o en realidad virtual — es el tratamiento más efectivo. Los fármacos tienen poco papel. Para fobia sangre: tensión aplicada (Öst).</p>
+  <p><strong>Ansiedad por Separación:</strong> TCC familiar (en niños) o individual (en adultos) + ISRS si es necesario.</p>
+  <p><strong>Mutismo Selectivo:</strong> TCC con exposición gradual al habla. Los ISRS pueden complementar.</p>`},
+
+  {t:'question',
+   q:'Un paciente de 48 años sin antecedentes psiquiátricos consulta por "crisis de ansiedad" con palpitaciones intensas, sudoración, hipertensión y temblor. Las crisis duran 20-30 minutos y luego desaparecen. No hay preocupación anticipatoria entre crisis. ¿Qué debe descartarse primero?',
+   opts:['Trastorno de Pánico — las crisis son típicas','Trastorno de Ansiedad Generalizada — la preocupación puede ser subclínica','Feocromocitoma — crisis de catecolaminas que producen palpitaciones, hipertensión, sudoración y temblor, indistinguibles clínicamente del pánico','Fobia específica — hay un estímulo desencadenante no identificado'],
+   cor:2,
+   fb:'El feocromocitoma (tumor de la médula suprarrenal que secreta catecolaminas en crisis) puede ser clínicamente idéntico al trastorno de pánico. Las pistas que orientan a causa orgánica: inicio >40 años sin antecedentes, hipertensión en la crisis (el pánico también puede tenerla pero es más inconsistente), sin preocupación anticipatoria entre crisis, sin evitación. Diagnóstico: metanefrinas en orina de 24 horas o en plasma. Siempre descartar causas médicas en el primer episodio.'},
+
+  {t:'question',
+   q:'¿Por qué la exposición es el componente terapéutico indispensable en todos los trastornos de ansiedad con evitación?',
+   opts:['Porque la exposición elimina el recuerdo del miedo de la memoria','Porque sin confrontar el estímulo temido, la evitación se refuerza negativamente — el alivio inmediato de la ansiedad al evitar mantiene el miedo a largo plazo. La exposición rompe este ciclo y permite la extinción de la respuesta de miedo','Porque la exposición produce habituación sensorial al estímulo','Porque solo la exposición produce cambios neurológicos, los fármacos no'],
+   cor:1,
+   fb:'La evitación es mantenida por refuerzo negativo: evitar el estímulo → alivio inmediato de la ansiedad → aprendizaje de que "evitar funciona" → el miedo se mantiene. La exposición (gradual, sistemática, sin escape) interrumpe este ciclo: el paciente permanece en la situación temida hasta que la ansiedad disminuye naturalmente (habituación) o aprende que puede tolerar la ansiedad (aceptación). La exposición sin escape es el ingrediente activo más potente del tratamiento de los trastornos de ansiedad.'}
+ ],
+ quiz:[
+  {q:'Paciente que se preocupa principalmente por "quedar mal" cuando habla en público. La ansiedad es solo en esas situaciones — en casa o con amigos no hay ansiedad. ¿Cuál es el diagnóstico?',
+   opts:['TAG — la preocupación por quedar mal es una preocupación más','Trastorno de Pánico — el miedo en público puede producir crisis','Fobia Social con especificador "solo de actuación" — el miedo está delimitado a situaciones de hablar/actuar en público','Mutismo Selectivo — evita hablar en público'],
+   cor:2,
+   fb:'Fobia Social con especificador "solo de actuación": el miedo se limita a hablar o actuar en público, sin ansiedad en otras situaciones sociales (conversaciones, reuniones informales). Este subtipo tiene implicaciones terapéuticas específicas: los betabloqueantes (propranolol) son especialmente útiles para situaciones concretas de actuación. En el TAG, la preocupación es múltiple y difusa, no delimitada a una situación.'},
+  {q:'¿Cuál es el primer paso antes de diagnosticar cualquier trastorno de ansiedad?',
+   opts:['Aplicar una escala de ansiedad validada (GAD-7, Hamilton)','Descartar causas médicas y farmacológicas — hipertiroidismo, feocromocitoma, arritmias, hipoglucemia, sustancias, abstinencia de benzodiacepinas o alcohol','Confirmar que hay comorbilidad con depresión','Establecer la duración exacta de los síntomas'],
+   cor:1,
+   fb:'Siempre descartar causas médicas primero, especialmente en: inicio >40 años sin antecedentes psiquiátricos, síntomas principalmente físicos sin componente cognitivo claro, hallazgos físicos anómalos, sin respuesta a tratamiento habitual. Las causas más frecuentes de ansiedad secundaria: hipertiroidismo (imita TAG/pánico), feocromocitoma (imita pánico), arritmias (imita pánico), hipoglucemia, abstinencia de alcohol o benzodiacepinas, consumo de estimulantes o cafeína en exceso.'},
+  {q:'¿Cuál es la principal diferencia entre el TAG y el TOC en términos de las preocupaciones/obsesiones?',
+   opts:['En el TAG siempre hay síntomas físicos; en el TOC no','Las preocupaciones del TAG son sobre situaciones cotidianas reales, se viven como excesivas pero propias (egosintónicas); las obsesiones del TOC son pensamientos intrusivos sobre temas específicos, se viven como ajenos e indeseados (egodistónicos) y generan compulsiones','El TAG tiene mayor riesgo suicida que el TOC','Las obsesiones del TOC duran más que las preocupaciones del TAG'],
+   cor:1,
+   fb:'La distinción egosintónico vs egodistónico es clave. TAG: "me preocupo demasiado por el trabajo y la salud de mis hijos, lo sé, es mi manera de ser". TOC: "tengo pensamientos horribles de hacerle daño a mi hijo que no quiero tener, me dan asco, tengo que lavarme las manos para neutralizarlos". Las preocupaciones del TAG son temáticas de la vida real; las obsesiones del TOC son intrusivas, específicas (contaminación, daño, orden, sexo, religión) y generan rituales compulsivos.'},
+  {q:'¿Por qué las benzodiacepinas NO son primera línea para los trastornos de ansiedad a pesar de su efecto ansiolítico inmediato?',
+   opts:['Porque no funcionan para la ansiedad','Porque producen dependencia, tolerancia y rebote — el alivio inmediato refuerza el uso pero no trata el trastorno subyacente; a largo plazo pueden empeorar la ansiedad y dificultan la psicoterapia de exposición','Porque solo funcionan para el pánico, no para el TAG','Porque tienen demasiados efectos secundarios cardíacos'],
+   cor:1,
+   fb:'Las benzodiacepinas producen alivio inmediato (atractivo) pero: (1) Generan dependencia en semanas/meses, (2) Tolerancia — se necesita más dosis para el mismo efecto, (3) Rebote — la ansiedad vuelve con más fuerza al intentar dejarlas, (4) Interfieren con la exposición — la ansiedad no se extingue si se bloquea farmacológicamente, (5) No tratan el trastorno, solo los síntomas. Primera línea: ISRS/IRSN + TCC. Las benzodiacepinas: segunda línea, máximo 4 semanas, o para situaciones específicas y aisladas.'},
+  {q:'¿En qué se diferencia el tratamiento de la agorafobia sin trastorno de pánico del tratamiento de la agorafobia con pánico?',
+   opts:['No hay diferencia — se trata igual en ambos casos','En agorafobia sin pánico: exposición en vivo como tratamiento central (sin fármacos necesariamente); en agorafobia con pánico: exposición + ISRS para tratar el componente de pánico. En ambos casos, la exposición es indispensable — los fármacos solos no resuelven la evitación agorafóbica','En agorafobia sin pánico solo se usa psicoanálisis','En agorafobia con pánico no se puede hacer exposición por el riesgo de las crisis'],
+   cor:1,
+   fb:'La exposición en vivo (ir gradualmente a las situaciones evitadas, sin escapar) es el componente indispensable en ambos casos. Sin exposición, la evitación persiste aunque los fármacos reduzcan la ansiedad. En agorafobia con pánico comórbido, los ISRS ayudan a reducir la frecuencia e intensidad de las crisis, lo que facilita la exposición. Pero el fármaco no elimina la evitación aprendida — eso requiere exposición.'}
+ ]
+}
+
+};
+
+const MODS=[{id:'ax',name:'Trastornos de Ansiedad',ic:'⚡',color:'#5b9bd5',
+ lecciones:[
+  {id:'ax1',title:'Trastorno de Ansiedad Generalizada',sub:'CIE-11 6B00 · DSM-5 300.02 · 6 síntomas · 6 meses',mins:14},
+  {id:'ax2',title:'Pánico y Agorafobia',sub:'CIE-11 6B01·02 · DSM-5 300.01·22 · 13 síntomas de crisis',mins:15},
+  {id:'ax3',title:'Fobia Social · Específicas · Separación · Mutismo',sub:'CIE-11 6B03–06 · DSM-5 300.23·29·309.21·313.23',mins:14},
+  {id:'ax4',title:'Diagnóstico Diferencial y Tratamientos',sub:'Entre sí · vs Depresión · vs médica · Evidencia terapéutica',mins:13}
+ ]}];
+
+const GAME_CASES=[
+  {id:'g1',lvl:1,pts_base:10,
+   caso:`María, 44 años. Lleva más de 1 año preocupándose "por todo": el trabajo, los hijos, la salud, el dinero, el futuro del país. "No puedo apagar la cabeza." Tiene tensión en la nuca, duerme mal, se irrita con facilidad. Ha consultado a un neurólogo por cefalea crónica y a un reumatólogo por dolor muscular difuso. Todos los exámenes normales.`,
+   q:'¿Cuál es el diagnóstico más probable y por qué?',
+   opts:['Trastorno de Pánico — las cefaleas son crisis somáticas','Fibromialgia — el dolor muscular es el diagnóstico','TAG — preocupación excesiva por múltiples temas, incontrolable, durante >6 meses, con ≥3 síntomas somáticos (tensión muscular, insomnio, irritabilidad)','Hipocondría — se preocupa principalmente por su salud'],
+   cor:2,
+   fb:'TAG: preocupación por múltiples temas (no solo uno), incontrolable, >6 meses (>1 año), con 3 síntomas del Criterio C: tensión muscular (5), insomnio (6), irritabilidad (4). La presentación somática con consultas a múltiples especialistas sin hallazgos es la ruta diagnóstica típica del TAG en medicina general. La cefalea tensional y el dolor muscular difuso son frecuentemente la expresión somática de la tensión crónica del TAG.'},
+
+  {id:'g2',lvl:1,pts_base:10,
+   caso:`Pedro, 32 años. Tres episodios en 2 meses de taquicardia intensa, sudoración, sensación de ahogo y "miedo a morirme". Cada episodio dura 10-15 minutos y desaparece solo. EKG normal. Desde entonces evita el gimnasio ("el ejercicio me puede disparar uno") y prefiere no manejar solo. Está "pendiente de cualquier sensación en el pecho".`,
+   q:'¿Cuál es el diagnóstico y qué mecanismo mantiene el trastorno?',
+   opts:['Arritmia cardíaca — el EKG normal no descarta todo','Hipocondría — está obsesionado con su salud cardíaca','Trastorno de Pánico — crisis inesperadas recurrentes + cambio de comportamiento (evitación del ejercicio, conducir solo) + ansiedad anticipatoria. El ciclo del pánico (miedo al miedo) lo mantiene','TAG — las preocupaciones son sobre su salud'],
+   cor:2,
+   fb:'Trastorno de Pánico: crisis inesperadas (×3) + Criterio B cumplido (cambio de comportamiento: evita gimnasio y conducir solo; ansiedad anticipatoria: "pendiente de cualquier sensación"). El mecanismo de mantenimiento es el ciclo del miedo al miedo: sensación física → interpretación catastrófica → más ansiedad → más síntomas → crisis. La evitación reduce la ansiedad a corto plazo (refuerzo negativo) pero mantiene el trastorno a largo plazo.'},
+
+  {id:'g3',lvl:1,pts_base:10,
+   caso:`Valentina, 17 años. Excelente estudiante pero "no puede hacer exposiciones orales". Cuando le toca hablar frente al curso, se pone roja, le tiembla la voz, siente que "todos la están juzgando". Evita levantar la mano aunque sepa la respuesta. En casa y con amigos íntimos está completamente normal. Lleva 2 años así.`,
+   q:'¿Cuál es el diagnóstico más apropiado?',
+   opts:['TAG — la preocupación por el rendimiento es un tipo de preocupación generalizada','Timidez normal — es adolescente y la timidez es esperable','Fobia Social con especificador "solo de actuación" — miedo a la evaluación negativa delimitado a situaciones de hablar/actuar en público, con funcionamiento normal en otros contextos sociales','Trastorno de Pánico — tiene síntomas físicos al hablar'],
+   cor:2,
+   fb:'Fobia Social, solo de actuación: el miedo está delimitado a situaciones de actuación/hablar en público (no a todas las situaciones sociales — en casa y con amigos es normal). Duración: 2 años (>6 meses). Deterioro: evita participar en clase, lo que afecta el rendimiento académico. El diferencial con timidez: la timidez no genera deterioro funcional significativo ni evitación activa. Este subtipo responde especialmente bien a propranolol para situaciones específicas + TCC.'},
+
+  {id:'g4',lvl:2,pts_base:15,
+   caso:`Claudia, 29 años. Desde que vio un accidente hace 18 meses, no puede ir en transporte público ("y si me pasa algo y no hay nadie que me ayude"), evita centros comerciales y sitios concurridos, y no sale sola de su apartamento. Nunca ha tenido una crisis de pánico completa.`,
+   q:'¿Cuál es el diagnóstico y cuál es el cambio del DSM-5 que lo posibilita?',
+   opts:['TEPT — el accidente es el trauma desencadenante','Trastorno de Pánico — la evitación es agorafóbica por definición','Agorafobia como diagnóstico independiente — evitación de ≥2 situaciones (transporte público, centros comerciales, fuera de casa sola) por miedo a no poder escapar/recibir ayuda, durante ≥6 meses, SIN historia de pánico completo. El DSM-5 y CIE-11 independizaron la agorafobia del pánico','Fobia específica múltiple — cada situación es una fobia separada'],
+   cor:2,
+   fb:'Agorafobia independiente: evita transporte público (1), centros comerciales/concurridos (2+3), salir sola de casa (5) — ≥2 de 5 situaciones. Duración: 18 meses (≥6 meses). Sin crisis de pánico completas previas. En el DSM-IV, la agorafobia sin pánico era una categoría raramente usada. En DSM-5 y CIE-11, es un diagnóstico autónomo completamente válido. El TEPT se descarta porque no hay reviviscencia del trauma, hipervigilancia ni evitación de recordatorios — el miedo no es al trauma sino a no recibir ayuda.'},
+
+  {id:'g5',lvl:2,pts_base:15,
+   caso:`Roberto, 52 años, sin antecedentes psiquiátricos. Consulta por "crisis de ansiedad" con palpitaciones, sudoración profusa, cefalea intensa y presión de 180/110 durante las crisis. Las crisis duran 20 minutos. Entre crisis, presión normal. Sin ansiedad anticipatoria ni evitación.`,
+   q:'¿Qué diagnóstico debe descartarse urgentemente antes de diagnosticar Trastorno de Pánico?',
+   opts:['Hipotiroidismo — produce ansiedad crónica','Trastorno de Ansiedad Generalizada — la presión alta es un síntoma de ansiedad','Feocromocitoma — las crisis de hipertensión + palpitaciones + sudoración son su presentación clásica, indistinguible del pánico. Diagnóstico: metanefrinas en orina o plasma','Fobia específica a las sensaciones físicas'],
+   cor:2,
+   fb:'Feocromocitoma: tumor de la médula suprarrenal que secreta catecolaminas en crisis → hipertensión severa + palpitaciones + sudoración + cefalea + ansiedad. Las pistas: inicio >45 años, sin antecedentes psiquiátricos, hipertensión severa en la crisis, presión normal entre crisis, sin ansiedad anticipatoria, sin evitación. Diagnóstico: metanefrinas fraccionadas en orina de 24h o plasma. Es una causa potencialmente tratable y mortal si no se detecta — siempre descartar en primer episodio con estas características.'},
+
+  {id:'g6',lvl:3,pts_base:20,
+   caso:`Andrés, 28 años. Lleva 3 años con ansiedad severa. El psiquiatra anterior lo diagnosticó solo con TAG y le prescribió alprazolam 0.5mg 3 veces al día. Ahora, si intenta bajar la dosis "me desespero, siento que me voy a morir, tiemblo". En la evaluación: preocupaciones por evaluación social (reuniones, presentaciones), evita el metro y los centros comerciales porque "si me da algo no hay quién me ayude", y tiene crisis de ansiedad intensa al intentar hablar con su jefe.`,
+   q:'¿Qué errores diagnósticos y terapéuticos identifica en este caso?',
+   opts:['No hay errores — el TAG y el alprazolam son correctos','Error 1: diagnóstico incompleto — hay componente de fobia social (miedo evaluación) + agorafobia (metro, centros comerciales) además del TAG. Error 2: alprazolam a largo plazo es segunda línea, genera dependencia; los síntomas al bajar la dosis son abstinencia de benzodiacepinas, no solo TAG subyacente. Corrección: diagnóstico completo + descontinuación gradual de alprazolam + ISRS + TCC','Solo hay error diagnóstico — el alprazolam está bien prescrito','Solo hay error terapéutico — el diagnóstico de TAG es correcto'],
+   cor:1,
+   fb:'Doble error: (1) Diagnóstico incompleto — además del TAG hay fobia social (miedo a presentaciones, hablar con el jefe) y agorafobia (metro, centros comerciales por miedo a no recibir ayuda). Tres diagnósticos de ansiedad pueden coexistir. (2) Error terapéutico grave — alprazolam 3 veces al día a largo plazo genera dependencia física. Los síntomas "al bajar la dosis" son en parte abstinencia de benzodiacepinas, no solo la ansiedad de base. Corrección: (a) diagnóstico completo, (b) descontinuación muy gradual del alprazolam, (c) iniciar ISRS, (d) TCC con exposición para cada componente.'}
+];
+
+let ST={done:{},pts:0,correct:0,total:0,streak:0,game:{pts:0,unlocked:1}};
+function save(){try{localStorage.setItem('psicodx_ax',JSON.stringify(ST));}catch(e){}}
+function load(){try{const d=localStorage.getItem('psicodx_ax');if(d)ST=JSON.parse(d);}catch(e){}}
+load();
+
+function refreshHome(){
+  const done=Object.keys(ST.done).length;
+  document.getElementById('hs-les').textContent=done;
+  document.getElementById('hs-prec').textContent=ST.total>0?Math.round(ST.correct/ST.total*100)+'%':'—';
+  document.getElementById('hs-pts').textContent=ST.pts;
+  document.getElementById('h-les').textContent=done;
+  document.getElementById('h-pts').textContent=ST.pts;
+  document.getElementById('h-str').textContent=(ST.streak||0)+'🔥';
+  const el=document.getElementById('home-modules');
+  el.innerHTML='';
+  MODS.forEach(mod=>{
+    const doneLes=mod.lecciones.filter(l=>ST.done[l.id]).length;
+    const modEl=document.createElement('div');
+    modEl.className='card';
+    modEl.style.cssText='padding:1rem 1.1rem;margin-bottom:.85rem';
+    modEl.innerHTML=`<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.85rem">
+      <div style="width:38px;height:38px;border-radius:50%;background:${mod.color}22;border:2px solid ${mod.color}44;display:flex;align-items:center;justify-content:center;font-size:1.1rem">${mod.ic}</div>
+      <div style="flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">${mod.name}</div>
+      <div style="font-size:.65rem;color:var(--text);opacity:.5">${doneLes}/${mod.lecciones.length} completadas</div></div>
+    </div>`;
+    mod.lecciones.forEach(les=>{
+      const isDone=!!ST.done[les.id];
+      const row=document.createElement('div');
+      row.className='mod-card'+(isDone?' done':'');
+      row.style.marginBottom='.5rem';
+      row.innerHTML=`<div class="mod-header">
+        <div class="mod-icon" style="background:${isDone?'#3a9e6f22':'var(--bg)'};border:1.5px solid ${isDone?'var(--ok)':'var(--rl)'}">${isDone?'✓':'📖'}</div>
+        <div class="mod-info">
+          <div class="mod-title">${les.title}</div>
+          <div class="mod-sub">${les.sub}</div>
+          <div class="mod-prog-wrap"><div class="mod-prog-fill" style="width:${isDone?100:0}%"></div></div>
+        </div>
+      </div>
+      <div class="mod-meta"><span>⏱ ${les.mins} min</span><span>${isDone?'✓ Completada':'Pendiente'}</span></div>`;
+      row.addEventListener('click',()=>openPreLes(les.id));
+      modEl.appendChild(row);
+    });
+    el.appendChild(modEl);
+  });
+}
+
+let currentLesId='';
+function openPreLes(id){
+  currentLesId=id;
+  const l=LECCIONES[id];
+  document.getElementById('pre-mod-name').textContent=l.mod;
+  document.getElementById('pre-title').textContent=l.title;
+  document.getElementById('pre-sub').textContent=l.sub;
+  const nq=l.bloques.filter(b=>b.t==='question').length;
+  document.getElementById('pre-info').innerHTML=`<div class="instr-block"><div class="instr-title">Esta lección incluye</div>
+    <div class="instr-item"><div class="instr-ic">📝</div><div class="instr-txt"><div class="instr-label">Contenido clínico</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='text'||b.t==='section').length} secciones</div></div></div>
+    <div class="instr-item"><div class="instr-ic">📊</div><div class="instr-txt"><div class="instr-label">Comparaciones y tablas</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='compare'||b.t==='table').length} tablas CIE-11 vs DSM-5</div></div></div>
+    <div class="instr-item"><div class="instr-ic">⚡</div><div class="instr-txt"><div class="instr-label">Preguntas</div><div class="instr-desc">${nq} preguntas intercaladas</div></div></div>
+    <div class="instr-item"><div class="instr-ic">🏆</div><div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">${l.quiz.length} preguntas · ≥80% maestría</div></div></div>
+  </div>`;
+  document.getElementById('pre-les').classList.add('open');
+}
+
+let lsIdx=0,lsAnswered=[];
+function startLesson(){
+  document.getElementById('pre-les').classList.remove('open');
+  const l=LECCIONES[currentLesId];
+  document.getElementById('ls-title').textContent=l.title;
+  lsIdx=0;lsAnswered=new Array(l.bloques.length).fill(false);
+  renderLesBlock();
+  document.getElementById('ls').classList.add('open');
+}
+
+function renderLesBlock(){
+  const l=LECCIONES[currentLesId],b=l.bloques[lsIdx];
+  document.getElementById('ls-prog').style.width=Math.round((lsIdx+1)/l.bloques.length*100)+'%';
+  document.getElementById('ls-prev').style.display=lsIdx===0?'none':'';
+  document.getElementById('ls-next').textContent=lsIdx===l.bloques.length-1?'Ir al Quiz →':'Siguiente →';
+  const body=document.getElementById('ls-body');
+  body.innerHTML='';body.scrollTop=0;
+  const div=document.createElement('div');
+  div.className='les-block';
+  if(b.t==='text') div.innerHTML=`<div class="lb-text">${b.content}</div>`;
+  else if(b.t==='section') div.innerHTML=`<div class="lb-section">${b.content}</div>`;
+  else if(b.t==='case') div.innerHTML=`<div class="lb-case"><div class="lb-case-label">Caso Clínico</div><div class="lb-case-text">${b.text}</div></div>`;
+  else if(b.t==='alert') div.innerHTML=`<div class="lb-alert"><div class="lb-alert-label">⚠ ${b.label}</div><div class="lb-alert-text">${b.text}</div></div>`;
+  else if(b.t==='tip') div.innerHTML=`<div class="lb-tip"><div class="lb-tip-label">💡 ${b.label}</div><div class="lb-tip-text">${b.text}</div></div>`;
+  else if(b.t==='compare') div.innerHTML=`<div class="compare-box"><div class="compare-hd"><div class="compare-hd-cie">CIE-11</div><div class="compare-hd-dsm">DSM-5-TR</div></div><div class="compare-body"><div class="compare-col">${b.cie}</div><div class="compare-col">${b.dsm}</div></div></div>`;
+  else if(b.t==='table'){
+    let h=b.headers.map(x=>`<th>${x}</th>`).join('');
+    let r=b.rows.map(row=>`<tr>${row.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+    div.innerHTML=`<table class="lb-table"><thead><tr>${h}</tr></thead><tbody>${r}</tbody></table>`;
+  } else if(b.t==='question'){
+    const qid=`q-${lsIdx}`;
+    div.innerHTML=`<div class="lb-q"><div class="lb-q-label">⚡ Pregunta intercalada</div><div class="lb-q-text">${b.q}</div><div class="lb-q-opts">${b.opts.map((o,i)=>`<button class="lb-q-opt" data-i="${i}">${o}</button>`).join('')}</div><div class="lb-q-fb" id="${qid}-fb"></div><button class="lb-q-cont" id="${qid}-cont">Continuar →</button></div>`;
+    setTimeout(()=>{
+      div.querySelectorAll('.lb-q-opt').forEach(opt=>{
+        opt.addEventListener('click',function(){
+          if(lsAnswered[lsIdx])return;
+          lsAnswered[lsIdx]=true;
+          const ch=parseInt(this.dataset.i),ok=ch===b.cor;
+          div.querySelectorAll('.lb-q-opt').forEach(o=>o.disabled=true);
+          div.querySelectorAll('.lb-q-opt')[b.cor].classList.add('q-cor');
+          if(!ok)this.classList.add('q-wrg');
+          ST.total++;if(ok){ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+5');}else ST.streak=0;
+          save();refreshHome();
+          const fb=div.querySelector(`#${qid}-fb`);
+          fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+b.fb;
+          fb.className='lb-q-fb show '+(ok?'fb-ok':'fb-err');
+          const cont=div.querySelector(`#${qid}-cont`);
+          cont.className='lb-q-cont show';
+          cont.addEventListener('click',()=>{if(lsIdx<l.bloques.length-1){lsIdx++;renderLesBlock();}else startQuiz();});
+        });
+      });
+    },50);
+  }
+  body.appendChild(div);
+}
+
+let qIdx=0,qCorrect=0,qStart=0;
+function startQuiz(){
+  document.getElementById('ls').classList.remove('open');
+  qIdx=0;qCorrect=0;qStart=Date.now();
+  document.getElementById('qs').classList.add('open');
+  renderQ();
+}
+function renderQ(){
+  const l=LECCIONES[currentLesId],q=l.quiz[qIdx];
+  document.getElementById('q-prog').style.width=Math.round(qIdx/l.quiz.length*100)+'%';
+  document.getElementById('q-n').textContent=`${qIdx+1}/${l.quiz.length}`;
+  document.getElementById('q-fb').className='qfb';
+  document.getElementById('q-next').style.display='none';
+  document.getElementById('q-body').innerHTML=`<div class="q-mod-badge">Trastornos de Ansiedad · CIE-11 + DSM-5</div><div class="qq">${q.q}</div><div class="qopts">${q.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${o}</button>`).join('')}</div>`;
+  document.querySelectorAll('.qopt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.qopt').forEach(o=>o.disabled=true);
+      const ch=parseInt(this.dataset.i),ok=ch===q.cor;
+      document.querySelectorAll('.qopt')[q.cor].classList.add('cor');
+      if(!ok)this.classList.add('wrg');
+      if(ok){qCorrect++;ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+10');}else ST.streak=0;
+      ST.total++;
+      const fb=document.getElementById('q-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+q.fb;
+      fb.className='qfb show '+(ok?'cor-fb':'wrg-fb');
+      const nxt=document.getElementById('q-next');
+      nxt.style.display='block';
+      nxt.textContent=qIdx<l.quiz.length-1?'Siguiente →':'Ver resultados';
+    });
+  });
+}
+document.getElementById('q-next').addEventListener('click',()=>{qIdx++;if(qIdx<LECCIONES[currentLesId].quiz.length)renderQ();else finishQuiz();});
+function finishQuiz(){
+  document.getElementById('qs').classList.remove('open');
+  const l=LECCIONES[currentLesId],pct=Math.round(qCorrect/l.quiz.length*100);
+  const pts=qCorrect*10+(pct>=80?20:0);
+  ST.pts=(ST.pts||0)+pts;ST.done[currentLesId]={pct,pts,date:Date.now()};
+  const elapsed=Math.round((Date.now()-qStart)/1000);
+  save();refreshHome();
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-v').textContent=pct>=80?'¡Maestría!':pct>=60?'Bien hecho':'Sigue practicando';
+  document.getElementById('res-s').textContent=pct>=80?'Dominas los trastornos de ansiedad.':pct>=60?'Revisa el foco del miedo y las duraciones mínimas.':'Vuelve a la lección y presta atención a los diferenciales.';
+  document.getElementById('res-cor').textContent=`${qCorrect}/${l.quiz.length}`;
+  document.getElementById('res-pts').textContent='+'+pts;
+  document.getElementById('res-time').textContent=elapsed+'s';
+  document.getElementById('res').classList.add('open');
+}
+
+const GAME_LEVELS_DATA=[{id:1,name:'Básico',pts_base:10,n:3,color:'#3a9e6f'},{id:2,name:'Intermedio',pts_base:15,n:2,color:'#c49a3a'},{id:3,name:'Avanzado',pts_base:20,n:1,color:'#c0553a'}];
+let gCases=[],gIdx=0,gPts=0,gStreak=0,gCorrect=0;
+function renderGameHome(){
+  const el=document.getElementById('game-home-content'),unl=ST.game.unlocked||1;
+  el.innerHTML='';
+  GAME_LEVELS_DATA.forEach(lvl=>{
+    const isUnl=lvl.id<=unl,cases=GAME_CASES.filter(c=>c.lvl===lvl.id);
+    const div=document.createElement('div');
+    div.className='card';
+    div.style.cssText='padding:1rem 1.1rem;margin-bottom:.75rem;cursor:'+(isUnl?'pointer':'default')+';opacity:'+(isUnl?'1':'.4');
+    div.innerHTML=`<div style="display:flex;align-items:center;gap:.8rem"><div style="width:36px;height:36px;border-radius:50%;background:${lvl.color}22;border:2px solid ${lvl.color}44;display:flex;align-items:center;justify-content:center;font-size:1rem">${lvl.id===1?'🎯':lvl.id===2?'💡':'🔥'}</div><div style="flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">Nivel ${lvl.id} — ${lvl.name}</div><div style="font-size:.68rem;color:var(--text);opacity:.5">${cases.length} casos · ${lvl.pts_base} pts c/u</div></div><div style="font-size:.75rem;font-weight:700;color:${isUnl?lvl.color:'var(--text)'}">${isUnl?'JUGAR':'🔒'}</div></div>`;
+    if(isUnl)div.addEventListener('click',()=>startGame(lvl.id));
+    el.appendChild(div);
+  });
+}
+function startGame(lvlId){
+  const lvlCases=GAME_CASES.filter(c=>c.lvl===lvlId);
+  gCases=lvlCases.sort(()=>Math.random()-.5).slice(0,GAME_LEVELS_DATA.find(l=>l.id===lvlId).n);
+  gIdx=0;gPts=0;gStreak=0;gCorrect=0;
+  document.getElementById('go-title').textContent='Nivel '+lvlId+' — Ansiedad';
+  document.getElementById('go-pts-live').textContent='0';
+  document.getElementById('go-streak-live').textContent='0🔥';
+  document.getElementById('game-overlay').classList.add('open');
+  renderGameCase();
+}
+function renderGameCase(){
+  const c=gCases[gIdx];
+  document.getElementById('go-body').innerHTML=`<div class="case-card"><div class="case-label">Caso ${gIdx+1}/${gCases.length}</div><div class="case-text">${c.caso}</div></div><div class="game-q-label">${c.q}</div><div class="game-opts">${c.opts.map((o,i)=>`<button class="game-opt" data-i="${i}">${o}</button>`).join('')}</div><div class="game-fb" id="game-fb"></div>`;
+  document.getElementById('go-ft').innerHTML='';
+  document.querySelectorAll('.game-opt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.game-opt').forEach(o=>o.disabled=true);
+      const ch=parseInt(this.dataset.i),ok=ch===c.cor;
+      document.querySelectorAll('.game-opt')[c.cor].classList.add('g-cor');
+      if(!ok)this.classList.add('g-wrg');
+      const fb=document.getElementById('game-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+c.fb;
+      fb.className='game-fb show '+(ok?'fb-ok':'fb-err');
+      const lvl=GAME_LEVELS_DATA.find(l=>l.id===c.lvl);
+      if(ok){gPts+=lvl.pts_base;gStreak++;gCorrect++;popXP('+'+lvl.pts_base);}else gStreak=0;
+      document.getElementById('go-pts-live').textContent=gPts;
+      document.getElementById('go-streak-live').textContent=gStreak+'🔥';
+      const hasNext=gIdx<gCases.length-1;
+      document.getElementById('go-ft').innerHTML=hasNext?`<button class="btn btn-p" id="go-next" style="width:100%">Siguiente →</button>`:`<button class="btn btn-p" id="go-finish" style="width:100%">Ver resultados</button>`;
+      if(hasNext)document.getElementById('go-next').addEventListener('click',()=>{gIdx++;renderGameCase();});
+      else document.getElementById('go-finish').addEventListener('click',finishGame);
+    });
+  });
+}
+function finishGame(){
+  const lvlId=gCases[0].lvl,g=ST.game;
+  g.pts=(g.pts||0)+gPts;
+  const pct=Math.round(gCorrect/gCases.length*100);
+  if(pct>=70&&lvlId<3)g.unlocked=Math.max(g.unlocked||1,lvlId+1);
+  ST.pts=(ST.pts||0)+gPts;save();
+  document.getElementById('go-body').innerHTML=`<div style="text-align:center;padding:1.5rem 1rem"><div style="font-size:2.8rem;margin-bottom:.5rem">${pct>=80?'🎯':pct>=60?'💡':'📚'}</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:.3rem">${pct>=80?'¡Diagnóstico preciso!':'Ronda completada'}</div><div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--blue)">+${gPts}</div><div style="font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin-bottom:.7rem">puntos</div><div style="font-size:.8rem;opacity:.65;line-height:1.6">${gCorrect} de ${gCases.length} correctos${pct>=70&&lvlId<3?'<br><strong style="color:var(--ok)">🔓 Nivel '+(lvlId+1)+' desbloqueado</strong>':''}</div></div>`;
+  document.getElementById('go-ft').innerHTML=`<div style="display:flex;gap:.55rem"><button class="btn btn-g" id="go-exit" style="flex:1">← Salir</button><button class="btn btn-p" id="go-repeat" style="flex:1">Repetir</button></div>`;
+  document.getElementById('go-exit').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  document.getElementById('go-repeat').addEventListener('click',()=>startGame(lvlId));
+  refreshHome();
+}
+function renderProg(){
+  const el=document.getElementById('prog-bars');
+  el.innerHTML='<div class="ey" style="margin-bottom:.55rem">Progreso por lección</div>';
+  MODS[0].lecciones.forEach(les=>{
+    el.innerHTML+=`<div class="prog-bar-row"><div class="pbr-label">${les.title.split(' ').slice(0,2).join(' ')}</div><div class="pbr-wrap"><div class="pbr-fill" style="width:${ST.done[les.id]?100:0}%"></div></div><div class="pbr-pct">${ST.done[les.id]?100:0}%</div></div>`;
+  });
+  const B=[{ic:'⚡',name:'Primera',earned:Object.keys(ST.done).length>=1},{ic:'🎯',name:'Racha 3',earned:(ST.streak||0)>=3},{ic:'📚',name:'2 Lecciones',earned:Object.keys(ST.done).length>=2},{ic:'🏆',name:'Módulo ✓',earned:Object.keys(ST.done).length>=4},{ic:'💯',name:'90% Precisión',earned:ST.total>=5&&ST.correct/ST.total>=.9},{ic:'🎮',name:'50 Pts Juego',earned:(ST.game.pts||0)>=50},{ic:'🔓',name:'Nivel 2',earned:(ST.game.unlocked||1)>=2},{ic:'⭐',name:'Maestría',earned:Object.keys(ST.done).length>=4}];
+  document.getElementById('badges-grid').innerHTML=B.map(b=>`<div class="badge-item ${b.earned?'earned':'locked-b'}"><div class="badge-icon">${b.ic}</div><div class="badge-name">${b.name}</div></div>`).join('');
+}
+function nav(tab){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+tab).classList.add('active');
+  if(tab==='home')refreshHome();
+  if(tab==='game')renderGameHome();
+  if(tab==='prog')renderProg();
+}
+function popXP(txt){
+  const el=document.createElement('div');
+  el.className='xp-pop';el.textContent=txt;
+  el.style.cssText=`left:${35+Math.random()*30}%;top:${25+Math.random()*20}%`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+      btn.classList.add('active');nav(btn.dataset.tab);
+    });
+  });
+  document.getElementById('pre-close').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-close2').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-start').addEventListener('click',startLesson);
+  document.getElementById('ls-close').addEventListener('click',()=>document.getElementById('ls').classList.remove('open'));
+  document.getElementById('ls-prev').addEventListener('click',()=>{if(lsIdx>0){lsIdx--;renderLesBlock();}});
+  document.getElementById('ls-next').addEventListener('click',()=>{
+    const l=LECCIONES[currentLesId],b=l.bloques[lsIdx];
+    if(b.t==='question'&&!lsAnswered[lsIdx])return;
+    if(lsIdx<l.bloques.length-1){lsIdx++;renderLesBlock();}else startQuiz();
+  });
+  document.getElementById('qs-close').addEventListener('click',()=>{document.getElementById('qs').classList.remove('open');document.getElementById('ls').classList.remove('open');});
+  document.getElementById('go-close').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  document.getElementById('res-home').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');refreshHome();});
+  document.getElementById('res-repeat').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');startQuiz();});
+  refreshHome();renderGameHome();
+});
+</script>
+</body>
+</html>

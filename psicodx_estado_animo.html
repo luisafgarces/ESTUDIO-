@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PsicoDx · Estado de Ánimo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5b9bd5;--bg:#daeaf8;--text:#0d2a4a;--white:#f4f9ff;
+  --rl:rgba(91,155,213,.18);--rm:rgba(91,155,213,.45);--rd:#3a7bbf;
+  --ok:#3a9e6f;--err:#c0553a;--warn:#c49a3a;
+  --b1:#5b9bd5;--b2:#3a7bbf;--b3:#2a5a9a;
+  --cie:#3a7bbf;--dsm:#5b4fa8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+.app-header{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text)}
+.logo em{color:var(--blue);font-style:italic}
+.hstats{display:flex;gap:.9rem}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);line-height:1}
+.hs-l{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text);opacity:.5}
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.25rem 0 .4rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.35rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif}
+.ni-ic{font-size:1.15rem;line-height:1}
+.ni-lb{font-size:.54rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.35}
+.ni.active .ni-lb{color:var(--blue);opacity:1}
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1.1rem 1rem 1rem}
+.sc.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:300;color:var(--text);margin-bottom:1rem;line-height:1.1}
+.st em{color:var(--blue);font-style:italic}
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.85rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem 1.3rem;border-radius:30px;border:1.5px solid var(--blue);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--blue)}
+.ibox{background:var(--rl);border-radius:10px;padding:.75rem 1rem;font-size:.8rem;line-height:1.6;color:var(--text);margin-bottom:.9rem;display:flex;gap:.55rem;align-items:flex-start}
+.banner{background:linear-gradient(135deg,var(--b1) 0%,var(--b3) 100%);border-radius:16px;padding:1.3rem 1.1rem;color:#fff;margin-bottom:1.1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%}
+.banner-ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.banner-s{font-size:.78rem;opacity:.85;line-height:1.5}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.8rem .5rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--blue);line-height:1}
+.sc3-l{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.45;margin-top:.15rem}
+.mod-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.mod-card:hover{border-color:var(--rm);transform:translateY(-1px)}
+.mod-card.done{border-color:var(--ok)}
+.mod-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem}
+.mod-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text)}
+.mod-sub{font-size:.68rem;color:var(--text);opacity:.55;margin-top:.08rem}
+.mod-prog-wrap{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:.28rem}
+.mod-prog-fill{height:100%;border-radius:2px;transition:width .5s ease;background:var(--blue)}
+.mod-meta{display:flex;justify-content:space-between;font-size:.66rem;color:var(--text);opacity:.5;margin-top:.35rem}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.badge-item{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.7rem .4rem;text-align:center}
+.badge-item.earned{border-color:var(--blue);background:linear-gradient(135deg,var(--bg),var(--white))}
+.badge-item.locked-b{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:1.5rem;line-height:1;margin-bottom:.25rem}
+.badge-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);opacity:.7}
+#pre-les{position:fixed;inset:0;background:var(--bg);z-index:190;display:none;flex-direction:column}
+#pre-les.open{display:flex}
+.pre-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.pre-body{flex:1;overflow-y:auto;padding:1.3rem 1rem}
+.pre-ft{flex-shrink:0;padding:.9rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.65rem}
+.pre-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.pre-sub{font-size:.75rem;color:var(--blue);font-style:italic;margin-bottom:1.1rem}
+.instr-block{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.instr-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.instr-item{display:flex;align-items:flex-start;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--rl)}
+.instr-item:last-child{border-bottom:none}
+.instr-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--bg);border:1.5px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+.instr-txt{flex:1}
+.instr-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.15rem}
+.instr-desc{font-size:.8rem;line-height:1.55;color:var(--text);opacity:.82}
+#ls{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#ls.open{display:flex}
+.ls-hd{flex-shrink:0;padding:.7rem 1rem;border-bottom:1.5px solid var(--rl);display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:var(--white)}
+.ls-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-prog-wrap{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;width:60px;flex-shrink:0}
+.ls-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.ls-body{flex:1;overflow-y:auto;padding:1.3rem 1.1rem 2rem}
+.ls-ft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.6rem}
+.les-block{margin-bottom:1.1rem;animation:fi .2s ease}
+.lb-text{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;line-height:1.88;color:var(--text)}
+.lb-text p{margin-bottom:.9rem}
+.lb-text p:last-child{margin-bottom:0}
+.lb-text strong{color:var(--b3);font-weight:600}
+.lb-text em{color:var(--blue);font-style:normal;font-weight:600;font-family:'Jost',sans-serif;font-size:.88em;letter-spacing:.02em}
+.lb-section{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--blue);margin-bottom:.5rem;margin-top:.3rem;padding-top:.3rem;border-top:1.5px solid var(--rl)}
+.lb-case{background:var(--text);border-radius:12px;padding:.9rem 1rem;margin:.3rem 0}
+.lb-case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem;opacity:.85}
+.lb-case-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:400;line-height:1.75;color:rgba(255,255,255,.9)}
+.lb-case-text strong{color:#7dc8f7}
+.lb-alert{background:rgba(192,85,58,.07);border:1.5px solid rgba(192,85,58,.25);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-alert-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--err);margin-bottom:.28rem}
+.lb-alert-text{font-size:.8rem;line-height:1.65;color:var(--err)}
+.lb-tip{background:rgba(91,155,213,.07);border:1.5px solid var(--rl);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-tip-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.28rem}
+.lb-tip-text{font-size:.8rem;line-height:1.65;color:var(--b3)}
+.lb-table{width:100%;border-collapse:collapse;font-size:.74rem;margin:.3rem 0;border-radius:10px;overflow:hidden;border:1.5px solid var(--rl)}
+.lb-table th{background:var(--b3);color:#fff;padding:.42rem .6rem;text-align:left;font-family:'Jost',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.04em}
+.lb-table td{padding:.38rem .6rem;border-bottom:1px solid var(--rl);line-height:1.5;color:var(--text);background:var(--white)}
+.lb-table tr:nth-child(even) td{background:rgba(91,155,213,.04)}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-q{background:var(--bg);border:2px solid var(--blue);border-radius:14px;padding:.95rem 1rem;margin:.4rem 0}
+.lb-q-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem}
+.lb-q-text{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:.75rem}
+.lb-q-opts{display:flex;flex-direction:column;gap:.42rem}
+.lb-q-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:10px;padding:.65rem .85rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.lb-q-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.lb-q-opt.q-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.lb-q-opt.q-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.lb-q-fb{font-size:.78rem;line-height:1.58;background:var(--white);border-radius:8px;padding:.6rem .8rem;margin-top:.65rem;border-left:3px solid var(--blue);display:none;color:var(--text)}
+.lb-q-fb.show{display:block}
+.lb-q-fb.fb-ok{border-left-color:var(--ok)}
+.lb-q-fb.fb-err{border-left-color:var(--err)}
+.lb-q-cont{width:100%;margin-top:.6rem;padding:.45rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;display:none}
+.lb-q-cont.show{display:block}
+.compare-box{border-radius:12px;overflow:hidden;margin:.3rem 0;border:1.5px solid var(--rl)}
+.compare-hd{display:grid;grid-template-columns:1fr 1fr}
+.compare-hd-cie{background:var(--cie);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-hd-dsm{background:var(--dsm);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-body{display:grid;grid-template-columns:1fr 1fr}
+.compare-col{padding:.7rem .75rem;font-size:.77rem;line-height:1.6;color:var(--text);background:var(--white)}
+.compare-col:first-child{border-right:1px solid var(--rl)}
+.compare-col ul{padding-left:1rem;margin:0}
+.compare-col ul li{margin-bottom:.3rem}
+.compare-col strong{color:var(--b3);font-weight:600}
+#qs{position:fixed;inset:0;background:var(--bg);z-index:201;display:none;flex-direction:column}
+#qs.open{display:flex}
+.qhd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem}
+.qpw{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.qpf{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
+.qn{font-size:.7rem;font-weight:700;color:var(--blue);flex-shrink:0}
+.qbody{flex:1;overflow-y:auto;padding:1.4rem 1rem}
+.q-mod-badge{display:inline-flex;background:var(--rl);border-radius:8px;padding:.3rem .65rem;font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+.qq{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.2rem}
+.qopts{display:flex;flex-direction:column;gap:.55rem}
+.qopt{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.82rem .9rem;cursor:pointer;font-size:.84rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.qopt:hover{border-color:var(--rm);background:var(--rl)}
+.qopt.cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.qopt.wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.qft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.qfb{font-size:.8rem;line-height:1.55;color:var(--text);background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin-bottom:.7rem;display:none;border-left:3px solid var(--blue)}
+.qfb.show{display:block}
+.qfb.cor-fb{border-left-color:var(--ok)}
+.qfb.wrg-fb{border-left-color:var(--err)}
+#res{position:fixed;inset:0;background:var(--bg);z-index:202;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.4rem;text-align:center}
+#res.open{display:flex;animation:fi .3s ease}
+.res-circle{width:108px;height:108px;border-radius:50%;border:3px solid var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem}
+.res-pct{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;line-height:1;color:var(--blue)}
+.res-pl{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.res-v{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;margin-bottom:.4rem}
+.res-s{font-size:.8rem;opacity:.7;line-height:1.6;margin-bottom:1.2rem;max-width:280px}
+.res-row{display:flex;gap:1.3rem;justify-content:center;margin-bottom:1.5rem}
+.rd{text-align:center}
+.rd-v{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--blue)}
+.rd-l{font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+#game-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;display:none;flex-direction:column}
+#game-overlay.open{display:flex;animation:fi .2s ease}
+.go-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem}
+.go-body{flex:1;overflow-y:auto;padding:1.1rem 1rem}
+.go-ft{flex-shrink:0;padding:.75rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.case-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:.8rem}
+.case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem}
+.case-text{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.82;color:var(--text)}
+.game-q-label{font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
+.game-opts{display:flex;flex-direction:column;gap:.48rem;margin-bottom:.75rem}
+.game-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:11px;padding:.72rem .88rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.game-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.game-opt.g-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.game-opt.g-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.game-fb{font-size:.79rem;line-height:1.6;background:var(--bg);border-radius:8px;padding:.62rem .82rem;border-left:3px solid var(--blue);margin-bottom:.7rem;display:none}
+.game-fb.show{display:block}
+.game-fb.fb-ok{border-left-color:var(--ok)}
+.game-fb.fb-err{border-left-color:var(--err)}
+.go-stats{display:flex;gap:1rem;margin-left:auto}
+.go-stat{text-align:center}
+.go-stat-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--blue);line-height:1}
+.go-stat-l{font-size:.46rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.4}
+.prog-bar-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}
+.pbr-label{font-size:.7rem;font-weight:500;color:var(--text);width:100px;flex-shrink:0;line-height:1.25}
+.pbr-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.pbr-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--b1),var(--b3));transition:width .6s}
+.pbr-pct{font-size:.66rem;font-weight:700;color:var(--blue);width:30px;text-align:right}
+@keyframes popUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-35px) scale(1.25);opacity:0}}
+.xp-pop{position:fixed;pointer-events:none;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);animation:popUp .8s ease forwards;z-index:999}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="logo">Psico<em>Dx</em></div>
+  <div class="hstats">
+    <div class="hs"><div class="hs-v" id="h-les">0</div><div class="hs-l">Lecciones</div></div>
+    <div class="hs"><div class="hs-v" id="h-pts">0</div><div class="hs-l">Puntos</div></div>
+    <div class="hs"><div class="hs-v" id="h-str">0🔥</div><div class="hs-l">Racha</div></div>
+  </div>
+</div>
+<div class="sa">
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">Módulo 3 · CIE-11 + DSM-5-TR</div>
+      <div class="banner-t">Estado de <em>Ánimo</em></div>
+      <div class="banner-s">Depresión · Distimia · Bipolar I y II · Ciclotimia · Especificadores</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="hs-les">0</div><div class="sc3-l">Completadas</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-prec">—</div><div class="sc3-l">Precisión</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-pts">0</div><div class="sc3-l">Puntos</div></div>
+    </div>
+    <div class="ey">Lecciones del módulo</div>
+    <div id="home-modules"></div>
+  </div>
+  <div class="sc" id="sc-game">
+    <div class="ey">Modo Juego</div>
+    <div class="st">Diagnóstico <em>en Acción</em></div>
+    <div class="ibox"><span style="font-size:.95rem;flex-shrink:0">🎮</span><span>Casos del estado de ánimo. Identifica el diagnóstico correcto usando los criterios de duración, intensidad y contexto. Desbloquea niveles con ≥70%.</span></div>
+    <div id="game-home-content"></div>
+  </div>
+  <div class="sc" id="sc-prog">
+    <div class="ey">Tu progreso</div>
+    <div class="st">Avance por <em>Lección</em></div>
+    <div class="card" style="padding:1rem 1.1rem"><div id="prog-bars"></div></div>
+    <div class="ey" style="margin-bottom:.5rem;margin-top:.5rem">Logros</div>
+    <div class="badges-grid" id="badges-grid"></div>
+  </div>
+</div>
+<div class="bot-nav">
+  <button class="ni active" data-tab="home"><span class="ni-ic">🏠</span><span class="ni-lb">Inicio</span></button>
+  <button class="ni" data-tab="game"><span class="ni-ic">🎮</span><span class="ni-lb">Juego</span></button>
+  <button class="ni" data-tab="prog"><span class="ni-ic">📊</span><span class="ni-lb">Progreso</span></button>
+</div>
+<div id="pre-les">
+  <div class="pre-hd">
+    <button id="pre-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="flex:1"><div class="ey">Antes de comenzar</div><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)" id="pre-mod-name"></div></div>
+  </div>
+  <div class="pre-body">
+    <div class="pre-title" id="pre-title"></div>
+    <div class="pre-sub" id="pre-sub"></div>
+    <div class="instr-block">
+      <div class="instr-title">¿Cómo funciona esta lección?</div>
+      <div class="instr-item"><div class="instr-ic">📖</div><div class="instr-txt"><div class="instr-label">Lectura clínica profunda</div><div class="instr-desc">Criterios completos con razonamiento diagnóstico real.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">📊</div><div class="instr-txt"><div class="instr-label">Comparación CIE-11 vs DSM-5</div><div class="instr-desc">Diferencias que importan en la práctica.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">⚡</div><div class="instr-txt"><div class="instr-label">Preguntas intercaladas</div><div class="instr-desc">Feedback inmediato con explicación clínica.</div></div></div>
+      <div class="instr-item"><div class="instr-ic">🏆</div><div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">5 preguntas · ≥80% = maestría.</div></div></div>
+    </div>
+    <div id="pre-info"></div>
+  </div>
+  <div class="pre-ft">
+    <button class="btn btn-g" id="pre-close2" style="flex:1">Volver</button>
+    <button class="btn btn-p" id="pre-start" style="flex:2">Comenzar →</button>
+  </div>
+</div>
+<div id="ls">
+  <div class="ls-hd">
+    <button id="ls-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="ls-title" id="ls-title"></div>
+    <div class="ls-prog-wrap"><div class="ls-prog-fill" id="ls-prog" style="width:0%"></div></div>
+  </div>
+  <div class="ls-body" id="ls-body"></div>
+  <div class="ls-ft">
+    <button class="btn btn-g" id="ls-prev" style="flex:1">← Anterior</button>
+    <button class="btn btn-p" id="ls-next" style="flex:2">Siguiente →</button>
+  </div>
+</div>
+<div id="qs">
+  <div class="qhd">
+    <button id="qs-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="qpw"><div class="qpf" id="q-prog" style="width:0%"></div></div>
+    <div class="qn" id="q-n">1/5</div>
+  </div>
+  <div class="qbody" id="q-body"></div>
+  <div class="qft">
+    <div class="qfb" id="q-fb"></div>
+    <button class="btn btn-p" id="q-next" style="width:100%;display:none">Siguiente →</button>
+  </div>
+</div>
+<div id="res">
+  <div class="res-circle"><div class="res-pct" id="res-pct">0%</div><div class="res-pl">precisión</div></div>
+  <div class="res-v" id="res-v">Bien</div>
+  <div class="res-s" id="res-s"></div>
+  <div class="res-row">
+    <div class="rd"><div class="rd-v" id="res-cor">0</div><div class="rd-l">Correctas</div></div>
+    <div class="rd"><div class="rd-v" id="res-pts">+0</div><div class="rd-l">Puntos</div></div>
+    <div class="rd"><div class="rd-v" id="res-time">0s</div><div class="rd-l">Tiempo</div></div>
+  </div>
+  <div style="display:flex;gap:.65rem;width:100%;max-width:320px">
+    <button class="btn btn-g" id="res-home" style="flex:1">Inicio</button>
+    <button class="btn btn-p" id="res-repeat" style="flex:1">Repetir quiz</button>
+  </div>
+</div>
+<div id="game-overlay">
+  <div class="go-hd">
+    <button id="go-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text)" id="go-title">Juego</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-v" id="go-pts-live">0</div><div class="go-stat-l">pts</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-streak-live">0🔥</div><div class="go-stat-l">racha</div></div>
+    </div>
+  </div>
+  <div class="go-body" id="go-body"></div>
+  <div class="go-ft" id="go-ft"></div>
+</div>
+
+<script>
+const LECCIONES = {
+
+'an1':{
+ title:'Episodio Depresivo Mayor — Los 9 síntomas completos',
+ mod:'Estado de Ánimo',
+ sub:'CIE-11 (6A70) vs DSM-5 (296.xx) — Criterios, umbral y especificadores',
+ bloques:[
+  {t:'text', content:`<p>La <strong>depresión mayor</strong> es el trastorno mental más prevalente a nivel mundial y una de las principales causas de discapacidad. Sin embargo, sigue siendo subdiagnosticada — especialmente en presentaciones atípicas, en hombres (que presentan más irritabilidad que tristeza), en adultos mayores (que somatiza más) y en contextos médicos hospitalizarios.</p>
+  <p>El diagnóstico requiere <strong>≥5 de 9 síntomas</strong> durante al menos <strong>2 semanas</strong>, con al menos uno de los dos síntomas cardinales presentes: ánimo deprimido O pérdida de interés/placer (anhedonia). Ambos sistemas son casi idénticos en este punto.</p>`},
+
+  {t:'section', content:'Los 9 síntomas — ADESSCIP'},
+
+  {t:'text', content:`<p>La mnemotecnia <strong>ADESSCIP</strong> (o <em>SIG E CAPS</em> en inglés) cubre los 9 síntomas:</p>
+  <p><strong>1. Ánimo deprimido</strong> la mayor parte del día, casi todos los días (en niños y adolescentes puede ser irritabilidad). El paciente lo reporta subjetivamente o lo observa el clínico.</p>
+  <p><strong>2. Disminución del interés o placer</strong> en todas o casi todas las actividades (anhedonia). Este es el síntoma más específico de la depresión — pérdida del placer en cosas que antes generaban disfrute. No es simplemente "no tener ganas".</p>
+  <p><strong>3. Energía reducida o fatiga</strong> casi todos los días. Diferente al cansancio normal — es una fatiga que no mejora con el descanso.</p>
+  <p><strong>4. Sueño alterado</strong> — insomnio (más frecuente: despertar de madrugada con incapacidad de volver a dormir) o hipersomnia. El insomnio terminal (madrugada) es más específico de depresión que el de conciliación.</p>
+  <p><strong>5. Sentimientos de inutilidad o culpa excesiva o inapropiada</strong> (puede ser delusional). No simplemente culpa por estar enfermo — culpa desproporcionada, autoflagelación, creencia de ser una carga para todos.</p>
+  <p><strong>6. Concentración reducida o indecisión</strong> casi todos los días. La dificultad para tomar decisiones simples (qué comer, qué ponerse) es un marcador clínico importante.</p>
+  <p><strong>7. Ideas de muerte o suicidas</strong> — desde deseo pasivo de morir ("mejor si no me despertara") hasta ideación activa con plan. Este síntoma requiere evaluación de riesgo sistemática siempre.</p>
+  <p><strong>8. Cambio del peso o apetito</strong> — pérdida o aumento de ≥5% del peso corporal en un mes, o aumento/disminución del apetito casi todos los días.</p>
+  <p><strong>9. Agitación o enlentecimiento psicomotor</strong> observable por otros (no solo sensación subjetiva). El enlentecimiento psicomotor — habla lenta, movimientos lentos, respuestas tardías — es un marcador de severidad.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Código:</strong> 6A70 (episodio depresivo), 6A71 (trastorno depresivo recurrente)</li>
+    <li><strong>Umbral:</strong> ≥5 de 10 síntomas (CIE-11 incluye desesperanza como síntoma separado)</li>
+    <li><strong>Síntomas cardinales:</strong> Ánimo deprimido + pérdida de interés/placer — al menos uno requerido</li>
+    <li><strong>Duración:</strong> ≥2 semanas</li>
+    <li><strong>Severidad:</strong> Leve (5-6 síntomas, deterioro leve), Moderado (7+ síntomas o deterioro significativo), Grave (deterioro severo, con/sin psicosis)</li>
+    <li><strong>Nueva categoría:</strong> Trastorno depresivo mixto ansioso (6A73) — síntomas de ansiedad y depresión subumbrales para ambos</li>
+    <li><strong>Desesperanza:</strong> Listada como síntoma adicional propio</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Código:</strong> 296.21-296.36 (episodio único/recurrente × leve/moderado/grave)</li>
+    <li><strong>Umbral:</strong> ≥5 de 9 síntomas</li>
+    <li><strong>Síntomas cardinales:</strong> Ánimo deprimido O anhedonia — al menos uno requerido</li>
+    <li><strong>Duración:</strong> ≥2 semanas</li>
+    <li><strong>Especificadores:</strong> Con características ansiosas, melancólicas, atípicas, psicóticas, catatónicas, con inicio en el periparto, con patrón estacional</li>
+    <li><strong>No incluye desesperanza</strong> como síntoma separado en el Criterio A</li>
+    <li><strong>Criterio exclusión:</strong> No atribuible a sustancias, condición médica, ni duelo (el duelo ya no excluye el diagnóstico — cambio desde DSM-IV)</li>
+   </ul>`},
+
+  {t:'case',
+   label:'Depresión en hospital general — presentación somática',
+   text:`<strong>Don Carlos, 67 años, hospitalizado por cirugía de cadera.</strong> El equipo médico lo remite a psicología porque "no colabora con la rehabilitación". En la entrevista: "no tengo nada de ganas de hacer nada", no come desde hace 3 semanas ("la comida no sabe a nada"), duerme muy poco (se despierta a las 3am), llora sin razón aparente. Dice que "ya para qué, si total uno a esta edad..." Refiere sentirse "un estorbo para la familia".
+  <br><br><em>Episodio depresivo grave:</em> Anhedonia + ánimo deprimido + anorexia + insomnio terminal + llanto + ideación pasiva de muerte + sentimientos de ser carga. En adultos mayores hospitalizados la depresión se presenta frecuentemente como "no colaboración" o síntomas somáticos. La ideación de muerte ("ya para qué") requiere evaluación de riesgo inmediata.`},
+
+  {t:'question',
+   q:'¿Cuál es el cambio más importante del DSM-5 respecto al DSM-IV en relación con el duelo y el diagnóstico de depresión mayor?',
+   opts:['El DSM-5 exige que el duelo dure más de 6 meses para excluir depresión','El DSM-5 eliminó la "exclusión por duelo" — se puede diagnosticar depresión mayor aunque el episodio ocurra en el contexto de una pérdida reciente si se cumplen los criterios clínicos','El duelo sigue siendo criterio de exclusión en el DSM-5-TR','El DSM-5 creó una categoría nueva llamada "depresión por duelo"'],
+   cor:1,
+   fb:'El DSM-IV tenía una "exclusión por duelo" — no se diagnosticaba depresión si los síntomas ocurrían en las primeras 2 meses tras una pérdida. El DSM-5 eliminó esta exclusión, reconociendo que el duelo puede precipitar un episodio depresivo clínicamente significativo que requiere tratamiento. Esto no significa que todo duelo sea patológico — el DSM-5 incluye una nota que orienta el juicio clínico para distinguir el duelo normal de la depresión.'},
+
+  {t:'section', content:'Especificadores clínicamente relevantes'},
+
+  {t:'text', content:`<p>Los especificadores del DSM-5 tienen impacto en el tratamiento. Los más importantes:</p>
+  <p><strong>Con características melancólicas:</strong> Anhedonia profunda (no mejora ni temporalmente con eventos positivos), peor por las mañanas, despertar 2+ horas antes de lo habitual, enlentecimiento/agitación psicomotora marcada, anorexia/pérdida de peso, culpa excesiva. Este patrón responde mejor a antidepresivos tricíclicos y tiene mayor indicación de TEC.</p>
+  <p><strong>Con características atípicas:</strong> Reactividad del ánimo (sí mejora temporalmente con eventos positivos — el criterio más importante), hipersomnia, hiperfagia/aumento de peso, "parálisis de plomo" (pesadez en extremidades), hipersensibilidad al rechazo interpersonal crónica. Más frecuente en Bipolar II. Responde mejor a IMAO y tiene peor respuesta a tricíclicos.</p>
+  <p><strong>Con inicio en el periparto:</strong> Inicio durante el embarazo o dentro de las 4 semanas posparto. La depresión posparto con psicosis es una urgencia psiquiátrica — riesgo de infanticidio y suicidio.</p>
+  <p><strong>Con patrón estacional (SAD):</strong> Inicio y remisión en épocas específicas del año (más frecuente: depresión otoño-invierno, remisión primavera-verano). Tratamiento de primera línea: fototerapia.</p>`},
+
+  {t:'question',
+   q:'¿Cuál es el síntoma del especificador "con características atípicas" que funciona como criterio A obligatorio (sine qua non)?',
+   opts:['Hipersomnia — dormir más de 10 horas','Reactividad del ánimo — el ánimo mejora al menos temporalmente en respuesta a eventos positivos reales o potenciales','Hiperfagia — aumento del apetito','Parálisis de plomo — pesadez en extremidades'],
+   cor:1,
+   fb:'La reactividad del ánimo es el criterio A obligatorio para el especificador "atípico". Sin reactividad del ánimo, no se puede diagnosticar depresión con características atípicas. Los otros síntomas (hipersomnia, hiperfagia, parálisis de plomo, hipersensibilidad al rechazo) son adicionales — se requieren ≥2 de ellos además de la reactividad. La distinción es clínicamente importante: la depresión atípica es más frecuente en Bipolar II y responde diferente a los fármacos.'}
+ ],
+ quiz:[
+  {q:'¿Cuántos síntomas y de qué tipo se requieren mínimamente para diagnosticar un Episodio Depresivo Mayor según el DSM-5?',
+   opts:['3 síntomas cualesquiera durante 1 semana','≥5 de 9 síntomas durante ≥2 semanas, con al menos uno de los dos síntomas cardinales (ánimo deprimido O anhedonia)','≥7 de 9 síntomas durante ≥1 mes','≥5 síntomas cualquiera sin requisito de síntomas cardinales'],
+   cor:1,
+   fb:'≥5 de 9 síntomas, ≥2 semanas, con al menos uno siendo ánimo deprimido O anhedonia (pérdida de interés/placer). Sin uno de estos dos síntomas cardinales, no se puede diagnosticar EDM aunque haya 5 síntomas del resto. La CIE-11 usa el mismo umbral de 2 semanas y síntomas cardinales, pero lista la desesperanza como síntoma adicional y tiene gradación de severidad más detallada.'},
+  {q:'Paciente de 45 años refiere que "cuando pasan cosas buenas me siento un poco mejor temporalmente", tiene hipersomnia (duerme 12 horas), come más de lo normal, y siente sus brazos "pesados como plomo" desde hace 3 semanas. ¿Qué especificador corresponde?',
+   opts:['Con características melancólicas — el enlentecimiento es melancólico','Con características atípicas — hay reactividad del ánimo + ≥2 síntomas adicionales (hipersomnia, hiperfagia, parálisis de plomo)','Con patrón estacional — los síntomas son estacionales','Con características psicóticas — la pesadez es somática'],
+   cor:1,
+   fb:'Características atípicas: reactividad del ánimo (mejora con eventos positivos) + hipersomnia + hiperfagia + parálisis de plomo. Cumple el criterio A (reactividad) + ≥2 síntomas adicionales. El especificador "melancólico" tiene el patrón opuesto: ánimo que NO mejora con eventos positivos, insomnio terminal, anorexia. Esta distinción importa para el tratamiento — los atípicos responden mejor a IMAO.'},
+  {q:'¿Cuál es el tipo de insomnio más característico y específico de la depresión mayor?',
+   opts:['Insomnio de conciliación — dificultad para quedarse dormido inicialmente','Insomnio terminal — despertar de madrugada (3-5am) con incapacidad de volver a dormir','Insomnio mixto — dificultad en todas las fases del sueño','Hipersomnia — dormir demasiado'],
+   cor:1,
+   fb:'El insomnio terminal (despertar de madrugada, 3-5am, con incapacidad de volver a dormir) es el más específico de la depresión mayor, especialmente de las formas melancólicas. El insomnio de conciliación es más inespecífico — aparece en ansiedad, estrés, muchas otras condiciones. Preguntar siempre: "¿A qué hora se despierta? ¿Puede volver a dormirse?" es clave en la entrevista diagnóstica.'},
+  {q:'Una paciente de 32 años a las 3 semanas de haber dado a luz presenta llanto persistente, incapacidad de cuidar al bebé, ideas de que "estaría mejor sin mí" y dos alucinaciones visuales de ver al bebé lastimado. ¿Cuál es el diagnóstico y la urgencia?',
+   opts:['Baby blues — normal en el posparto, pasa solo','Depresión posparto leve — requiere psicoterapia ambulatoria','Episodio depresivo con inicio en el periparto con características psicóticas — urgencia psiquiátrica. Riesgo de infanticidio y suicidio. Requiere evaluación hospitalaria inmediata','Psicosis posparto — diagnóstico separado del DSM-5'],
+   cor:2,
+   fb:'Depresión posparto con psicosis (alucinaciones) es una emergencia psiquiátrica. La presencia de características psicóticas en el posparto multiplica el riesgo de infanticidio y suicidio. Requiere evaluación hospitalaria inmediata. En el DSM-5, "con inicio en el periparto" es el especificador — cubre desde el embarazo hasta las 4 semanas posparto. La psicosis posparto no es una categoría diagnóstica separada en DSM-5, sino un especificador dentro del EDM o del trastorno bipolar.'},
+  {q:'¿Cuál es la diferencia entre tristeza normal/duelo y un episodio depresivo mayor que requiere tratamiento?',
+   opts:['La tristeza normal nunca tiene síntomas somáticos; la depresión siempre','La tristeza normal es reactiva al contexto, mejora con distracción y no cumple el criterio de 5 síntomas durante 2 semanas con deterioro funcional; el EDM es pervasivo, no mejora con distracción, y causa deterioro significativo en el funcionamiento','La depresión siempre tiene ideación suicida; la tristeza no','Solo la duración distingue — cualquier tristeza de más de 2 semanas es depresión'],
+   cor:1,
+   fb:'El diferencial tristeza vs EDM no es solo de duración. Tristeza/duelo normal: reactiva (mejora con cosas positivas, distracción), preserva la capacidad de experimentar momentos de placer, no cumple los 5 síntomas completos, no deteriora el funcionamiento de forma significativa. EDM: pervasivo (presente la mayor parte del día, casi todos los días), anhedonia (no se disfruta nada), ≥5 síntomas, deterioro funcional. El DSM-5 eliminó la exclusión por duelo — el duelo puede precipitar un EDM real que requiere tratamiento.'}
+ ]
+},
+
+'an2':{
+ title:'Trastorno Depresivo Persistente · Disruptivo · Nuevo en CIE-11',
+ mod:'Estado de Ánimo',
+ sub:'Distimia (6A72/300.4) · TDRD (296.99) · Trastorno Depresivo Mixto Ansioso (6A73)',
+ bloques:[
+  {t:'text', content:`<p>No toda depresión es un episodio agudo. Hay formas crónicas y subumbrales que generan igual o mayor discapacidad a largo plazo. Este bloque cubre los trastornos depresivos que no son el EDM clásico: el trastorno depresivo persistente (distimia), el trastorno disruptivo de la desregulación del estado de ánimo (nuevo en DSM-5), y el trastorno depresivo mixto ansioso (nuevo en CIE-11).</p>`},
+
+  {t:'section', content:'Trastorno Depresivo Persistente — Distimia'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6A72 / DSM-5: 300.4</strong></p>
+  <p>El DSM-5 unificó la <strong>distimia</strong> y el <strong>trastorno depresivo mayor crónico</strong> del DSM-IV bajo una sola categoría: <strong>Trastorno Depresivo Persistente</strong>. La CIE-11 lo llama <em>trastorno distímico</em> (6A72).</p>
+  <p><strong>Criterios DSM-5 (300.4):</strong><br>
+  A. Ánimo deprimido la mayor parte del día, la mayoría de los días, durante <strong>≥2 años</strong> (≥1 año en niños y adolescentes).<br>
+  B. Presencia de ≥2 de 6 síntomas mientras está deprimido: (1) poco apetito o sobrealimentación, (2) insomnio o hipersomnia, (3) poca energía o fatiga, (4) baja autoestima, (5) dificultad para concentrarse o tomar decisiones, (6) sentimientos de desesperanza.<br>
+  C. Durante los 2 años nunca ha estado sin síntomas de los criterios A y B durante más de 2 meses seguidos.<br>
+  D. Puede haber episodios de depresión mayor concomitantes ("doble depresión").<br>
+  E. No hay episodios maníacos o hipomaníacos.<br>
+  F. No se explica por otro trastorno, sustancias o condición médica.</p>
+  <p><strong>Clínicamente:</strong> El paciente con distimia a menudo dice "siempre he sido así" o "soy depresivo de carácter". La cronicidad hace que la condición se normalice — tanto el paciente como su familia la ven como rasgo de personalidad, no como trastorno tratable. El promedio de retraso diagnóstico es de más de 10 años.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Código:</strong> 6A72 (Trastorno distímico)</li>
+    <li><strong>Duración:</strong> ≥2 años con ánimo deprimido persistente</li>
+    <li><strong>Síntomas:</strong> ≥3 de una lista similar al DSM-5 (incluye desesperanza, baja autoestima, fatiga, insomnio/hipersomnia, anorexia/hiperfagia, concentración reducida)</li>
+    <li><strong>La CIE-11 mantiene la etiqueta "distimia"</strong> como término reconocible</li>
+    <li><strong>No fusiona</strong> con depresión crónica de la forma en que lo hace el DSM-5</li>
+    <li>El trastorno mixto depresivo-ansioso (6A73) es nuevo en CIE-11 — sin equivalente directo en DSM-5</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Código:</strong> 300.4 (Trastorno Depresivo Persistente)</li>
+    <li><strong>Fusiona:</strong> Distimia DSM-IV + Trastorno Depresivo Mayor Crónico DSM-IV</li>
+    <li><strong>Duración:</strong> ≥2 años (adultos); ≥1 año (niños/adolescentes)</li>
+    <li><strong>Sin síntoma cardinal obligatorio:</strong> Solo requiere ánimo deprimido + ≥2 de 6 síntomas</li>
+    <li><strong>Doble depresión:</strong> Permite episodios de EDM superpuestos</li>
+    <li><strong>Especificadores:</strong> Con síndrome distímico puro / con episodio depresivo mayor persistente / con episodios depresivos mayores intermitentes</li>
+   </ul>`},
+
+  {t:'case',
+   label:'Distimia — "Siempre he sido así"',
+   text:`<strong>Mariana, 38 años, contadora.</strong> La trae su pareja porque "se la pasa triste y negativa". Mariana dice: "yo soy así de toda la vida, eso no tiene cura". Desde los 20 años aproximadamente se siente "con poco ánimo", sin energía para actividades que antes le gustaban, con baja autoestima ("nunca hago nada bien"), duerme mal, y siente que "todo es un esfuerzo". Funciona — trabaja, tiene pareja — pero "a medias". No recuerda un período de más de 2-3 semanas sin sentirse así en los últimos 15 años.
+  <br><br><em>Trastorno Depresivo Persistente:</em> La normalización es la trampa diagnóstica. "Siempre fui así" no es una razón para no diagnosticar ni tratar. La combinación de psicoterapia (especialmente CBASP — Cognitive Behavioral Analysis System of Psychotherapy, diseñada específicamente para depresión crónica) + antidepresivos tiene mejor respuesta que cualquiera solo.`},
+
+  {t:'section', content:'Trastorno Disruptivo de la Desregulación del Estado de Ánimo (TDRD)'},
+
+  {t:'text', content:`<p><strong>DSM-5: 296.99 / CIE-11: no tiene equivalente directo</strong></p>
+  <p>El TDRD es un diagnóstico <strong>nuevo en el DSM-5</strong>, creado para niños que presentan irritabilidad crónica severa con explosiones de ira, y que antes eran diagnosticados como Bipolar Pediátrico (diagnóstico que se estaba sobreutilizando gravemente en EE.UU.).</p>
+  <p><strong>Criterios DSM-5:</strong><br>
+  A. Explosiones de temperamento graves y recurrentes que se manifiestan verbalmente y/o conductualmente y que son groseramente desproporcionadas en intensidad o duración a la situación. Las explosiones son discordantes con el nivel de desarrollo.<br>
+  B. Las explosiones ocurren en promedio ≥3 veces por semana.<br>
+  C. El estado de ánimo entre las explosiones es persistentemente irritable o enojado la mayor parte del día, casi todos los días, y observable por otros.<br>
+  D. Los criterios A-C han estado presentes durante ≥12 meses. No ha habido un período de ≥3 meses sin síntomas de A, B o C.<br>
+  E. Los criterios A y C están presentes en al menos 2 de 3 contextos: hogar, colegio, con pares.<br>
+  F. Edad de inicio: diagnóstico no debe hacerse antes de los 6 años ni después de los 18.<br>
+  G. Edad de inicio de los síntomas: antes de los 10 años.<br>
+  H. Nunca ha habido un período de más de 1 día que cumpla criterios de episodio maníaco o hipomaníaco.<br>
+  I. No se explica mejor por otro trastorno mental.</p>
+  <p><strong>Por qué importa el diferencial con Bipolar:</strong> Los niños con TDRD tienen mayor riesgo de desarrollar <em>depresión y ansiedad</em> en la adultez — no trastorno bipolar. El Bipolar Pediátrico tiene episodios delimitados de euforia/grandiosidad. El TDRD tiene irritabilidad crónica y persistente sin episodios.</p>`},
+
+  {t:'section', content:'Trastorno Depresivo Mixto Ansioso — Nuevo en CIE-11'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6A73 / DSM-5: No existe como categoría formal</strong></p>
+  <p>Esta es una de las diferencias más interesantes entre los dos sistemas. La CIE-11 crea una nueva categoría para pacientes que tienen síntomas subumbrales tanto de depresión como de ansiedad — ninguno de los dos cuadros es lo suficientemente grave para diagnosticarse por separado, pero la combinación sí causa deterioro significativo.</p>
+  <p><strong>Criterios CIE-11 (6A73):</strong><br>
+  — Síntomas de depresión y ansiedad presentes la mayor parte de los días durante ≥2 semanas.<br>
+  — Ningún conjunto de síntomas es lo suficientemente numeroso, grave o persistente para justificar el diagnóstico de un trastorno depresivo o de ansiedad por separado.<br>
+  — Los síntomas causan deterioro significativo en el funcionamiento.<br>
+  — No se explican por otra condición médica o sustancias.</p>
+  <p><strong>Relevancia clínica:</strong> Este patrón mixto subumbral es muy frecuente en atención primaria y en hospitalización general. Su reconocimiento evita el dilema de "¿le pongo depresión o ansiedad?" cuando ninguno de los dos cumple criterios completos pero el paciente claramente está sufriendo y funcionando peor.</p>`},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia fundamental entre el TDRD y el Trastorno Bipolar Pediátrico?',
+   opts:['El TDRD solo afecta niñas; el Bipolar afecta ambos sexos','En el TDRD hay irritabilidad crónica y persistente sin episodios delimitados de euforia/grandiosidad; en el Bipolar hay episodios maníacos o hipomaníacos con cambio claro respecto al funcionamiento habitual','El TDRD requiere hospitalización; el Bipolar no','No hay diferencia — el TDRD es el nuevo nombre del Bipolar Pediátrico'],
+   cor:1,
+   fb:'Esta distinción fue la razón de crear el TDRD. El Bipolar Pediátrico (especialmente en EE.UU.) se estaba sobrediagnosticando en niños con irritabilidad crónica severa. El TDRD captura esa irritabilidad crónica + explosiones desproporcionadas SIN episodios delimitados de grandiosidad o euforia. El pronóstico longitudinal es diferente: TDRD → riesgo de depresión/ansiedad en la adultez; Bipolar → riesgo de episodios maníacos/depresivos.'},
+
+  {t:'question',
+   q:'¿Por qué la CIE-11 crea el "Trastorno Depresivo Mixto Ansioso" (6A73) si el DSM-5 no lo tiene?',
+   opts:['Porque la CIE-11 tiene más trastornos en general','Para capturar cuadros subumbrales de depresión y ansiedad que causan deterioro real pero no cumplen criterios de ninguno de los dos trastornos por separado — muy frecuentes en atención primaria y hospitalización general','Porque la OMS desconfía de la categorización del DSM-5','Porque la ansiedad y la depresión son lo mismo'],
+   cor:1,
+   fb:'La CIE-11 reconoce que muchos pacientes en el mundo real tienen presentaciones mixtas subumbrales que generan deterioro real pero que "no encajan" en ninguna categoría pura. El DSM-5 tiene la categoría "Otro trastorno depresivo especificado" o "Trastorno de ansiedad especificado" para estos casos, pero no los combina. La CIE-11 da una categoría específica que reconoce este patrón clínico muy frecuente y evita el infradiagnóstico.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la duración mínima requerida para diagnosticar Trastorno Depresivo Persistente en un adulto según el DSM-5?',
+   opts:['6 meses','1 año','2 años de ánimo deprimido la mayor parte del día, la mayoría de los días','5 años'],
+   cor:2,
+   fb:'2 años de ánimo deprimido persistente (≥1 año en niños/adolescentes) + ≥2 de 6 síntomas adicionales + sin períodos de remisión de >2 meses. La CIE-11 usa el mismo criterio de 2 años. La cronicidad es definitoria — es lo que lo diferencia del EDM, que puede resolverse.'},
+  {q:'¿Qué es la "doble depresión"?',
+   opts:['Depresión con dos episodios maníacos','Cuando un paciente con Trastorno Depresivo Persistente (distimia) tiene además episodios de Depresión Mayor superpuestos — ambos diagnósticos coexisten','Depresión con características psicóticas y melancólicas simultáneas','Cuando dos familiares de primer grado tienen depresión'],
+   cor:1,
+   fb:'"Doble depresión": Trastorno Depresivo Persistente (base crónica de distimia) + episodios de EDM superpuestos. El paciente tiene una "base" de depresión crónica y baja sobre esa base con episodios agudos más graves. El DSM-5 permite este diagnóstico dual. Clínicamente, la doble depresión tiene peor pronóstico que el EDM solo o la distimia sola, y requiere tratamiento para ambas capas.'},
+  {q:'¿A qué edad puede diagnosticarse el TDRD según el DSM-5?',
+   opts:['Cualquier edad si hay irritabilidad','Entre 6 y 18 años, con síntomas iniciados antes de los 10 años','Solo en niños menores de 6 años','Desde los 3 hasta los 12 años'],
+   cor:1,
+   fb:'El TDRD se diagnostica entre los 6 y 18 años. No se diagnostica antes de los 6 (porque la irritabilidad y las rabietas son normativas a esa edad) ni después de los 18 (porque en adultos estos cuadros se clasifican diferente). Los síntomas deben haber comenzado antes de los 10 años. Si un adulto mayor de 18 llega con este patrón, se busca otro diagnóstico (trastorno depresivo, TAG, trastorno de personalidad).'},
+  {q:'¿Cuál es el tratamiento con mejor evidencia para el Trastorno Depresivo Persistente (distimia)?',
+   opts:['Solo antidepresivos — la psicoterapia no funciona en depresión crónica','Solo psicoterapia — los antidepresivos no funcionan en distimia','Combinación de antidepresivos + psicoterapia (especialmente CBASP) — superior a cualquiera solo','TEC de mantenimiento — es el único tratamiento eficaz para depresión crónica'],
+   cor:2,
+   fb:'La combinación antidepresivo + psicoterapia es superior a cualquiera solo para el TDP. El CBASP (Cognitive Behavioral Analysis System of Psychotherapy de McCullough) es la psicoterapia diseñada específicamente para depresión crónica — trabaja el análisis situacional y los patrones interpersonales cronificados. Los ISRS son la primera línea farmacológica. La TEC puede usarse en casos resistentes graves pero no es primera línea.'},
+  {q:'¿Cuál es la principal diferencia entre el trastorno depresivo mixto ansioso de la CIE-11 y el diagnóstico de "Otro trastorno depresivo especificado" del DSM-5?',
+   opts:['Son exactamente iguales — solo tienen diferente nombre','La CIE-11 da una categoría específica que reconoce el patrón mixto subumbral ansioso-depresivo como entidad propia; el DSM-5 usa categorías residuales genéricas ("especificado/no especificado") sin reconocer el patrón mixto formalmente','El DSM-5 no tiene ninguna categoría para estos casos','La CIE-11 exige más síntomas que el DSM-5'],
+   cor:1,
+   fb:'La CIE-11 hace explícito el reconocimiento de un patrón clínico muy frecuente — síntomas mixtos depresivo-ansiosos subumbrales con deterioro funcional real. El DSM-5 tiene categorías residuales ("Otro trastorno depresivo especificado", "Otro trastorno de ansiedad especificado") pero no las combina ni reconoce formalmente el patrón mixto. En la práctica, muchos pacientes de hospitalización general o atención primaria tienen exactamente este cuadro.'}
+ ]
+},
+
+'an3':{
+ title:'Trastorno Bipolar I y II — DIG FAST y criterios completos',
+ mod:'Estado de Ánimo',
+ sub:'CIE-11 (6A60–6A61) vs DSM-5 (296.xx) — Manía, hipomanía y sus diferencias',
+ bloques:[
+  {t:'text', content:`<p>El <strong>trastorno bipolar</strong> es el diagnóstico del estado de ánimo más frecuentemente mal diagnosticado — en promedio, los pacientes esperan <strong>10 años</strong> desde los primeros síntomas hasta el diagnóstico correcto. Durante ese tiempo suelen recibir solo antidepresivos (que pueden desestabilizar el cuadro) o son mal etiquetados como depresión unipolar, trastorno de personalidad o ansiedad.</p>
+  <p>La distinción fundamental: el <strong>Bipolar I</strong> requiere al menos un episodio maníaco completo. El <strong>Bipolar II</strong> requiere al menos un episodio hipomaníaco y al menos un episodio depresivo mayor — <em>nunca ha tenido manía completa</em>.</p>`},
+
+  {t:'section', content:'Episodio Maníaco — Criterios completos'},
+
+  {t:'text', content:`<p><strong>Criterio A:</strong> Período diferenciado de ánimo anormal y persistentemente elevado, expansivo o irritable, y actividad o energía anormalmente y persistentemente aumentadas. Duración: <strong>≥7 días</strong> (o cualquier duración si requiere hospitalización o hay psicosis). Presente la mayor parte del día, casi todos los días.</p>
+  <p><strong>Criterio B — DIG FAST (≥3 síntomas; ≥4 si el ánimo es solo irritable):</strong></p>
+  <p><strong>D — Distractibilidad:</strong> Atención fácilmente atraída por estímulos externos sin importancia. El paciente no puede sostener una conversación — su mente salta de estímulo en estímulo.</p>
+  <p><strong>I — Impulsividad</strong> (aumento de actividades orientadas a metas con alto potencial de consecuencias dolorosas): gasto compulsivo, hypersexualidad, inversiones descabelladas, promiscuidad, conducción temeraria. No es placer — es regulación de un estado de energía interno insoportable.</p>
+  <p><strong>G — Grandiosidad:</strong> Autoestima exageradamente aumentada o grandiosidad. Puede llegar a delirios: creer tener poderes especiales, ser elegido por Dios, tener un descubrimiento que cambiará el mundo.</p>
+  <p><strong>F — Flight of ideas / Fuga de ideas:</strong> Pensamiento acelerado, salto de idea en idea con conexiones tangenciales. El paciente lo describe como "muchas ideas al mismo tiempo que no puedo parar".</p>
+  <p><strong>A — Activity increased / Aumento de la actividad:</strong> Múltiples proyectos simultáneos, hiperactividad psicomotora, agitación. Puede iniciar 10 proyectos en un día sin terminar ninguno.</p>
+  <p><strong>S — Sleep decreased / Sueño reducido sin cansancio:</strong> Necesidad de sueño reducida — duerme 2-3 horas y se siente completamente descansado. Este es el síntoma más específico: en insomnio depresivo hay cansancio; en manía no.</p>
+  <p><strong>T — Talkativeness / Logorrea:</strong> Habla más de lo habitual, presión para seguir hablando, difícil de interrumpir, a veces ininteligible por la velocidad.</p>
+  <p><strong>Criterio C:</strong> Suficientemente grave para causar deterioro social o laboral marcado, o necesitar hospitalización, o hay psicosis.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Bipolar I:</strong> 6A60 — requiere ≥1 episodio maníaco</li>
+    <li><strong>Bipolar II:</strong> 6A61 — ≥1 episodio hipomaníaco + ≥1 episodio depresivo</li>
+    <li><strong>Duración manía:</strong> ≥7 días o cualquier duración si requiere hospitalización</li>
+    <li><strong>Duración hipomanía:</strong> ≥4 días consecutivos</li>
+    <li><strong>CIE-11 no clasifica el Bipolar II como "menos grave"</strong> — reconoce que el II tiene más episodios depresivos y mayor riesgo suicida</li>
+    <li><strong>Episodio mixto:</strong> La CIE-11 permite especificar episodios mixtos (síntomas maníacos y depresivos simultáneos)</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Bipolar I:</strong> 296.xx — requiere ≥1 episodio maníaco completo (los episodios depresivos no son necesarios para el diagnóstico, aunque frecuentes)</li>
+    <li><strong>Bipolar II:</strong> 296.89 — ≥1 hipomaníaco + ≥1 EDM; NUNCA episodio maníaco completo</li>
+    <li><strong>Duración manía:</strong> ≥7 días; ≥4 días para hipomanía</li>
+    <li><strong>Especificadores:</strong> Con características ansiosas, melancólicas, psicóticas, catatónicas, periparto, patrón estacional, ciclación rápida</li>
+    <li><strong>Ciclación rápida:</strong> ≥4 episodios del estado de ánimo en 12 meses — especificador con impacto en el tratamiento</li>
+   </ul>`},
+
+  {t:'table',
+   headers:['Característica','Manía (Bipolar I)','Hipomanía (Bipolar II)'],
+   rows:[
+    ['Duración mínima','≥7 días (o menos si hospitalización/psicosis)','≥4 días consecutivos'],
+    ['Deterioro funcional','Sí — marcado deterioro o necesita hospitalización','No — cambio observable pero sin deterioro grave'],
+    ['Hospitalización requerida','A veces necesaria','No se requiere (si es necesaria, es manía)'],
+    ['Psicosis','Puede estar presente','No hay psicosis (si hay, es manía)'],
+    ['Conciencia del estado','Frecuentemente ausente (anosognosia)','Generalmente preservada — "me siento muy bien"'],
+    ['Diagnóstico resultante','Bipolar I','Bipolar II (si hay EDM previo o actual)'],
+   ]},
+
+  {t:'case',
+   label:'Bipolar II subdiagnosticado — 8 años con "depresión refractaria"',
+   text:`<strong>Daniela, 34 años.</strong> Ha tenido 4 episodios depresivos mayores en 8 años, tratada con 5 antidepresivos diferentes con respuesta parcial o nula. En la entrevista actual, su esposo menciona que "hay temporadas en que está muy activa, muy creativa, habla muchísimo, duerme poco pero dice que se siente perfectamente". Daniela lo confirma: "esos períodos son mis mejores épocas, no entiendo por qué son un problema". Duran 5-8 días. No ha necesitado hospitalización. No ha perdido el trabajo.
+  <br><br><em>Bipolar II con hipomanía no reportada:</em> La hipomanía es egosintónica — los pacientes no la reportan como síntoma porque la viven como bienestar. Solo el informante externo (pareja, familia) la detecta. El promedio de retraso diagnóstico del Bipolar II es 10 años. Los antidepresivos en monoterapia sin estabilizador pueden inducir ciclación rápida o estados mixtos.`},
+
+  {t:'question',
+   q:'¿Por qué se necesitan ≥4 síntomas DIG FAST cuando el ánimo es irritable, versus ≥3 cuando es eufórico/expansivo?',
+   opts:['Porque la irritabilidad es más grave','Porque la irritabilidad es un síntoma inespecífico que puede verse en muchos otros trastornos — exigir 4 síntomas aumenta la especificidad del diagnóstico cuando el síntoma cardinal es menos discriminativo','Porque los síntomas físicos son más frecuentes en manía irritable','Es una decisión arbitraria del DSM-5'],
+   cor:1,
+   fb:'La lógica es de especificidad diagnóstica. La euforia/expansividad son síntomas relativamente específicos de manía. La irritabilidad, en cambio, puede verse en depresión, TDAH, trastorno de personalidad, abuso de sustancias, TAG, entre otros. Al pedir un síntoma más del Criterio B cuando el ánimo es irritable, el DSM-5 aumenta la especificidad y reduce el riesgo de diagnosticar manía incorrectamente.'},
+
+  {t:'alert',
+   label:'Antidepresivos en Bipolar — Riesgo real',
+   text:'Dar antidepresivos sin estabilizador a un paciente bipolar puede: (1) precipitar un episodio maníaco o hipomaníaco, (2) inducir ciclación rápida (≥4 episodios/año), (3) producir estados mixtos con mayor riesgo suicida. Esta es la razón por la que siempre se debe preguntar por episodios de "energía aumentada, sueño reducido sin cansancio, y grandiosidad" antes de iniciar antidepresivos en depresión. Preguntar al informante externo es crítico — el paciente no reportará espontáneamente la hipomanía.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es la distinción diagnóstica definitiva entre Trastorno Bipolar I y Bipolar II?',
+   opts:['El Bipolar I tiene más episodios depresivos','El Bipolar I requiere al menos un episodio maníaco completo; el Bipolar II nunca ha tenido manía — solo hipomanía + episodios depresivos','El Bipolar II es más grave que el I','El Bipolar I no tiene episodios depresivos'],
+   cor:1,
+   fb:'La distinción es binaria y definitiva: si hay un episodio maníaco completo (≥7 días, con deterioro funcional grave o psicosis o necesidad de hospitalización) → Bipolar I, independientemente de los episodios depresivos. Si nunca ha habido episodio maníaco completo, solo hipomanía + EDM → Bipolar II. Si un paciente Bipolar II tiene un episodio maníaco completo, el diagnóstico cambia permanentemente a Bipolar I.'},
+  {q:'¿Cuál síntoma del DIG FAST diferencia más específicamente la manía del insomnio depresivo?',
+   opts:['Distractibilidad — también presente en TDAH','Grandiosidad — también en TPNarcisista','Sueño reducido SIN cansancio — en manía el paciente duerme 2-3 horas y se siente completamente descansado; en depresión el insomnio va acompañado de fatiga intensa','Logorrea — también en ansiedad'],
+   cor:2,
+   fb:'Sueño reducido sin cansancio es el síntoma más específico de manía. Preguntar: "¿Se sentía cansado o necesitó recuperar ese sueño?" Si no necesitó recuperarlo y se sentía lleno de energía = maníaco. Si el sueño reducido generaba fatiga = insomnio depresivo o de otro origen. Esta distinción es fundamental en la entrevista clínica, especialmente cuando el paciente reporta "dormir poco" en el contexto de un período de mucha energía.'},
+  {q:'Paciente tratada con 4 antidepresivos diferentes en 6 años con respuesta parcial. La pareja reporta períodos de 5-7 días donde "está perfecta, muy activa, habla sin parar, duerme 4 horas y no se cansa". ¿Cuál diagnóstico debe considerarse?',
+   opts:['Depresión refractaria — cambiar a otro antidepresivo','Trastorno Bipolar II — la descripción del esposo corresponde a hipomanía (≥4 días, cambio observable, sin deterioro grave, egosintónica)','Trastorno bipolar I — necesita hospitalización','TAG con períodos de menor ansiedad'],
+   cor:1,
+   fb:'Trastorno Bipolar II: la descripción de la pareja corresponde a hipomanía — duración ≥4 días, aumento de energía/actividad, logorrea, sueño reducido sin cansancio, cambio observable por otros, sin deterioro grave ni hospitalización. La hipomanía es egosintónica ("mis mejores épocas") — por eso no se reporta espontáneamente. La historia de depresión recurrente + hipomanía no reportada es el patrón clásico del Bipolar II subdiagnosticado.'},
+  {q:'¿Qué indica el especificador "ciclación rápida" en el trastorno bipolar?',
+   opts:['Los episodios duran menos de 1 día','≥4 episodios del estado de ánimo (maníacos, hipomaníacos, mixtos o depresivos) en los últimos 12 meses, con remisión parcial entre ellos','Los episodios cambian de maníaco a depresivo en horas','Solo se aplica al Bipolar I'],
+   cor:1,
+   fb:'Ciclación rápida: ≥4 episodios del estado de ánimo en 12 meses. Puede aplicarse a Bipolar I y II. Tiene implicaciones terapéuticas: los antidepresivos pueden inducirla o empeorarla — deben evitarse o reducirse. El litio es menos efectivo en ciclación rápida que el valproato o la lamotrigina. La ciclación rápida no es un especificador permanente — puede resolverse con el tratamiento adecuado.'},
+  {q:'¿Cuál es el mayor riesgo clínico del Trastorno Bipolar II que frecuentemente se subestima al compararlo con el Bipolar I?',
+   opts:['El Bipolar II tiene más psicosis que el Bipolar I','El Bipolar II tiene mayor proporción de tiempo en episodios depresivos y mayor riesgo de suicidio consumado que el Bipolar I — no es "menos grave"','El Bipolar II requiere más hospitalizaciones','El Bipolar II tiene peor respuesta al litio'],
+   cor:1,
+   fb:'El Bipolar II no es "Bipolar I leve". Los pacientes con Bipolar II pasan más tiempo en episodios depresivos que los Bipolar I, y tienen tasas de suicidio consumado más altas. La manía del Bipolar I es más dramática y lleva antes a consulta, pero la depresión crónica del Bipolar II es más silenciosa y devastadora. La CIE-11 hace explícito que el Bipolar II no debe considerarse menos grave que el I.'}
+ ]
+},
+
+'an4':{
+ title:'Ciclotimia · Estados Mixtos · Especificadores avanzados',
+ mod:'Estado de Ánimo',
+ sub:'CIE-11 (6A62) vs DSM-5 (301.13) · Mixtos · Suicidio en trastornos del ánimo',
+ bloques:[
+  {t:'text', content:`<p>Este bloque cierra el módulo con los trastornos del ánimo que requieren mayor nivel de discriminación diagnóstica: la ciclotimia, los episodios mixtos, y el manejo del riesgo suicida en el contexto del estado de ánimo — una competencia clínica indispensable en cualquier entorno hospitalario.</p>`},
+
+  {t:'section', content:'Trastorno Ciclotímico — El espectro subumbral bipolar'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6A62 / DSM-5: 301.13</strong></p>
+  <p><strong>Criterios DSM-5:</strong><br>
+  A. Durante ≥2 años (≥1 año en niños/adolescentes), presencia de numerosos períodos con síntomas hipomaníacos que no cumplen criterios de episodio hipomaníaco, y numerosos períodos con síntomas depresivos que no cumplen criterios de episodio depresivo mayor.<br>
+  B. Durante los 2 años no ha habido ausencia de síntomas de A por más de 2 meses seguidos.<br>
+  C. Nunca se han cumplido criterios de EDM, episodio maníaco o hipomaníaco.<br>
+  D. No se explica por otro trastorno.<br>
+  E. No atribuible a sustancias ni condición médica.<br>
+  F. Deterioro clínicamente significativo.</p>
+  <p><strong>Posición en el espectro:</strong><br>
+  Ciclotimia → Bipolar II → Bipolar I<br>
+  (subumbral) → (hipomanía+EDM) → (manía completa)</p>
+  <p><strong>Riesgo de conversión:</strong> El 15-50% de pacientes con ciclotimia desarrollan Bipolar I o II. Es una condición dinámica — requiere seguimiento.</p>
+  <p><strong>Diferencial con trastorno de personalidad límite (TLP):</strong> Ambos tienen labilidad afectiva. La diferencia clave: en ciclotimia los cambios de ánimo son más autónomos del contexto interpersonal; en TLP son reactivos a eventos relacionales ("me abandonan → crisis"). Los períodos de ciclotimia son más prolongados (días) que los del TLP (horas).</p>`},
+
+  {t:'section', content:'Episodios Mixtos — Lo más peligroso del espectro'},
+
+  {t:'text', content:`<p>Un estado mixto combina síntomas maníacos/hipomaníacos y depresivos simultáneamente. Son los estados de mayor riesgo suicida en el trastorno bipolar — la energía maníaca al servicio de la desesperación depresiva.</p>
+  <p><strong>DSM-5:</strong> Eliminó el "episodio mixto" del DSM-IV como categoría separada y lo convirtió en un <strong>especificador "con características mixtas"</strong> que puede aplicarse a episodios maníacos, hipomaníacos o depresivos.</p>
+  <p><strong>Especificador "con características mixtas" en episodio maníaco/hipomaníaco:</strong> ≥3 síntomas depresivos durante la mayoría de los días del episodio: disforia o ánimo deprimido, disminución del interés, enlentecimiento psicomotor, fatiga, sentimientos de inutilidad, pensamientos de muerte.</p>
+  <p><strong>Especificador "con características mixtas" en episodio depresivo:</strong> ≥3 síntomas maníacos/hipomaníacos la mayoría de los días: ánimo elevado o expansivo, grandiosidad, logorrea, fuga de ideas, aumento de energía, conducta de riesgo, disminución necesidad de sueño sin cansancio.</p>
+  <p><strong>Clínicamente:</strong> El paciente en estado mixto puede estar agitado, llorando, con pensamientos acelerados, desesperado y con energía suficiente para actuar sobre esa desesperación. La combinación es más letal que cualquiera de los dos estados por separado.</p>`},
+
+  {t:'alert',
+   label:'Estados mixtos y riesgo suicida — Lo que no se puede ignorar',
+   text:'Los estados mixtos tienen el mayor riesgo de suicidio consumado en el espectro bipolar. La depresión pura tiene ideación pero menos energía para actuar. La manía pura tiene energía pero no la desesperación. El estado mixto tiene ambos. Señales de alarma: agitación + llanto + pensamiento acelerado + hablar de muerte + insomnio. Siempre evaluar plan, intención y medios. Los antidepresivos en monoterapia pueden inducir estados mixtos en bipolares — otro argumento para no darlos sin estabilizador.'},
+
+  {t:'section', content:'Suicidio y trastornos del estado de ánimo'},
+
+  {t:'text', content:`<p>Los trastornos del estado de ánimo son los diagnósticos más frecuentemente asociados al suicidio consumado. Datos clave:</p>
+  <p><strong>Riesgo a lo largo de la vida:</strong><br>
+  — Depresión mayor unipolar: ~2-4% de suicidio consumado (vs ~1.4% en población general)<br>
+  — Trastorno Bipolar I y II: ~4-10% — el más alto del espectro<br>
+  — Bipolar II con estados mixtos: mayor riesgo aún que el Bipolar I</p>
+  <p><strong>Factores de riesgo específicos en depresión:</strong><br>
+  — Ideación activa con plan específico<br>
+  — Intentos previos (predictor más fuerte)<br>
+  — Acceso a medios letales (armas, medicamentos)<br>
+  — Aislamiento social<br>
+  — Desesperanza (más predictiva que la intensidad de la depresión)<br>
+  — Ansiedad comórbida intensa<br>
+  — Consumo de alcohol/sustancias<br>
+  — Comorbilidad con dolor crónico</p>
+  <p><strong>La desesperanza como predictor:</strong> Beck demostró que la desesperanza es más predictiva del suicidio consumado que la intensidad de la depresión. Un paciente con depresión leve pero desesperanza intensa ("nunca va a mejorar") tiene mayor riesgo que uno con depresión grave pero esperanza terapéutica.</p>`},
+
+  {t:'tip',
+   label:'Evaluación de riesgo suicida — No es solo preguntar "¿tiene ideas de hacerse daño?"',
+   text:'La evaluación completa incluye: (1) Ideación: ¿Ha pensado en quitarse la vida? ¿Con qué frecuencia? ¿Cuánto tiempo duran los pensamientos? (2) Plan: ¿Tiene un plan específico de cómo hacerlo? (3) Intención: ¿Piensa llevarlo a cabo? ¿Cuándo? (4) Medios: ¿Tiene acceso a los medios del plan? (5) Intentos previos: ¿Ha intentado antes? ¿Cómo? ¿Qué pasó? (6) Factores protectores: ¿Qué le impediría hacerlo? (familia, hijos, creencias). La restricción de medios (retirar armas, limitar acceso a medicamentos) es una de las intervenciones con más evidencia para prevenir suicidio consumado.'},
+
+  {t:'question',
+   q:'¿Por qué los estados mixtos tienen mayor riesgo suicida que la depresión mayor pura o la manía pura?',
+   opts:['Porque la medicación para estados mixtos es más tóxica','Porque combinan la desesperación y el plan depresivo con la energía y la impulsividad maníaca — el paciente tiene tanto la motivación como la capacidad de actuar','Porque los estados mixtos duran más tiempo','Porque en estados mixtos siempre hay psicosis'],
+   cor:1,
+   fb:'La combinación es la que hace el estado mixto tan peligroso. En depresión pura: hay desesperación pero la inhibición psicomotora frena la acción. En manía pura: hay energía pero no la desesperación suicida (generalmente). En estado mixto: la energía maníaca + impulsividad + pensamiento acelerado al servicio de la desesperanza depresiva = combinación letal. Es la razón por la que se debe evaluar suicidio en cualquier estado de activación (agitación, ansiedad intensa) en un paciente bipolar o deprimido.'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia entre ciclotimia y Trastorno Bipolar II?',
+   opts:['La ciclotimia tiene episodios maníacos; el Bipolar II no','En ciclotimia los síntomas no alcanzan el umbral de episodio hipomaníaco completo ni de EDM — son subumbrales pero persistentes durante ≥2 años; en Bipolar II hay episodios hipomaníacos y depresivos que SÍ cumplen criterios completos','La ciclotimia solo afecta adolescentes','No hay diferencia clínica real'],
+   cor:1,
+   fb:'La distinción es de umbral: Ciclotimia = fluctuaciones subumbrales (no cumplen criterios completos de hipomanía ni de EDM) durante ≥2 años. Bipolar II = episodios que SÍ cumplen criterios completos de hipomanía + EDM. Clínicamente, la ciclotimia puede ser difícil de distinguir del Bipolar II si los episodios son leves. El seguimiento longitudinal ayuda a clarificar.'}
+ ],
+ quiz:[
+  {q:'¿Cuántos años de síntomas se requieren para diagnosticar Trastorno Ciclotímico en un adulto?',
+   opts:['6 meses','1 año','≥2 años de períodos hipomaníacos y depresivos subumbrales sin remisión de >2 meses','5 años'],
+   cor:2,
+   fb:'≥2 años (≥1 año en niños/adolescentes) de numerosos períodos con síntomas hipomaníacos subumbrales y depresivos subumbrales, sin ausencia de síntomas por más de 2 meses. La cronicidad y la naturaleza subumbral son definitivas. La CIE-11 usa el mismo criterio de 2 años para el trastorno ciclotímico (6A62).'},
+  {q:'¿Qué cambio hizo el DSM-5 respecto al "episodio mixto" del DSM-IV?',
+   opts:['Lo eliminó completamente — los estados mixtos no existen','Lo convirtió de categoría diagnóstica separada a especificador "con características mixtas" que puede aplicarse a episodios maníacos, hipomaníacos o depresivos','Lo trasladó al capítulo de trastornos de ansiedad','Lo renombró como "episodio disfórico"'],
+   cor:1,
+   fb:'El DSM-IV tenía el "episodio mixto" como un tipo de episodio (simultáneamente maníaco y depresivo). El DSM-5 eliminó esa categoría y creó el especificador "con características mixtas" que puede aplicarse a cualquier tipo de episodio del ánimo. Esto refleja la evidencia de que los síntomas mixtos son un espectro, no una categoría discreta. La CIE-11 también permite especificar características mixtas en los episodios.'},
+  {q:'¿Cuál factor es el predictor más fuerte del suicidio consumado en trastornos depresivos según Beck?',
+   opts:['La intensidad de la depresión — cuanto más grave, mayor riesgo','El número de intentos previos','La desesperanza — más predictiva que la intensidad de la depresión misma','El aislamiento social'],
+   cor:2,
+   fb:'Aaron Beck demostró en estudios longitudinales que la desesperanza (evaluada con la Escala de Desesperanza de Beck — BHS) es más predictiva del suicidio consumado que la intensidad de la depresión. Un paciente con depresión leve pero con convicción de que "nada va a mejorar nunca" tiene mayor riesgo que uno con depresión grave pero con esperanza terapéutica. Los intentos previos son el predictor histórico más fuerte, pero la desesperanza es el predictor psicológico más potente.'},
+  {q:'¿Cuál es el riesgo de suicidio consumado a lo largo de la vida en el Trastorno Bipolar?',
+   opts:['Es igual que la población general (~1.4%)','Es menor que en depresión unipolar','~4-10% — mayor que en depresión mayor unipolar, con el Bipolar II y los estados mixtos concentrando el mayor riesgo','Solo hay riesgo durante los episodios depresivos, no durante la manía'],
+   cor:2,
+   fb:'El trastorno bipolar tiene una de las tasas más altas de suicidio consumado: ~4-10% a lo largo de la vida (vs ~2-4% en depresión unipolar y ~1.4% en población general). El Bipolar II, contrario a lo que se asume, puede tener mayor riesgo que el I — los pacientes pasan más tiempo en episodios depresivos. Los estados mixtos concentran el mayor riesgo. El suicidio es responsable del ~20-30% de las muertes en el trastorno bipolar.'},
+  {q:'¿Cuál es la intervención basada en evidencia más efectiva para reducir el riesgo de suicidio consumado en pacientes con trastorno bipolar?',
+   opts:['Solo psicoterapia — los fármacos no reducen el suicidio','Solo hospitalización preventiva','Litio — es el único fármaco con evidencia sólida de reducción del suicidio consumado en trastorno bipolar, independientemente de su efecto estabilizador del ánimo','ISRS en altas dosis'],
+   cor:2,
+   fb:'El litio es el único fármaco con evidencia sólida y consistente de reducción del suicidio consumado en trastorno bipolar — con reducción de hasta 80% en algunos estudios. Este efecto antisuicida parece ser independiente de su efecto estabilizador del ánimo. El valproato y la lamotrigina tienen menos evidencia en este punto específico. La clozapina tiene evidencia similar en esquizofrenia pero no en bipolar. Esto hace que el litio sea el fármaco de primera elección en pacientes bipolares con alto riesgo suicida.'}
+ ]
+}
+
+};
+
+const MODS=[{id:'an',name:'Estado de Ánimo',ic:'🌊',color:'#5b9bd5',
+ lecciones:[
+  {id:'an1',title:'Episodio Depresivo Mayor',sub:'CIE-11 6A70 · DSM-5 296.xx · 9 síntomas · Especificadores',mins:16},
+  {id:'an2',title:'Distimia · TDRD · Mixto Ansioso',sub:'TDP 300.4 · TDRD 296.99 · CIE-11 6A73 nuevo',mins:13},
+  {id:'an3',title:'Bipolar I y II — DIG FAST completo',sub:'CIE-11 6A60–61 · DSM-5 296.xx · Manía vs hipomanía',mins:15},
+  {id:'an4',title:'Ciclotimia · Mixtos · Suicidio',sub:'CIE-11 6A62 · Estados mixtos · Riesgo suicida',mins:14}
+ ]}];
+
+const GAME_CASES=[
+  {id:'g1',lvl:1,pts_base:10,
+   caso:`Carolina, 42 años. Hace 5 semanas comenzó a sentirse "sin ganas de nada", perdió 4 kg sin dieta, se despierta a las 3am sin poder volver a dormir, no puede concentrarse en el trabajo, llora sin motivo y siente que "es una carga para su familia". Antes disfrutaba el jardín, la cocina, ver a sus nietos — ahora "todo es igual".`,
+   q:'¿Cuántos síntomas del Criterio A cumple y cuál es el diagnóstico?',
+   opts:['3 síntomas — no cumple criterios de EDM','6 síntomas (ánimo deprimido, anhedonia, pérdida de peso, insomnio terminal, concentración reducida, sentimientos de ser carga/inutilidad) — Episodio Depresivo Mayor moderado','Solo tristeza reactiva — no hay EDM','Distimia — porque lleva más de 2 semanas'],
+   cor:1,
+   fb:'6 síntomas del Criterio A: (1) ánimo deprimido, (2) anhedonia (perdió interés en jardín, cocina, nietos), (3) pérdida de peso, (4) insomnio terminal (despierta 3am), (5) concentración reducida, (6) sentimientos de inutilidad/ser carga. ≥5 de 9 durante ≥2 semanas = EDM. La anhedonia ("todo es igual") es el síntoma más específico.'},
+
+  {id:'g2',lvl:1,pts_base:10,
+   caso:`Jorge, 29 años. Desde hace 10 días: duerme 3 horas y "no necesito más", ha iniciado 5 proyectos de negocio simultáneos, gastó 15 millones de sus ahorros en "inversiones seguras", habla sin parar (su esposa no puede interrumpirlo), y cree que "tiene el talento de Elon Musk". Su esposa dice que "es otra persona".`,
+   q:'¿Cuántos síntomas DIG FAST cumple y cuál es el diagnóstico más probable?',
+   opts:['Es TDAH — tiene múltiples proyectos e impulsividad','5 síntomas DIG FAST (Sueño reducido sin cansancio, Impulsividad/gastos, Grandiosidad, Aumento de actividad, Talkativeness/logorrea) + ánimo elevado ≥7 días — Episodio maníaco, Bipolar I','Es hipomanía — no requiere hospitalización aún','Es trastorno de personalidad narcisista'],
+   cor:1,
+   fb:'5 síntomas DIG FAST: S (sueño reducido sin cansancio), I (gasto impulsivo), G (grandiosidad — "talento de Musk"), A (múltiples proyectos), T (logorrea). Más ánimo elevado durante ≥7 días con deterioro observable (su esposa lo nota). Esto cumple criterios de episodio maníaco — Bipolar I. El diferencial con TDAH: en TDAH no hay grandiosidad ni cambio episódico desde un funcionamiento previo normal.'},
+
+  {id:'g3',lvl:1,pts_base:10,
+   caso:`Patricia, 47 años. Consulta por "tristeza crónica desde siempre". Refiere que desde los 28 años se siente con poco ánimo, baja energía, baja autoestima ("nunca hago nada bien"), duerme mal y tiene dificultad para concentrarse. Funciona: trabaja, tiene familia. "Nunca he estado bien más de 2-3 semanas seguidas en 19 años". No hay períodos de euforia.`,
+   q:'¿Cuál es el diagnóstico más apropiado?',
+   opts:['Episodio Depresivo Mayor recurrente — 19 años de síntomas','Trastorno Depresivo Persistente (distimia) — ≥2 años de ánimo deprimido persistente con ≥2 síntomas adicionales, sin remisión de >2 meses','Trastorno de personalidad depresiva','Bipolar II — la baja energía puede ser hipomanía'],
+   cor:1,
+   fb:'Trastorno Depresivo Persistente: ≥2 años de ánimo deprimido (aquí 19 años) + ≥2 síntomas (baja energía, baja autoestima, insomnio, concentración reducida) + sin períodos de remisión >2 meses. El EDM recurrente tiene episodios con inicio y fin claros; la distimia es un estado de fondo crónico. La normalización ("siempre fui así") es la trampa clínica más frecuente.'},
+
+  {id:'g4',lvl:2,pts_base:15,
+   caso:`Andrés, 37 años. Ha tenido 3 episodios depresivos mayores. En el episodio actual: ánimo muy deprimido, pero cuando lo llama su hijo y le cuenta algo bueno "se ilumina por un momento". Duerme 11 horas, come más de lo normal (especialmente carbohidratos), y dice sentir los brazos "pesados como cemento". El episodio anterior respondió mal a sertralina y paroxetina.`,
+   q:'¿Qué especificador corresponde y qué implica para el tratamiento?',
+   opts:['Con características melancólicas — no mejora con eventos positivos','Con características atípicas — reactividad del ánimo presente + hipersomnia + hiperfagia + parálisis de plomo. Implica: peor respuesta a ISRS estándar, mejor respuesta a IMAO; y mayor sospecha de Bipolar II','Con inicio en el periparto — síntomas tras el nacimiento del hijo','Con patrón estacional — los síntomas son siempre en invierno'],
+   cor:1,
+   fb:'Características atípicas: reactividad del ánimo (se ilumina con el hijo — criterio A obligatorio) + hipersomnia (11h) + hiperfagia + parálisis de plomo. Las características atípicas son más frecuentes en Bipolar II — la historia de respuesta pobre a 2 ISRS refuerza esta sospecha. Antes de añadir otro antidepresivo, hay que explorar si ha habido períodos hipomaníacos no reportados. Tratamiento: los atípicos responden mejor a IMAO; los ISRS son menos efectivos.'},
+
+  {id:'g5',lvl:2,pts_base:15,
+   caso:`Luis, 52 años, bipolar I conocido. Llega a urgencias agitado, llorando, con pensamiento acelerado, dice "no puedo más, todo es un desastre" pero habla rapidísimo y no puede quedarse quieto. Lleva 4 días con este cuadro. La enfermera lo describe como "al mismo tiempo maníaco y deprimido".`,
+   q:'¿Qué estado clínico describe este caso y cuál es la urgencia?',
+   opts:['Episodio maníaco con agitación — dar haloperidol y sedar','Episodio depresivo grave — dar antidepresivo urgente','Estado mixto (episodio maníaco con características mixtas) — mayor riesgo suicida. Evaluar suicidio inmediatamente. Tratamiento: estabilizador + antipsicótico. NO antidepresivos solos','Trastorno de conversión — los síntomas son inconsistentes'],
+   cor:2,
+   fb:'Estado mixto: agitación + pensamiento acelerado (maníaco) + llanto + desesperación + "no puedo más" (depresivo). Es el estado de mayor riesgo suicida del espectro bipolar — energía maníaca al servicio de la desesperación depresiva. Urgencia: evaluación de suicidio inmediata. Tratamiento: estabilizador (valproato) + antipsicótico atípico. Los antidepresivos están contraindicados — pueden empeorar el estado mixto.'},
+
+  {id:'g6',lvl:3,pts_base:20,
+   caso:`Valentina, 16 años. Desde los 14 años alterna períodos de "estar muy bien, muy activa, muy sociable" (5-7 días) con períodos de "estar triste y sin energía" (7-10 días), ninguno lo suficientemente grave para cumplir criterios completos. Nunca ha habido un período de >6 semanas sin algún síntoma. Refiere que "así soy yo — unas semanas bien, otras mal". Funciona en el colegio con dificultad.`,
+   q:'¿Cuál es el diagnóstico más apropiado y cuál es el riesgo longitudinal?',
+   opts:['Trastorno de personalidad límite — la labilidad es el síntoma central','Episodio Depresivo Mayor recurrente — los períodos bajos son el problema','Trastorno Ciclotímico — períodos subumbrales hipomaníacos y depresivos durante ≥1 año (criterio adolescentes), con riesgo de conversión a Bipolar I o II en 15-50% de casos','TDAH con labilidad emocional'],
+   cor:2,
+   fb:'Trastorno Ciclotímico: desde los 14 años (≥1 año en adolescentes = criterio cumplido), fluctuaciones subumbrales hipomaníacas (períodos de 5-7 días activos — no alcanzan 4 días completos de hipomanía o no cumplen todos los síntomas) y depresivas (no cumplen los 5 síntomas del EDM), sin remisión >6 semanas. Riesgo longitudinal: 15-50% desarrolla Bipolar I o II. Diferencial con TLP: los cambios de ciclotimia son más autónomos del contexto interpersonal y duran más (días, no horas).'}
+];
+
+let ST={done:{},pts:0,correct:0,total:0,streak:0,game:{pts:0,unlocked:1}};
+function save(){try{localStorage.setItem('psicodx_an',JSON.stringify(ST));}catch(e){}}
+function load(){try{const d=localStorage.getItem('psicodx_an');if(d)ST=JSON.parse(d);}catch(e){}}
+load();
+
+function refreshHome(){
+  const done=Object.keys(ST.done).length;
+  document.getElementById('hs-les').textContent=done;
+  document.getElementById('hs-prec').textContent=ST.total>0?Math.round(ST.correct/ST.total*100)+'%':'—';
+  document.getElementById('hs-pts').textContent=ST.pts;
+  document.getElementById('h-les').textContent=done;
+  document.getElementById('h-pts').textContent=ST.pts;
+  document.getElementById('h-str').textContent=(ST.streak||0)+'🔥';
+  const el=document.getElementById('home-modules');
+  el.innerHTML='';
+  MODS.forEach(mod=>{
+    const doneLes=mod.lecciones.filter(l=>ST.done[l.id]).length;
+    const modEl=document.createElement('div');
+    modEl.className='card';
+    modEl.style.cssText='padding:1rem 1.1rem;margin-bottom:.85rem';
+    modEl.innerHTML=`<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.85rem">
+      <div style="width:38px;height:38px;border-radius:50%;background:${mod.color}22;border:2px solid ${mod.color}44;display:flex;align-items:center;justify-content:center;font-size:1.1rem">${mod.ic}</div>
+      <div style="flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">${mod.name}</div>
+      <div style="font-size:.65rem;color:var(--text);opacity:.5">${doneLes}/${mod.lecciones.length} completadas</div></div>
+    </div>`;
+    mod.lecciones.forEach(les=>{
+      const isDone=!!ST.done[les.id];
+      const row=document.createElement('div');
+      row.className='mod-card'+(isDone?' done':'');
+      row.style.marginBottom='.5rem';
+      row.innerHTML=`<div class="mod-header">
+        <div class="mod-icon" style="background:${isDone?'#3a9e6f22':'var(--bg)'};border:1.5px solid ${isDone?'var(--ok)':'var(--rl)'}">${isDone?'✓':'📖'}</div>
+        <div class="mod-info">
+          <div class="mod-title">${les.title}</div>
+          <div class="mod-sub">${les.sub}</div>
+          <div class="mod-prog-wrap"><div class="mod-prog-fill" style="width:${isDone?100:0}%"></div></div>
+        </div>
+      </div>
+      <div class="mod-meta"><span>⏱ ${les.mins} min</span><span>${isDone?'✓ Completada':'Pendiente'}</span></div>`;
+      row.addEventListener('click',()=>openPreLes(les.id));
+      modEl.appendChild(row);
+    });
+    el.appendChild(modEl);
+  });
+}
+
+let currentLesId='';
+function openPreLes(id){
+  currentLesId=id;
+  const l=LECCIONES[id];
+  document.getElementById('pre-mod-name').textContent=l.mod;
+  document.getElementById('pre-title').textContent=l.title;
+  document.getElementById('pre-sub').textContent=l.sub;
+  const nq=l.bloques.filter(b=>b.t==='question').length;
+  document.getElementById('pre-info').innerHTML=`<div class="instr-block"><div class="instr-title">Esta lección incluye</div>
+    <div class="instr-item"><div class="instr-ic">📝</div><div class="instr-txt"><div class="instr-label">Contenido clínico</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='text'||b.t==='section').length} secciones de texto</div></div></div>
+    <div class="instr-item"><div class="instr-ic">📊</div><div class="instr-txt"><div class="instr-label">Comparaciones</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='compare'||b.t==='table').length} tablas CIE-11 vs DSM-5</div></div></div>
+    <div class="instr-item"><div class="instr-ic">⚡</div><div class="instr-txt"><div class="instr-label">Preguntas</div><div class="instr-desc">${nq} preguntas intercaladas</div></div></div>
+    <div class="instr-item"><div class="instr-ic">🏆</div><div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">${l.quiz.length} preguntas · ≥80% maestría</div></div></div>
+  </div>`;
+  document.getElementById('pre-les').classList.add('open');
+}
+
+let lsIdx=0,lsAnswered=[];
+function startLesson(){
+  document.getElementById('pre-les').classList.remove('open');
+  const l=LECCIONES[currentLesId];
+  document.getElementById('ls-title').textContent=l.title;
+  lsIdx=0;lsAnswered=new Array(l.bloques.length).fill(false);
+  renderLesBlock();
+  document.getElementById('ls').classList.add('open');
+}
+
+function renderLesBlock(){
+  const l=LECCIONES[currentLesId],b=l.bloques[lsIdx];
+  document.getElementById('ls-prog').style.width=Math.round((lsIdx+1)/l.bloques.length*100)+'%';
+  document.getElementById('ls-prev').style.display=lsIdx===0?'none':'';
+  document.getElementById('ls-next').textContent=lsIdx===l.bloques.length-1?'Ir al Quiz →':'Siguiente →';
+  const body=document.getElementById('ls-body');
+  body.innerHTML='';body.scrollTop=0;
+  const div=document.createElement('div');
+  div.className='les-block';
+  if(b.t==='text') div.innerHTML=`<div class="lb-text">${b.content}</div>`;
+  else if(b.t==='section') div.innerHTML=`<div class="lb-section">${b.content}</div>`;
+  else if(b.t==='case') div.innerHTML=`<div class="lb-case"><div class="lb-case-label">Caso Clínico</div><div class="lb-case-text">${b.text}</div></div>`;
+  else if(b.t==='alert') div.innerHTML=`<div class="lb-alert"><div class="lb-alert-label">⚠ ${b.label}</div><div class="lb-alert-text">${b.text}</div></div>`;
+  else if(b.t==='tip') div.innerHTML=`<div class="lb-tip"><div class="lb-tip-label">💡 ${b.label}</div><div class="lb-tip-text">${b.text}</div></div>`;
+  else if(b.t==='compare') div.innerHTML=`<div class="compare-box"><div class="compare-hd"><div class="compare-hd-cie">CIE-11</div><div class="compare-hd-dsm">DSM-5-TR</div></div><div class="compare-body"><div class="compare-col">${b.cie}</div><div class="compare-col">${b.dsm}</div></div></div>`;
+  else if(b.t==='table'){
+    let h=b.headers.map(x=>`<th>${x}</th>`).join('');
+    let r=b.rows.map(row=>`<tr>${row.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+    div.innerHTML=`<table class="lb-table"><thead><tr>${h}</tr></thead><tbody>${r}</tbody></table>`;
+  } else if(b.t==='question'){
+    const qid=`q-${lsIdx}`;
+    div.innerHTML=`<div class="lb-q"><div class="lb-q-label">⚡ Pregunta intercalada</div><div class="lb-q-text">${b.q}</div><div class="lb-q-opts">${b.opts.map((o,i)=>`<button class="lb-q-opt" data-i="${i}">${o}</button>`).join('')}</div><div class="lb-q-fb" id="${qid}-fb"></div><button class="lb-q-cont" id="${qid}-cont">Continuar →</button></div>`;
+    setTimeout(()=>{
+      div.querySelectorAll('.lb-q-opt').forEach(opt=>{
+        opt.addEventListener('click',function(){
+          if(lsAnswered[lsIdx])return;
+          lsAnswered[lsIdx]=true;
+          const ch=parseInt(this.dataset.i),ok=ch===b.cor;
+          div.querySelectorAll('.lb-q-opt').forEach(o=>o.disabled=true);
+          div.querySelectorAll('.lb-q-opt')[b.cor].classList.add('q-cor');
+          if(!ok)this.classList.add('q-wrg');
+          ST.total++;if(ok){ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+5');}else ST.streak=0;
+          save();refreshHome();
+          const fb=div.querySelector(`#${qid}-fb`);
+          fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+b.fb;
+          fb.className='lb-q-fb show '+(ok?'fb-ok':'fb-err');
+          const cont=div.querySelector(`#${qid}-cont`);
+          cont.className='lb-q-cont show';
+          cont.addEventListener('click',()=>{if(lsIdx<l.bloques.length-1){lsIdx++;renderLesBlock();}else startQuiz();});
+        });
+      });
+    },50);
+  }
+  body.appendChild(div);
+}
+
+let qIdx=0,qCorrect=0,qStart=0;
+function startQuiz(){
+  document.getElementById('ls').classList.remove('open');
+  qIdx=0;qCorrect=0;qStart=Date.now();
+  document.getElementById('qs').classList.add('open');
+  renderQ();
+}
+function renderQ(){
+  const l=LECCIONES[currentLesId],q=l.quiz[qIdx];
+  document.getElementById('q-prog').style.width=Math.round(qIdx/l.quiz.length*100)+'%';
+  document.getElementById('q-n').textContent=`${qIdx+1}/${l.quiz.length}`;
+  document.getElementById('q-fb').className='qfb';
+  document.getElementById('q-next').style.display='none';
+  document.getElementById('q-body').innerHTML=`<div class="q-mod-badge">Estado de Ánimo · CIE-11 + DSM-5</div><div class="qq">${q.q}</div><div class="qopts">${q.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${o}</button>`).join('')}</div>`;
+  document.querySelectorAll('.qopt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.qopt').forEach(o=>o.disabled=true);
+      const ch=parseInt(this.dataset.i),ok=ch===q.cor;
+      document.querySelectorAll('.qopt')[q.cor].classList.add('cor');
+      if(!ok)this.classList.add('wrg');
+      if(ok){qCorrect++;ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+10');}else ST.streak=0;
+      ST.total++;
+      const fb=document.getElementById('q-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+q.fb;
+      fb.className='qfb show '+(ok?'cor-fb':'wrg-fb');
+      const nxt=document.getElementById('q-next');
+      nxt.style.display='block';
+      nxt.textContent=qIdx<l.quiz.length-1?'Siguiente →':'Ver resultados';
+    });
+  });
+}
+document.getElementById('q-next').addEventListener('click',()=>{qIdx++;if(qIdx<LECCIONES[currentLesId].quiz.length)renderQ();else finishQuiz();});
+function finishQuiz(){
+  document.getElementById('qs').classList.remove('open');
+  const l=LECCIONES[currentLesId],pct=Math.round(qCorrect/l.quiz.length*100);
+  const pts=qCorrect*10+(pct>=80?20:0);
+  ST.pts=(ST.pts||0)+pts;ST.done[currentLesId]={pct,pts,date:Date.now()};
+  const elapsed=Math.round((Date.now()-qStart)/1000);
+  save();refreshHome();
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-v').textContent=pct>=80?'¡Maestría!':pct>=60?'Bien hecho':'Sigue practicando';
+  document.getElementById('res-s').textContent=pct>=80?'Dominas los trastornos del estado de ánimo.':pct>=60?'Revisa los criterios de duración y especificadores.':'Vuelve a la lección y presta atención a los diferenciales.';
+  document.getElementById('res-cor').textContent=`${qCorrect}/${l.quiz.length}`;
+  document.getElementById('res-pts').textContent='+'+pts;
+  document.getElementById('res-time').textContent=elapsed+'s';
+  document.getElementById('res').classList.add('open');
+}
+
+const GAME_LEVELS_DATA=[{id:1,name:'Básico',pts_base:10,n:3,color:'#3a9e6f'},{id:2,name:'Intermedio',pts_base:15,n:2,color:'#c49a3a'},{id:3,name:'Avanzado',pts_base:20,n:1,color:'#c0553a'}];
+let gCases=[],gIdx=0,gPts=0,gStreak=0,gCorrect=0;
+function renderGameHome(){
+  const el=document.getElementById('game-home-content'),unl=ST.game.unlocked||1;
+  el.innerHTML='';
+  GAME_LEVELS_DATA.forEach(lvl=>{
+    const isUnl=lvl.id<=unl,cases=GAME_CASES.filter(c=>c.lvl===lvl.id);
+    const div=document.createElement('div');
+    div.className='card';
+    div.style.cssText='padding:1rem 1.1rem;margin-bottom:.75rem;cursor:'+(isUnl?'pointer':'default')+';opacity:'+(isUnl?'1':'.4');
+    div.innerHTML=`<div style="display:flex;align-items:center;gap:.8rem"><div style="width:36px;height:36px;border-radius:50%;background:${lvl.color}22;border:2px solid ${lvl.color}44;display:flex;align-items:center;justify-content:center;font-size:1rem">${lvl.id===1?'🎯':lvl.id===2?'💡':'🔥'}</div><div style="flex:1"><div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">Nivel ${lvl.id} — ${lvl.name}</div><div style="font-size:.68rem;color:var(--text);opacity:.5">${cases.length} casos · ${lvl.pts_base} pts c/u</div></div><div style="font-size:.75rem;font-weight:700;color:${isUnl?lvl.color:'var(--text)'}">${isUnl?'JUGAR':'🔒'}</div></div>`;
+    if(isUnl)div.addEventListener('click',()=>startGame(lvl.id));
+    el.appendChild(div);
+  });
+}
+function startGame(lvlId){
+  const lvlCases=GAME_CASES.filter(c=>c.lvl===lvlId);
+  gCases=lvlCases.sort(()=>Math.random()-.5).slice(0,GAME_LEVELS_DATA.find(l=>l.id===lvlId).n);
+  gIdx=0;gPts=0;gStreak=0;gCorrect=0;
+  document.getElementById('go-title').textContent='Nivel '+lvlId+' — Estado de Ánimo';
+  document.getElementById('go-pts-live').textContent='0';
+  document.getElementById('go-streak-live').textContent='0🔥';
+  document.getElementById('game-overlay').classList.add('open');
+  renderGameCase();
+}
+function renderGameCase(){
+  const c=gCases[gIdx];
+  document.getElementById('go-body').innerHTML=`<div class="case-card"><div class="case-label">Caso ${gIdx+1}/${gCases.length}</div><div class="case-text">${c.caso}</div></div><div class="game-q-label">${c.q}</div><div class="game-opts">${c.opts.map((o,i)=>`<button class="game-opt" data-i="${i}">${o}</button>`).join('')}</div><div class="game-fb" id="game-fb"></div>`;
+  document.getElementById('go-ft').innerHTML='';
+  document.querySelectorAll('.game-opt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.game-opt').forEach(o=>o.disabled=true);
+      const ch=parseInt(this.dataset.i),ok=ch===c.cor;
+      document.querySelectorAll('.game-opt')[c.cor].classList.add('g-cor');
+      if(!ok)this.classList.add('g-wrg');
+      const fb=document.getElementById('game-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+c.fb;
+      fb.className='game-fb show '+(ok?'fb-ok':'fb-err');
+      const lvl=GAME_LEVELS_DATA.find(l=>l.id===c.lvl);
+      if(ok){gPts+=lvl.pts_base;gStreak++;gCorrect++;popXP('+'+lvl.pts_base);}else gStreak=0;
+      document.getElementById('go-pts-live').textContent=gPts;
+      document.getElementById('go-streak-live').textContent=gStreak+'🔥';
+      const hasNext=gIdx<gCases.length-1;
+      document.getElementById('go-ft').innerHTML=hasNext?`<button class="btn btn-p" id="go-next" style="width:100%">Siguiente →</button>`:`<button class="btn btn-p" id="go-finish" style="width:100%">Ver resultados</button>`;
+      if(hasNext)document.getElementById('go-next').addEventListener('click',()=>{gIdx++;renderGameCase();});
+      else document.getElementById('go-finish').addEventListener('click',finishGame);
+    });
+  });
+}
+function finishGame(){
+  const lvlId=gCases[0].lvl,g=ST.game;
+  g.pts=(g.pts||0)+gPts;
+  const pct=Math.round(gCorrect/gCases.length*100);
+  if(pct>=70&&lvlId<3)g.unlocked=Math.max(g.unlocked||1,lvlId+1);
+  ST.pts=(ST.pts||0)+gPts;save();
+  document.getElementById('go-body').innerHTML=`<div style="text-align:center;padding:1.5rem 1rem"><div style="font-size:2.8rem;margin-bottom:.5rem">${pct>=80?'🎯':pct>=60?'💡':'📚'}</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:.3rem">${pct>=80?'¡Diagnóstico preciso!':'Ronda completada'}</div><div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--blue)">+${gPts}</div><div style="font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin-bottom:.7rem">puntos</div><div style="font-size:.8rem;opacity:.65;line-height:1.6">${gCorrect} de ${gCases.length} correctos${pct>=70&&lvlId<3?'<br><strong style="color:var(--ok)">🔓 Nivel '+(lvlId+1)+' desbloqueado</strong>':''}</div></div>`;
+  document.getElementById('go-ft').innerHTML=`<div style="display:flex;gap:.55rem"><button class="btn btn-g" id="go-exit" style="flex:1">← Salir</button><button class="btn btn-p" id="go-repeat" style="flex:1">Repetir</button></div>`;
+  document.getElementById('go-exit').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  document.getElementById('go-repeat').addEventListener('click',()=>startGame(lvlId));
+  refreshHome();
+}
+function renderProg(){
+  const el=document.getElementById('prog-bars');
+  el.innerHTML='<div class="ey" style="margin-bottom:.55rem">Progreso por lección</div>';
+  MODS[0].lecciones.forEach(les=>{
+    el.innerHTML+=`<div class="prog-bar-row"><div class="pbr-label">${les.title.split(' ').slice(0,2).join(' ')}</div><div class="pbr-wrap"><div class="pbr-fill" style="width:${ST.done[les.id]?100:0}%"></div></div><div class="pbr-pct">${ST.done[les.id]?100:0}%</div></div>`;
+  });
+  const B=[{ic:'🌊',name:'Primera',earned:Object.keys(ST.done).length>=1},{ic:'⚡',name:'Racha 3',earned:(ST.streak||0)>=3},{ic:'📚',name:'2 Lecciones',earned:Object.keys(ST.done).length>=2},{ic:'🏆',name:'Módulo ✓',earned:Object.keys(ST.done).length>=4},{ic:'💯',name:'90% Precisión',earned:ST.total>=5&&ST.correct/ST.total>=.9},{ic:'🎮',name:'50 Pts Juego',earned:(ST.game.pts||0)>=50},{ic:'🔓',name:'Nivel 2',earned:(ST.game.unlocked||1)>=2},{ic:'⭐',name:'Maestría',earned:Object.keys(ST.done).length>=4}];
+  document.getElementById('badges-grid').innerHTML=B.map(b=>`<div class="badge-item ${b.earned?'earned':'locked-b'}"><div class="badge-icon">${b.ic}</div><div class="badge-name">${b.name}</div></div>`).join('');
+}
+function nav(tab){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+tab).classList.add('active');
+  if(tab==='home')refreshHome();
+  if(tab==='game')renderGameHome();
+  if(tab==='prog')renderProg();
+}
+function popXP(txt){
+  const el=document.createElement('div');
+  el.className='xp-pop';el.textContent=txt;
+  el.style.cssText=`left:${35+Math.random()*30}%;top:${25+Math.random()*20}%`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+      btn.classList.add('active');nav(btn.dataset.tab);
+    });
+  });
+  document.getElementById('pre-close').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-close2').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-start').addEventListener('click',startLesson);
+  document.getElementById('ls-close').addEventListener('click',()=>document.getElementById('ls').classList.remove('open'));
+  document.getElementById('ls-prev').addEventListener('click',()=>{if(lsIdx>0){lsIdx--;renderLesBlock();}});
+  document.getElementById('ls-next').addEventListener('click',()=>{
+    const l=LECCIONES[currentLesId],b=l.bloques[lsIdx];
+    if(b.t==='question'&&!lsAnswered[lsIdx])return;
+    if(lsIdx<l.bloques.length-1){lsIdx++;renderLesBlock();}else startQuiz();
+  });
+  document.getElementById('qs-close').addEventListener('click',()=>{document.getElementById('qs').classList.remove('open');document.getElementById('ls').classList.remove('open');});
+  document.getElementById('go-close').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  document.getElementById('res-home').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');refreshHome();});
+  document.getElementById('res-repeat').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');startQuiz();});
+  refreshHome();renderGameHome();
+});
+</script>
+</body>
+</html>

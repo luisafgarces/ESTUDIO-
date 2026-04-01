@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PsicoDx · Neurodesarrollo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#5b9bd5;--bg:#daeaf8;--text:#0d2a4a;--white:#f4f9ff;
+  --rl:rgba(91,155,213,.18);--rm:rgba(91,155,213,.45);--rd:#3a7bbf;
+  --ok:#3a9e6f;--err:#c0553a;--warn:#c49a3a;
+  --b1:#5b9bd5;--b2:#3a7bbf;--b3:#2a5a9a;
+  --cie:#3a7bbf;--dsm:#5b4fa8;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh}
+
+.app-header{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text)}
+.logo em{color:var(--blue);font-style:italic}
+.hstats{display:flex;gap:.9rem}
+.hs{text-align:center}
+.hs-v{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);line-height:1}
+.hs-l{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text);opacity:.5}
+
+.bot-nav{flex-shrink:0;background:var(--white);border-top:1.5px solid var(--rl);display:flex;padding:.25rem 0 .4rem}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.35rem .1rem;cursor:pointer;border:none;background:none;font-family:'Jost',sans-serif;transition:all .15s}
+.ni-ic{font-size:1.15rem;line-height:1}
+.ni-lb{font-size:.54rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text);opacity:.35;transition:all .15s}
+.ni.active .ni-lb{color:var(--blue);opacity:1}
+
+.sa{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sc{display:none;padding:1.1rem 1rem 1rem}
+.sc.active{display:block;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.2rem}
+.st{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:300;color:var(--text);margin-bottom:1rem;line-height:1.1}
+.st em{color:var(--blue);font-style:italic}
+
+.card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;overflow:hidden;margin-bottom:.85rem}
+.badge{display:inline-flex;align-items:center;gap:.25rem;background:var(--bg);border:1px solid var(--rm);border-radius:20px;padding:.15rem .55rem;font-size:.62rem;font-weight:700;letter-spacing:.07em;color:var(--blue);text-transform:uppercase}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.6rem 1.3rem;border-radius:30px;border:1.5px solid var(--blue);font-family:'Jost',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.06em;text-transform:uppercase}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:var(--rd)}
+.btn-g{background:transparent;color:var(--blue)}
+.btn-g:hover{background:var(--rl)}
+.btn-sm{padding:.3rem .75rem;font-size:.68rem;border-radius:20px;border:1px solid var(--rm);background:transparent;color:var(--text);cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;transition:all .15s}
+.btn-sm.on,.btn-sm:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.divider{height:1px;background:var(--rl);margin:.9rem 0}
+.ibox{background:var(--rl);border-radius:10px;padding:.75rem 1rem;font-size:.8rem;line-height:1.6;color:var(--text);margin-bottom:.9rem;display:flex;gap:.55rem;align-items:flex-start}
+.ii{font-size:.95rem;flex-shrink:0;margin-top:.05rem}
+
+.banner{background:linear-gradient(135deg,var(--b1) 0%,var(--b3) 100%);border-radius:16px;padding:1.3rem 1.1rem;color:#fff;margin-bottom:1.1rem;position:relative;overflow:hidden}
+.banner::after{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%}
+.banner-ey{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;opacity:.8;margin-bottom:.25rem}
+.banner-t{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:400;line-height:1.1;margin-bottom:.5rem}
+.banner-s{font-size:.78rem;opacity:.85;line-height:1.5}
+.stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.sc3{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.8rem .5rem;text-align:center}
+.sc3-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--blue);line-height:1}
+.sc3-l{font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.45;margin-top:.15rem}
+
+.mod-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.75rem;cursor:pointer;transition:all .2s}
+.mod-card:hover:not(.locked){border-color:var(--rm);transform:translateY(-1px)}
+.mod-card.locked{opacity:.5;cursor:default}
+.mod-card.done{border-color:var(--ok)}
+.mod-header{display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem}
+.mod-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.mod-info{flex:1}
+.mod-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text)}
+.mod-sub{font-size:.68rem;color:var(--text);opacity:.55;margin-top:.08rem}
+.mod-prog-wrap{height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:.28rem}
+.mod-prog-fill{height:100%;border-radius:2px;transition:width .5s ease;background:var(--blue)}
+.mod-meta{display:flex;justify-content:space-between;font-size:.66rem;color:var(--text);opacity:.5;margin-top:.35rem}
+
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.badge-item{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.7rem .4rem;text-align:center}
+.badge-item.earned{border-color:var(--blue);background:linear-gradient(135deg,var(--bg),var(--white))}
+.badge-item.locked-b{opacity:.35;filter:grayscale(1)}
+.badge-icon{font-size:1.5rem;line-height:1;margin-bottom:.25rem}
+.badge-name{font-size:.56rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text);opacity:.7}
+
+#pre-les{position:fixed;inset:0;background:var(--bg);z-index:190;display:none;flex-direction:column}
+#pre-les.open{display:flex}
+.pre-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.7rem}
+.pre-body{flex:1;overflow-y:auto;padding:1.3rem 1rem;-webkit-overflow-scrolling:touch}
+.pre-ft{flex-shrink:0;padding:.9rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.65rem}
+.pre-title{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--text);margin-bottom:.15rem}
+.pre-sub{font-size:.75rem;color:var(--blue);font-style:italic;margin-bottom:1.1rem}
+.instr-block{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.instr-title{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.instr-item{display:flex;align-items:flex-start;gap:.7rem;padding:.45rem 0;border-bottom:1px solid var(--rl)}
+.instr-item:last-child{border-bottom:none}
+.instr-ic{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--bg);border:1.5px solid var(--rm);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+.instr-txt{flex:1}
+.instr-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.15rem}
+.instr-desc{font-size:.8rem;line-height:1.55;color:var(--text);opacity:.82}
+
+#ls{position:fixed;inset:0;background:var(--white);z-index:200;display:none;flex-direction:column}
+#ls.open{display:flex}
+.ls-hd{flex-shrink:0;padding:.7rem 1rem;border-bottom:1.5px solid var(--rl);display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:var(--white)}
+.ls-title{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-prog-wrap{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;width:60px;flex-shrink:0}
+.ls-prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.ls-body{flex:1;overflow-y:auto;padding:1.3rem 1.1rem 2rem;-webkit-overflow-scrolling:touch}
+.ls-ft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white);display:flex;gap:.6rem;align-items:center}
+
+.les-block{margin-bottom:1.1rem;animation:fi .2s ease}
+.lb-text{font-family:'Cormorant Garamond',serif;font-size:1.08rem;font-weight:400;line-height:1.88;color:var(--text);max-width:640px}
+.lb-text p{margin-bottom:.9rem}
+.lb-text p:last-child{margin-bottom:0}
+.lb-text strong{color:var(--b3);font-weight:600}
+.lb-text em{color:var(--blue);font-style:normal;font-weight:600;font-family:'Jost',sans-serif;font-size:.88em;letter-spacing:.02em}
+.lb-text .hi{background:rgba(91,155,213,.12);border-radius:4px;padding:.05rem .25rem}
+
+.lb-section{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--blue);margin-bottom:.5rem;margin-top:.3rem;padding-top:.3rem;border-top:1.5px solid var(--rl)}
+
+.lb-case{background:var(--text);border-radius:12px;padding:.9rem 1rem;margin:.3rem 0}
+.lb-case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem;opacity:.85}
+.lb-case-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:400;line-height:1.75;color:rgba(255,255,255,.9)}
+.lb-case-text strong{color:#7dc8f7;font-style:normal}
+
+.lb-alert{background:rgba(192,85,58,.07);border:1.5px solid rgba(192,85,58,.25);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-alert-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--err);margin-bottom:.28rem}
+.lb-alert-text{font-size:.8rem;line-height:1.65;color:var(--err)}
+
+.lb-tip{background:rgba(91,155,213,.07);border:1.5px solid var(--rl);border-radius:10px;padding:.75rem .95rem;margin:.3rem 0}
+.lb-tip-label{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:.28rem}
+.lb-tip-text{font-size:.8rem;line-height:1.65;color:var(--b3)}
+
+.lb-table{width:100%;border-collapse:collapse;font-size:.74rem;margin:.3rem 0;border-radius:10px;overflow:hidden;border:1.5px solid var(--rl)}
+.lb-table th{background:var(--b3);color:#fff;padding:.42rem .6rem;text-align:left;font-family:'Jost',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.04em}
+.lb-table td{padding:.38rem .6rem;border-bottom:1px solid var(--rl);line-height:1.5;color:var(--text);background:var(--white)}
+.lb-table tr:nth-child(even) td{background:rgba(91,155,213,.04)}
+.lb-table tr:last-child td{border-bottom:none}
+
+.lb-q{background:var(--bg);border:2px solid var(--blue);border-radius:14px;padding:.95rem 1rem;margin:.4rem 0}
+.lb-q-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.5rem;display:flex;align-items:center;gap:.3rem}
+.lb-q-text{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:.75rem}
+.lb-q-opts{display:flex;flex-direction:column;gap:.42rem}
+.lb-q-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:10px;padding:.65rem .85rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.lb-q-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.lb-q-opt.q-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.lb-q-opt.q-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.lb-q-fb{font-size:.78rem;line-height:1.58;background:var(--white);border-radius:8px;padding:.6rem .8rem;margin-top:.65rem;border-left:3px solid var(--blue);display:none;color:var(--text)}
+.lb-q-fb.show{display:block}
+.lb-q-fb.fb-ok{border-left-color:var(--ok)}
+.lb-q-fb.fb-err{border-left-color:var(--err)}
+.lb-q-cont{width:100%;margin-top:.6rem;padding:.45rem;background:var(--blue);color:#fff;border:none;border-radius:8px;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;display:none}
+.lb-q-cont.show{display:block}
+
+/* Comparación CIE-11 vs DSM-5 */
+.compare-box{border-radius:12px;overflow:hidden;margin:.3rem 0;border:1.5px solid var(--rl)}
+.compare-hd{display:grid;grid-template-columns:1fr 1fr}
+.compare-hd-cie{background:var(--cie);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-hd-dsm{background:var(--dsm);color:#fff;padding:.45rem .75rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.compare-body{display:grid;grid-template-columns:1fr 1fr;min-height:60px}
+.compare-col{padding:.7rem .75rem;font-size:.77rem;line-height:1.6;color:var(--text);background:var(--white)}
+.compare-col:first-child{border-right:1px solid var(--rl)}
+.compare-col ul{padding-left:1rem;margin:0}
+.compare-col ul li{margin-bottom:.3rem}
+.compare-col strong{color:var(--b3);font-weight:600}
+
+#qs{position:fixed;inset:0;background:var(--bg);z-index:201;display:none;flex-direction:column}
+#qs.open{display:flex}
+.qhd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.8rem 1rem;display:flex;align-items:center;gap:.8rem}
+.qpw{flex:1;height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.qpf{height:100%;background:var(--blue);border-radius:2px;transition:width .3s ease}
+.qn{font-size:.7rem;font-weight:700;color:var(--blue);flex-shrink:0}
+.qbody{flex:1;overflow-y:auto;padding:1.4rem 1rem;-webkit-overflow-scrolling:touch}
+.q-mod-badge{display:inline-flex;background:var(--rl);border-radius:8px;padding:.3rem .65rem;font-size:.64rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--blue);margin-bottom:.7rem}
+.qq{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:1.2rem}
+.qopts{display:flex;flex-direction:column;gap:.55rem}
+.qopt{background:var(--white);border:1.5px solid var(--rl);border-radius:12px;padding:.82rem .9rem;cursor:pointer;font-size:.84rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.qopt:hover{border-color:var(--rm);background:var(--rl)}
+.qopt.cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.qopt.wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.qft{flex-shrink:0;padding:.8rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.qfb{font-size:.8rem;line-height:1.55;color:var(--text);background:var(--bg);border-radius:8px;padding:.65rem .85rem;margin-bottom:.7rem;display:none;border-left:3px solid var(--blue)}
+.qfb.show{display:block}
+.qfb.cor-fb{border-left-color:var(--ok)}
+.qfb.wrg-fb{border-left-color:var(--err)}
+
+#res{position:fixed;inset:0;background:var(--bg);z-index:202;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.4rem;text-align:center}
+#res.open{display:flex;animation:fi .3s ease}
+.res-circle{width:108px;height:108px;border-radius:50%;border:3px solid var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem}
+.res-pct{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;line-height:1;color:var(--blue)}
+.res-pl{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.res-v{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:400;margin-bottom:.4rem}
+.res-s{font-size:.8rem;opacity:.7;line-height:1.6;margin-bottom:1.2rem;max-width:280px}
+.res-row{display:flex;gap:1.3rem;justify-content:center;margin-bottom:1.5rem}
+.rd{text-align:center}
+.rd-v{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;color:var(--blue)}
+.rd-l{font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.5}
+
+#game-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;display:none;flex-direction:column}
+#game-overlay.open{display:flex;animation:fi .2s ease}
+.go-hd{flex-shrink:0;background:var(--white);border-bottom:1.5px solid var(--rl);padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem}
+.go-body{flex:1;overflow-y:auto;padding:1.1rem 1rem;-webkit-overflow-scrolling:touch}
+.go-ft{flex-shrink:0;padding:.75rem 1rem;border-top:1.5px solid var(--rl);background:var(--white)}
+.case-card{background:var(--white);border:1.5px solid var(--rl);border-radius:14px;padding:1rem;margin-bottom:.8rem}
+.case-label{font-size:.56rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-bottom:.35rem}
+.case-text{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.82;color:var(--text)}
+.game-q-label{font-size:.74rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
+.game-opts{display:flex;flex-direction:column;gap:.48rem;margin-bottom:.75rem}
+.game-opt{background:var(--white);border:1.5px solid var(--rl);border-radius:11px;padding:.72rem .88rem;cursor:pointer;font-size:.82rem;line-height:1.4;color:var(--text);transition:all .15s;text-align:left;font-family:'Jost',sans-serif;width:100%}
+.game-opt:hover:not(:disabled){border-color:var(--rm);background:var(--rl)}
+.game-opt.g-cor{border-color:var(--ok)!important;background:rgba(58,158,111,.1)!important;color:var(--ok);font-weight:600}
+.game-opt.g-wrg{border-color:var(--err)!important;background:rgba(192,85,58,.08)!important;color:var(--err)}
+.game-fb{font-size:.79rem;line-height:1.6;background:var(--bg);border-radius:8px;padding:.62rem .82rem;border-left:3px solid var(--blue);margin-bottom:.7rem;display:none}
+.game-fb.show{display:block}
+.game-fb.fb-ok{border-left-color:var(--ok)}
+.game-fb.fb-err{border-left-color:var(--err)}
+.go-stats{display:flex;gap:1rem;margin-left:auto}
+.go-stat{text-align:center}
+.go-stat-v{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--blue);line-height:1}
+.go-stat-l{font-size:.46rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);opacity:.4}
+
+.prog-bar-row{display:flex;align-items:center;gap:.55rem;margin-bottom:.55rem}
+.pbr-label{font-size:.7rem;font-weight:500;color:var(--text);width:100px;flex-shrink:0;line-height:1.25}
+.pbr-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.pbr-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--b1),var(--b3));transition:width .6s}
+.pbr-pct{font-size:.66rem;font-weight:700;color:var(--blue);width:30px;text-align:right}
+
+@keyframes popUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-35px) scale(1.25);opacity:0}}
+.xp-pop{position:fixed;pointer-events:none;font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--blue);animation:popUp .8s ease forwards;z-index:999}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="logo">Psico<em>Dx</em></div>
+  <div class="hstats">
+    <div class="hs"><div class="hs-v" id="h-les">0</div><div class="hs-l">Lecciones</div></div>
+    <div class="hs"><div class="hs-v" id="h-pts">0</div><div class="hs-l">Puntos</div></div>
+    <div class="hs"><div class="hs-v" id="h-str">0🔥</div><div class="hs-l">Racha</div></div>
+  </div>
+</div>
+
+<div class="sa">
+  <div class="sc active" id="sc-home">
+    <div class="banner">
+      <div class="banner-ey">Módulo 1 · CIE-11 + DSM-5-TR</div>
+      <div class="banner-t">Trastornos del <em>Neurodesarrollo</em></div>
+      <div class="banner-s">Criterios completos · Comparación CIE-11 vs DSM-5 · Casos clínicos · Sin superficialidades</div>
+    </div>
+    <div class="stats3">
+      <div class="sc3"><div class="sc3-n" id="hs-les">0</div><div class="sc3-l">Completadas</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-prec">—</div><div class="sc3-l">Precisión</div></div>
+      <div class="sc3"><div class="sc3-n" id="hs-pts">0</div><div class="sc3-l">Puntos</div></div>
+    </div>
+    <div class="ey">Lecciones del módulo</div>
+    <div id="home-modules"></div>
+  </div>
+
+  <div class="sc" id="sc-game">
+    <div class="ey">Modo Juego</div>
+    <div class="st">Diagnóstico <em>en Acción</em></div>
+    <div class="ibox"><span class="ii">🎮</span><span>Casos clínicos reales. Identifica el diagnóstico, el sistema clasificatorio y el criterio clave. Desbloquea niveles con ≥70% de aciertos.</span></div>
+    <div id="game-home-content"></div>
+  </div>
+
+  <div class="sc" id="sc-prog">
+    <div class="ey">Tu progreso</div>
+    <div class="st">Avance por <em>Lección</em></div>
+    <div class="card" style="padding:1rem 1.1rem;margin-bottom:.85rem">
+      <div id="prog-bars"></div>
+    </div>
+    <div class="ey" style="margin-bottom:.5rem">Logros</div>
+    <div class="badges-grid" id="badges-grid"></div>
+  </div>
+</div>
+
+<div class="bot-nav">
+  <button class="ni active" data-tab="home"><span class="ni-ic">🏠</span><span class="ni-lb">Inicio</span></button>
+  <button class="ni" data-tab="game"><span class="ni-ic">🎮</span><span class="ni-lb">Juego</span></button>
+  <button class="ni" data-tab="prog"><span class="ni-ic">📊</span><span class="ni-lb">Progreso</span></button>
+</div>
+
+<!-- PRE-LECCIÓN -->
+<div id="pre-les">
+  <div class="pre-hd">
+    <button id="pre-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="flex:1">
+      <div class="ey">Antes de comenzar</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)" id="pre-mod-name"></div>
+    </div>
+  </div>
+  <div class="pre-body">
+    <div class="pre-title" id="pre-title"></div>
+    <div class="pre-sub" id="pre-sub"></div>
+    <div class="instr-block">
+      <div class="instr-title">¿Cómo funciona esta lección?</div>
+      <div class="instr-item">
+        <div class="instr-ic">📖</div>
+        <div class="instr-txt"><div class="instr-label">Lectura activa</div><div class="instr-desc">Bloques de texto clínico profundo. No memorización — comprensión real con casos.</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">⚡</div>
+        <div class="instr-txt"><div class="instr-label">Preguntas intercaladas</div><div class="instr-desc">Preguntas mientras lees. Feedback inmediato con explicación clínica detallada.</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">📊</div>
+        <div class="instr-txt"><div class="instr-label">Comparación CIE-11 vs DSM-5</div><div class="instr-desc">Tablas y bloques en paralelo para ver las diferencias y similitudes entre sistemas.</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">🏆</div>
+        <div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">5 preguntas de integración. ≥80% = maestría. Puntos para el ranking.</div></div>
+      </div>
+    </div>
+    <div id="pre-info"></div>
+  </div>
+  <div class="pre-ft">
+    <button class="btn btn-g" id="pre-close2" style="flex:1">Volver</button>
+    <button class="btn btn-p" id="pre-start" style="flex:2">Comenzar lección →</button>
+  </div>
+</div>
+
+<!-- LECCIÓN -->
+<div id="ls">
+  <div class="ls-hd">
+    <button id="ls-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="ls-title" id="ls-title"></div>
+    <div class="ls-prog-wrap"><div class="ls-prog-fill" id="ls-prog" style="width:0%"></div></div>
+  </div>
+  <div class="ls-body" id="ls-body"></div>
+  <div class="ls-ft">
+    <button class="btn btn-g" id="ls-prev" style="flex:1">← Anterior</button>
+    <button class="btn btn-p" id="ls-next" style="flex:2">Siguiente →</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="qs">
+  <div class="qhd">
+    <button id="qs-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div class="qpw"><div class="qpf" id="q-prog" style="width:0%"></div></div>
+    <div class="qn" id="q-n">1/5</div>
+  </div>
+  <div class="qbody" id="q-body"></div>
+  <div class="qft">
+    <div class="qfb" id="q-fb"></div>
+    <button class="btn btn-p" id="q-next" style="width:100%;display:none">Siguiente →</button>
+  </div>
+</div>
+
+<!-- RESULTADOS -->
+<div id="res">
+  <div class="res-circle"><div class="res-pct" id="res-pct">0%</div><div class="res-pl">precisión</div></div>
+  <div class="res-v" id="res-v">Bien</div>
+  <div class="res-s" id="res-s"></div>
+  <div class="res-row">
+    <div class="rd"><div class="rd-v" id="res-cor">0</div><div class="rd-l">Correctas</div></div>
+    <div class="rd"><div class="rd-v" id="res-pts">+0</div><div class="rd-l">Puntos</div></div>
+    <div class="rd"><div class="rd-v" id="res-time">0s</div><div class="rd-l">Tiempo</div></div>
+  </div>
+  <div style="display:flex;gap:.65rem;width:100%;max-width:320px">
+    <button class="btn btn-g" id="res-home" style="flex:1">Inicio</button>
+    <button class="btn btn-p" id="res-repeat" style="flex:1">Repetir quiz</button>
+  </div>
+</div>
+
+<!-- JUEGO OVERLAY -->
+<div id="game-overlay">
+  <div class="go-hd">
+    <button id="go-close" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text)">←</button>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:.95rem;font-weight:600;color:var(--text)" id="go-title">Juego</div>
+    <div class="go-stats">
+      <div class="go-stat"><div class="go-stat-v" id="go-pts-live">0</div><div class="go-stat-l">pts</div></div>
+      <div class="go-stat"><div class="go-stat-v" id="go-streak-live">0🔥</div><div class="go-stat-l">racha</div></div>
+    </div>
+  </div>
+  <div class="go-body" id="go-body"></div>
+  <div class="go-ft" id="go-ft"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DATOS — LECCIONES
+// ══════════════════════════════════════════
+const LECCIONES = {
+
+'nd1':{
+ title:'Discapacidad Intelectual (DI)',
+ mod:'Neurodesarrollo',
+ sub:'Criterios completos CIE-11 (6A00) vs DSM-5 (317–319)',
+ bloques:[
+  {t:'text', content:`<p>La <strong>Discapacidad Intelectual</strong> no es simplemente "bajo CI". Es un diagnóstico que requiere tres elementos inseparables: déficits en el funcionamiento intelectual, déficits en el comportamiento adaptativo, y que todo esto haya ocurrido durante el período de desarrollo.</p>
+  <p>El error más frecuente en clínica es diagnosticar DI solo con un CI bajo sin evaluar el comportamiento adaptativo — o lo contrario. Ambas dimensiones son obligatorias.</p>`},
+
+  {t:'section', content:'CIE-11 (6A00) — Criterios esenciales'},
+
+  {t:'text', content:`<p><strong>Criterio A — Funcionamiento intelectual:</strong> Déficits significativos en funciones intelectuales como razonamiento, resolución de problemas, planificación, pensamiento abstracto, juicio y aprendizaje por experiencia. La CIE-11 <em>no exige un punto de corte de CI específico</em> — el juicio clínico es central.</p>
+  <p><strong>Criterio B — Comportamiento adaptativo:</strong> Déficits significativos en el comportamiento adaptativo que resultan en fracaso en el cumplimiento de estándares de desarrollo y socioculturales para la independencia personal y la responsabilidad social, en uno o más de los dominios: conceptual (lenguaje, lectura, escritura, matemáticas), social (empatía, juicio social, comunicación), o práctico (autocuidado, manejo del dinero, organización del trabajo).</p>
+  <p><strong>Criterio C — Inicio en el período de desarrollo:</strong> Los déficits ocurren durante el período de desarrollo. La CIE-11 no especifica una edad exacta.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Sin CI estricto:</strong> No exige puntuación específica de CI como criterio formal</li>
+    <li><strong>Juicio clínico central:</strong> La evaluación clínica integral determina el diagnóstico</li>
+    <li><strong>Severidad funcional:</strong> Se gradúa por funcionamiento adaptativo, no por CI</li>
+    <li><strong>Niveles:</strong> Leve, Moderada, Grave, Profunda</li>
+    <li><strong>Código:</strong> 6A00.0 (leve) → 6A00.3 (profunda)</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>CI ~≤70 como referencia:</strong> Usa puntuación CI (~2 DE por debajo de la media) como orientación, no como criterio exclusivo</li>
+    <li><strong>Pruebas estandarizadas:</strong> Enfatiza confirmación por evaluación psicométrica formal</li>
+    <li><strong>Severidad funcional:</strong> También se gradúa por comportamiento adaptativo</li>
+    <li><strong>Niveles:</strong> Leve, Moderado, Grave, Profundo</li>
+    <li><strong>Código:</strong> 317 (leve), 318.0 (moderado), 318.1 (grave), 318.2 (profundo)</li>
+   </ul>`},
+
+  {t:'section', content:'Niveles de severidad — lo que importa clínicamente'},
+
+  {t:'text', content:`<p><strong>DI Leve (la más frecuente — 85% de los casos):</strong> Dificultades en aprendizaje académico, pero pueden lograr independencia en áreas de cuidado personal. Necesitan apoyo en tareas complejas. Muchos trabajan, tienen familias, viven solos con apoyo ocasional.</p>
+  <p><strong>DI Moderada (~10% de los casos):</strong> Comunicación funcional presente pero limitada. Necesitan supervisión para muchas actividades de la vida diaria. Con apoyo, pueden realizar tareas laborales simples.</p>
+  <p><strong>DI Grave (~3-4%):</strong> Lenguaje muy limitado. Supervisión constante. Necesitan apoyo extenso para todas las áreas de funcionamiento.</p>
+  <p><strong>DI Profunda (~1-2%):</strong> Comunicación básica (verbal o gestual). Dependencia total para cuidado personal. Frecuentemente asociada a otras condiciones neurológicas.</p>`},
+
+  {t:'case',
+   label:'Caso clínico — Error diagnóstico frecuente',
+   text:`<strong>Mateo, 9 años.</strong> Remitido por el colegio con CI de 65 en prueba aplicada por el orientador. La madre reporta que en casa Mateo "hace todo solo" — se baña, prepara su desayuno, maneja el dinero para la tienda del barrio, tiene amigos, juega videojuegos complejos. En el colegio tiene dificultades con lectura y matemáticas abstractas, pero se comunica bien y entiende normas sociales.
+  <br><br><em>Diagnóstico correcto:</em> No cumple criterios de DI. El comportamiento adaptativo en los dominios práctico y social está preservado. Lo más probable es un <strong>Trastorno del Aprendizaje</strong> específico. Un CI bajo aislado no hace el diagnóstico.`},
+
+  {t:'question',
+   q:'Sebastián tiene CI de 62 pero vive solo, trabaja como mensajero, maneja su dinero y tiene relaciones sociales satisfactorias. ¿Cumple criterios de DI?',
+   opts:['Sí, porque el CI es criterio suficiente','No, porque el comportamiento adaptativo está preservado en los dominios relevantes','Sí, pero solo DI leve','Depende de si el CI fue confirmado por dos pruebas'],
+   cor:1,
+   fb:'Correcto. La DI requiere AMBOS: déficits intelectuales Y déficits en el comportamiento adaptativo. Sebastián puede tener un CI por debajo de la media, pero su funcionamiento adaptativo en los dominios práctico y social es adecuado. Esto es fundamental — tanto CIE-11 como DSM-5 son explícitos en que ninguno de los dos criterios es suficiente por sí solo.'},
+
+  {t:'tip',
+   label:'Diferencial clave',
+   text:'DI vs Trastorno del Aprendizaje: En el TA, los déficits son específicos (lectura, escritura, matemáticas) pero el funcionamiento adaptativo general y la inteligencia en otras áreas están preservados. En DI, los déficits son generalizados, afectando el funcionamiento adaptativo global.'},
+
+  {t:'alert',
+   label:'Error diagnóstico en contexto forense y hospitalario',
+   text:'Diagnosticar DI solo por CI bajo sin evaluar comportamiento adaptativo es un error con consecuencias graves — puede determinar inimputabilidad incorrectamente, afectar la capacidad legal del paciente, o negar servicios a quien realmente los necesita. La evaluación siempre debe incluir instrumentos de comportamiento adaptativo (ej. Vineland-3, ABAS-3).'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia principal entre CIE-11 y DSM-5 en el criterio intelectual de la DI?',
+   opts:['El DSM-5 no usa CI en absoluto; la CIE-11 sí exige CI <70','La CIE-11 no exige un punto de corte de CI formal — enfatiza el juicio clínico; el DSM-5 usa CI ~≤70 como referencia orientadora junto con la evaluación clínica','Son idénticos — ambos exigen CI <70 como criterio único','La CIE-11 exige CI <65; el DSM-5 exige CI <70'],
+   cor:1,
+   fb:'La CIE-11 eliminó el criterio de CI como umbral numérico obligatorio. Enfatiza la evaluación clínica integral. El DSM-5 usa CI aproximadamente ≤70 (2 desviaciones estándar por debajo de la media) como referencia, pero también aclara que no es criterio suficiente por sí solo. Ambos sistemas convergen en que el comportamiento adaptativo es igual de determinante que el CI.'}
+ ],
+ quiz:[
+  {q:'¿Cuáles son los tres dominios del comportamiento adaptativo que deben evaluarse para el diagnóstico de DI?',
+   opts:['Motor, cognitivo y emocional','Conceptual (lenguaje, lectura, matemáticas), social (empatía, comunicación) y práctico (autocuidado, dinero, trabajo)','Académico, laboral y familiar','Verbal, no verbal y ejecutivo'],
+   cor:1,
+   fb:'Los tres dominios son: conceptual (lenguaje, lectura, escritura, matemáticas, tiempo, dinero), social (empatía, juicio social, habilidades de comunicación, hacer amigos) y práctico (autocuidado, responsabilidades laborales, manejo del dinero, seguridad). Un déficit significativo en uno o más de estos dominios — no solo en el CI — es criterio obligatorio tanto en CIE-11 como en DSM-5.'},
+  {q:'¿Qué porcentaje aproximado de los casos de DI corresponde a DI leve?',
+   opts:['30%','50%','85%','95%'],
+   cor:2,
+   fb:'Aproximadamente el 85% de las personas con DI tienen DI leve. La DI moderada representa ~10%, la grave ~3-4% y la profunda ~1-2%. Esto tiene implicaciones clínicas: la mayoría de personas con DI que vas a ver en consulta o en hospitalización tendrán DI leve, con funcionamiento adaptativo relativamente preservado y necesidades de apoyo intermitentes.'},
+  {q:'Una paciente con CI de 68, dificultades para leer y manejar el dinero, incapaz de vivir sola sin supervisión, inicio de síntomas evidente desde los 3 años. ¿Qué diagnóstico corresponde?',
+   opts:['Trastorno del aprendizaje con DI comórbida','DI — cumple los tres criterios: déficit intelectual, déficit adaptativo (dinero, independencia) e inicio en período de desarrollo','Trastorno neurocognitivo leve — el CI de 68 es borderline','Dificultades de aprendizaje — el CI no es suficientemente bajo'],
+   cor:1,
+   fb:'DI leve: CI bajo + déficits adaptativos funcionales (no puede vivir sola, no maneja dinero) + inicio en el desarrollo (desde los 3 años). Los tres criterios están presentes. En el diferencial con TA: el TA tiene déficits específicos (ej. solo lectura) pero el funcionamiento adaptativo general está preservado.'},
+  {q:'¿Por qué la CIE-11 eliminó el criterio de CI < 70 como umbral obligatorio?',
+   opts:['Porque el CI no es válido como instrumento','Porque el CI tiene variabilidad de medición (error estándar ±5 puntos) y no determina funcionamiento adaptativo — el diagnóstico clínico integral es más preciso','Porque el DSM-5 ya lo usaba','Porque las pruebas de CI son difíciles de aplicar en campo'],
+   cor:1,
+   fb:'El CI tiene un error estándar de medición de aproximadamente 5 puntos. Alguien con CI de 73 puede estar dentro del rango diagnóstico; alguien con CI de 67 puede no tener déficits funcionales relevantes. La CIE-11 reconoce que el diagnóstico requiere evaluación clínica integral — el número aislado es insuficiente e incluso potencialmente engañoso.'},
+  {q:'¿Cuál instrumento es más adecuado para evaluar comportamiento adaptativo en la DI?',
+   opts:['MMSE — Minimental State Examination','WAIS-IV o WISC-V — escalas de inteligencia Wechsler','Vineland-3 (Vineland Adaptive Behavior Scales) o ABAS-3','Hamilton Rating Scale para ansiedad'],
+   cor:2,
+   fb:'El WAIS/WISC mide CI, no comportamiento adaptativo. Para comportamiento adaptativo, los estándares son el Vineland-3 (comportamiento adaptativo desde el nacimiento hasta adultez) y el ABAS-3 (Adaptive Behavior Assessment System). El diagnóstico de DI idealmente incluye AMBOS: evaluación intelectual (WAIS/WISC) + evaluación adaptativa (Vineland o ABAS).'}
+ ]
+},
+
+'nd2':{
+ title:'Trastorno del Espectro Autista (TEA)',
+ mod:'Neurodesarrollo',
+ sub:'Criterios completos CIE-11 (6A02) vs DSM-5 (299.00) — Díada diagnóstica',
+ bloques:[
+  {t:'text', content:`<p>El <strong>TEA</strong> pasó de ser una categoría con subtipos separados (Autismo de Kanner, Síndrome de Asperger, Autismo atípico en CIE-10; Trastorno Autista, Asperger, TGD-NE en DSM-IV) a ser un espectro único. Este cambio no fue arbitrario: los estudios mostraron que los subtipos tenían poca fiabilidad entre evaluadores y no predecían bien el pronóstico ni la respuesta al tratamiento.</p>
+  <p>Tanto CIE-11 como DSM-5 organizan el TEA alrededor de una <em>díada</em>: comunicación/interacción social y comportamientos restrictivos/repetitivos. Antes (DSM-IV) era una tríada — el lenguaje era criterio separado. Ahora el lenguaje es un especificador, no un criterio central.</p>`},
+
+  {t:'section', content:'Criterio A — Comunicación e Interacción Social'},
+
+  {t:'text', content:`<p>Tanto en CIE-11 como en DSM-5, el Criterio A requiere déficits persistentes en la comunicación e interacción social. El DSM-5 es más explícito en los tres subdominios:</p>
+  <p><strong>A1 — Reciprocidad socioemocional:</strong> No es simplemente "no querer socializar". Es la incapacidad para el ida y vuelta social — iniciar conversaciones, responder al llamado del nombre, compartir intereses, empatía afectiva. Una persona con TEA puede desear conexión pero no tener las herramientas para lograrla.</p>
+  <p><strong>A2 — Comunicación no verbal:</strong> Contacto visual reducido o atípico (no ausente necesariamente), gestos reducidos, expresión facial que no coincide con el contexto emocional, dificultad para integrar comunicación verbal y no verbal.</p>
+  <p><strong>A3 — Relaciones:</strong> Dificultad para adaptar el comportamiento al contexto social, para hacer amigos, para juego imaginativo compartido. El interés en las personas puede existir, pero falta la comprensión implícita de las normas sociales no dichas.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Criterio A:</strong> Déficits persistentes en la comunicación e interacción social recíproca — presentación como categoría única</li>
+    <li><strong>No especifica subdominios formales</strong> — más flexible, orientado al juicio clínico</li>
+    <li><strong>Énfasis en el "inicio en el desarrollo"</strong> aunque puede manifestarse después si las demandas sociales aumentan</li>
+    <li><strong>Sin lenguaje mínimo requerido</strong></li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Criterio A:</strong> Tres subdominios explícitos: reciprocidad socioemocional, comunicación no verbal, y desarrollo/mantenimiento de relaciones</li>
+    <li><strong>Requiere los tres subdominios</strong> — más operacionalizado</li>
+    <li><strong>Inicio en el período de desarrollo temprano</strong> aunque puede no manifestarse hasta que las demandas superen las capacidades</li>
+    <li><strong>Sin lenguaje mínimo requerido</strong></li>
+   </ul>`},
+
+  {t:'section', content:'Criterio B — Comportamientos Restrictivos y Repetitivos (CRR)'},
+
+  {t:'text', content:`<p>El DSM-5 requiere <strong>≥2 de 4 tipos</strong> de CRR (actualmente o por historia). La CIE-11 requiere "al menos dos" de patrones similares. Los cuatro tipos del DSM-5 son:</p>
+  <p><strong>B1 — Movimientos, uso de objetos o habla estereotipados/repetitivos:</strong> Aleteo de manos, balanceo, espinning de objetos, ecolalia inmediata o diferida, frases idiosincrásicas.</p>
+  <p><strong>B2 — Insistencia en la igualdad, rutinas inflexibles, rituales:</strong> Malestar extremo ante cambios pequeños (ruta diferente al colegio, cambio de hora de comida), rituales rígidos para transiciones, pensamiento inflexible.</p>
+  <p><strong>B3 — Intereses muy restringidos de intensidad o foco anormal:</strong> Apego o preocupación intensa por objetos inusuales, intereses de intensidad o concentración anormales. No es simplemente "un hobby" — es un nivel de detalle y tiempo absorbido cualitativamente diferente.</p>
+  <p><strong>B4 — Hiper o hiporreactividad sensorial:</strong> Indiferencia aparente al dolor/temperatura, respuesta adversa a sonidos o texturas específicas, fascinación por luces o movimientos, exceso de olfateo o tacto de objetos.</p>`},
+
+  {t:'case',
+   label:'Presentación clínica — TEA en adultos de alto funcionamiento',
+   text:`<strong>Valentina, 28 años, psicóloga.</strong> Consulta por ansiedad social. En la entrevista: contacto visual reducido pero compensado ("aprendí a mirarlo a la frente"). Reporta que de niña "nunca entendía los chistes" y que necesitaba que le explicaran las reglas sociales explícitamente. Tiene un interés intenso en taxonomía de insectos — pasó 6 años catalogando cada especie de Colombia. Le molesta profundamente la ropa con etiquetas. Come los mismos 7 alimentos hace 15 años.
+  <br><br><em>El diagnóstico de TEA se había "perdido" porque compensó bien sus déficits sociales.</em> Las mujeres con TEA tienden a "enmascarar" — aprenden conductas sociales por imitación. El diagnóstico tardío es especialmente frecuente en mujeres y en personas de alto CI.`},
+
+  {t:'question',
+   q:'Una paciente de 25 años tiene dificultades en reciprocidad social y un interés absorbente en genealogía medieval, pero NO tiene comportamientos motores estereotipados ni insistencia en rutinas. ¿Puede diagnosticarse TEA?',
+   opts:['No, porque los comportamientos repetitivos son criterio obligatorio en todos los casos','Sí — si cumple Criterio A completamente y ≥2 síntomas CRR (los intereses restringidos cuentan como CRR tipo B3, y el déficit social como Criterio A)','No, porque sin ecolalia o movimientos estereotipados no hay TEA','Sí, pero solo se diagnostica Síndrome de Asperger, no TEA'],
+   cor:1,
+   fb:'Los intereses absorbentes/restringidos (B3) y la insistencia en la igualdad o rituales (B2) son CRR válidos — no se necesitan estereotipias motoras. Si cumple el Criterio A completo y ≥2 de los 4 tipos de CRR, hay TEA. El Síndrome de Asperger ya no existe como categoría diagnóstica en CIE-11 ni DSM-5 — todo es TEA con especificadores.'},
+
+  {t:'section', content:'Especificadores y niveles de gravedad (DSM-5)'},
+
+  {t:'text', content:`<p>El DSM-5 incluye especificadores que la CIE-11 también contempla de forma similar:</p>
+  <p><strong>Con/sin discapacidad intelectual acompañante</strong><br>
+  <strong>Con/sin deterioro del lenguaje acompañante</strong><br>
+  <strong>Asociado a condición médica/genética conocida</strong> (ej. síndrome de Rett, X frágil)<br>
+  <strong>Asociado a otro trastorno del neurodesarrollo, mental o del comportamiento</strong></p>
+  <p>Los <strong>niveles de gravedad (1, 2, 3)</strong> del DSM-5 se refieren a la necesidad de apoyo — no a la "gravedad" del TEA per se:</p>
+  <p>Nivel 1: Necesita apoyo. Nivel 2: Necesita apoyo sustancial. Nivel 3: Necesita apoyo muy sustancial.</p>`},
+
+  {t:'tip',
+   label:'Diagnóstico diferencial crítico: TEA vs Esquizofrenia de inicio temprano',
+   text:'En esquizofrenia: los síntomas psicóticos son episódicos y representan un deterioro desde el nivel previo de funcionamiento. En TEA: el patrón de comunicación atípica es estable desde el desarrollo. Las alucinaciones y delirios formales no son parte del TEA — aunque puede coexistir con psicosis. Preguntar siempre: ¿Cómo era de niño? ¿Hubo un cambio desde un funcionamiento previo normal?'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia más importante entre CIE-10/DSM-IV y CIE-11/DSM-5 en el diagnóstico del autismo?',
+   opts:['La edad de diagnóstico cambió de 3 a 5 años','Se eliminaron los subtipos (Asperger, autismo atípico, TGD-NE) y se unificó en un espectro único con especificadores; el lenguaje pasó de ser criterio a especificador','Los criterios son más estrictos en CIE-11','La comorbilidad con DI ya no se permite diagnosticar'],
+   cor:1,
+   fb:'El cambio paradigmático fue la unificación en espectro. Antes: Autismo de Kanner, Asperger, TGD-NE, Autismo Atípico — con poca fiabilidad entre evaluadores y sin valor pronóstico claro. Ahora: TEA único con especificadores que capturan el nivel de funcionamiento, presencia de DI y deterioro del lenguaje. El lenguaje pasó de ser criterio central (tríada) a especificador (díada + especificadores).'}
+ ],
+ quiz:[
+  {q:'¿Cuántos tipos de comportamientos restrictivos/repetitivos deben estar presentes para cumplir el Criterio B del DSM-5 para TEA?',
+   opts:['Al menos 1 de 4','Al menos 2 de 4','Todos los 4','Al menos 3 de 4'],
+   cor:1,
+   fb:'≥2 de los 4 tipos, ya sea en el momento de la evaluación o por historia. Los 4 tipos son: (1) movimientos/uso de objetos/habla estereotipados, (2) insistencia en la igualdad/rutinas inflexibles, (3) intereses muy restringidos de intensidad/foco anormal, (4) hiper o hiporreactividad sensorial. Importante: pueden ser actuales o reportados por historia — no tienen que estar presentes en la evaluación directa.'},
+  {q:'¿Cuál de estos NO es un síntoma del Criterio A (comunicación/interacción social) en TEA?',
+   opts:['Déficit en reciprocidad socioemocional — no iniciar conversaciones o responder a ellas','Insistencia en la igualdad — malestar extremo ante cambios de rutina','Dificultad para adaptar el comportamiento a diferentes contextos sociales','Déficit en comunicación no verbal — reducción del contacto visual o gestos'],
+   cor:1,
+   fb:'La insistencia en la igualdad/rutinas inflexibles pertenece al Criterio B (comportamientos restrictivos/repetitivos — tipo B2). El Criterio A incluye: reciprocidad socioemocional, comunicación no verbal, y desarrollo/mantenimiento de relaciones. Confundir criterios A y B es un error frecuente en evaluaciones.'},
+  {q:'Una niña de 7 años tiene buen lenguaje, es aplicada académicamente, tiene una amiga, pero necesita que el colegio siga exactamente la misma rutina, hace aleteos de manos cuando se emociona, tiene hipersensibilidad a texturas de ropa y un interés absorbente en dinosaurios que ocupa 4 horas diarias. ¿Qué diagnóstico considerar?',
+   opts:['TOC con rituales — los comportamientos repetitivos son obsesiones','TDAH con comorbilidad ansiosa — la rigidez es por ansiedad','TEA Nivel 1 — cumple Criterio B (≥2 CRR: rutinas, estereotipias, sensorial, intereses restringidos) y debe evaluarse Criterio A formalmente','Trastorno de ansiedad generalizada — la sensibilidad es síntoma de ansiedad'],
+   cor:2,
+   fb:'La niña tiene ≥2 CRR claramente: rutinas rígidas (B2), aleteos (B1), hipersensibilidad sensorial (B4), intereses restringidos (B3). Tener una amiga y buen lenguaje no excluye TEA — muchas niñas con TEA aprenden a "enmascarar" el déficit social. La evaluación formal del Criterio A está indicada. En el diferencial TOC: en TOC las compulsiones son egodistónicas (generan malestar); en TEA son egosintónicas o placenteras.'},
+  {q:'¿Por qué el Síndrome de Asperger fue eliminado como categoría independiente en CIE-11 y DSM-5?',
+   opts:['Porque Hans Asperger fue desacreditado históricamente','Porque los estudios de campo mostraron baja fiabilidad entre evaluadores y los subtipos no predecían diferencias en pronóstico, tratamiento o neurobiología','Porque el síndrome de Asperger es más grave que el autismo clásico','Porque solo se presentaba en adultos'],
+   cor:1,
+   fb:'La decisión fue empírica: los estudios mostraron que los clínicos no coincidían frecuentemente en si un caso era "Asperger" vs "Autismo de alto funcionamiento", y que las diferencias no se traducían en diferencias clínicas relevantes de pronóstico o tratamiento. Se mantienen como especificadores: si hay o no DI, si hay o no deterioro del lenguaje. Nota: aunque el contexto histórico de Asperger es complejo, la razón diagnóstica fue la evidencia de campo, no la controversia histórica.'},
+  {q:'En TEA, ¿qué indica el "Nivel 1" de gravedad del DSM-5?',
+   opts:['TEA leve — síntomas subclínicos que no afectan el funcionamiento','Necesita apoyo — sin apoyo, los déficits en comunicación social causan deterioro funcional; la inflexibilidad interfiere con el funcionamiento','TEA con DI asociada','TEA sin lenguaje funcional'],
+   cor:1,
+   fb:'Los niveles de gravedad del DSM-5 describen la necesidad de apoyo, no la intensidad de los síntomas. Nivel 1: necesita apoyo (déficits notorios, dificultad para iniciar interacciones, inflexibilidad que interfiere); Nivel 2: necesita apoyo sustancial (déficits marcados, comunicación limitada); Nivel 3: necesita apoyo muy sustancial (déficits graves, comunicación mínima). Una persona de nivel 1 puede tener QI alto y parecer "funcionar bien" pero tiene deterioro real.'}
+ ]
+},
+
+'nd3':{
+ title:'TDAH — Criterios completos y diagnóstico diferencial',
+ mod:'Neurodesarrollo',
+ sub:'CIE-11 (6A05) vs DSM-5 (314.xx) — 18 síntomas, presentaciones y diferenciales',
+ bloques:[
+  {t:'text', content:`<p>El TDAH es el diagnóstico del neurodesarrollo más frecuente en clínica. También es uno de los más sobrediagnosticados y subdiagnosticados simultáneamente — sobrediagnosticado en niños con problemas conductuales por otras causas, y subdiagnosticado en adultos, mujeres y personas con alto CI que compensan.</p>
+  <p>Tanto CIE-11 como DSM-5 usan prácticamente los mismos 18 síntomas organizados en dos dominios: inatención e hiperactividad-impulsividad. La diferencia entre los sistemas es mínima.</p>`},
+
+  {t:'section', content:'Los 9 síntomas de Inatención (Criterio A)'},
+
+  {t:'text', content:`<p>Se requieren <strong>≥6 síntomas</strong> en niños (<17 años) o <strong>≥5 síntomas</strong> en ≥17 años:</p>
+  <p><strong>IN1:</strong> Con frecuencia no presta atención suficiente a los detalles o incurre en errores por descuido en las tareas escolares, en el trabajo o durante otras actividades.</p>
+  <p><strong>IN2:</strong> Con frecuencia tiene dificultades para mantener la atención en tareas o actividades recreativas.</p>
+  <p><strong>IN3:</strong> Con frecuencia parece no escuchar cuando se le habla directamente (la mente está "en otro lugar" incluso sin distracción obvia).</p>
+  <p><strong>IN4:</strong> Con frecuencia no sigue las instrucciones al final y no termina las tareas escolares, los quehaceres o las obligaciones laborales (no es por conducta oposicionista ni por no entender instrucciones).</p>
+  <p><strong>IN5:</strong> Con frecuencia tiene dificultad para organizar tareas y actividades (dificultad para gestionar tareas secuenciales, mantener los materiales ordenados, descuidar el trabajo).</p>
+  <p><strong>IN6:</strong> Con frecuencia evita, le disgusta o se muestra poco entusiasta en iniciar tareas que requieren un esfuerzo mental sostenido.</p>
+  <p><strong>IN7:</strong> Con frecuencia pierde cosas necesarias para tareas o actividades (llaves, teléfono, lápices, libros, herramientas, cartera).</p>
+  <p><strong>IN8:</strong> Con frecuencia se distrae con facilidad por estímulos externos (en adultos: pensamientos no relacionados).</p>
+  <p><strong>IN9:</strong> Con frecuencia olvida las actividades cotidianas (hacer los quehaceres, cumplir las diligencias; en adultos: devolver llamadas, pagar facturas, acudir a las citas).</p>`},
+
+  {t:'section', content:'Los 9 síntomas de Hiperactividad-Impulsividad (Criterio A)'},
+
+  {t:'text', content:`<p>Se requieren <strong>≥6 síntomas</strong> en niños (<17 años) o <strong>≥5 síntomas</strong> en ≥17 años:</p>
+  <p><strong>HI1:</strong> Con frecuencia juguetea o golpea con las manos o los pies o se retuerce en el asiento.</p>
+  <p><strong>HI2:</strong> Con frecuencia se levanta en situaciones en que se espera que permanezca sentado.</p>
+  <p><strong>HI3:</strong> Con frecuencia corretea o trepa en situaciones en las que no resulta apropiado. (En adolescentes o adultos: puede limitarse a estar inquieto.)</p>
+  <p><strong>HI4:</strong> Con frecuencia es incapaz de jugar o de ocuparse tranquilamente en actividades recreativas.</p>
+  <p><strong>HI5:</strong> Con frecuencia está "ocupado," actuando como si "lo impulsara un motor".</p>
+  <p><strong>HI6:</strong> Con frecuencia habla excesivamente.</p>
+  <p><strong>HI7:</strong> Con frecuencia responde inesperadamente o antes de que se haya concluido una pregunta.</p>
+  <p><strong>HI8:</strong> Con frecuencia le es difícil esperar su turno.</p>
+  <p><strong>HI9:</strong> Con frecuencia interrumpe o se inmiscuye con otros.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>Código:</strong> 6A05 (TDAH), con subtipos</li>
+    <li><strong>Umbral:</strong> ≥6/9 síntomas en niños; ≥5/9 en ≥17 años — igual que DSM-5</li>
+    <li><strong>Inicio:</strong> Varios síntomas presentes antes de los <strong>12 años</strong></li>
+    <li><strong>Presentaciones:</strong> Predominantemente inatento, predominantemente hiperactivo-impulsivo, combinado</li>
+    <li><strong>No exige deterioro en "dos contextos" explícitamente — pero sí interferencia funcional significativa</strong></li>
+    <li><strong>Permite diagnóstico con TEA comórbido</strong> (cambio desde CIE-10)</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>Código:</strong> 314.01 (combinado), 314.00 (inatento), 314.01 (hiperactivo-impulsivo)</li>
+    <li><strong>Umbral:</strong> ≥6/9 en niños; ≥5/9 en ≥17 años</li>
+    <li><strong>Inicio:</strong> Varios síntomas presentes antes de los <strong>12 años</strong></li>
+    <li><strong>Dos contextos:</strong> Síntomas en ≥2 contextos (hogar, colegio, trabajo, amigos)</li>
+    <li><strong>Especificadores:</strong> En remisión parcial; gravedad leve/moderada/grave</li>
+    <li><strong>Permite diagnóstico con TEA comórbido</strong> (cambio desde DSM-IV)</li>
+   </ul>`},
+
+  {t:'case',
+   label:'TDAH en adultos — presentación frecuente en clínica',
+   text:`<strong>Alejandra, 34 años, médica residente.</strong> Consulta por "ansiedad y dificultad para concentrarme". Desde niña "era muy inquieta" pero "era inteligente y lo compensaba". Ahora en la residencia, las demandas aumentaron: empieza 10 cosas a la vez, no termina nada, llega tarde, pierde el pager, olvida citas. Sus notas de la secundaria muestran "inteligente pero distrae, no termina tareas, pierde útiles". Ningún psiquiatra lo había detectado porque su CI alto compensó hasta que las demandas superaron la capacidad de compensación.
+  <br><br><em>TDAH combinado en adulto de alto CI.</em> El TDAH en adultos se presenta más con inatención que con hiperactividad (que se "internaliza" como inquietud interna). El umbral menor (≥5 síntomas vs ≥6 en niños) reconoce que los adultos presentan menos síntomas totales.`},
+
+  {t:'question',
+   q:'¿Por qué el TDAH en adultos requiere solo ≥5 síntomas en lugar de ≥6 como en niños?',
+   opts:['Porque en adultos el TDAH es menos grave','Porque los síntomas de TDAH disminuyen naturalmente con la edad — los adultos con TDAH presentan menos síntomas totales pero con igual deterioro funcional','Porque en adultos la hiperactividad desaparece completamente','Porque el DSM-5-TR bajó el umbral arbitrariamente'],
+   cor:1,
+   fb:'Los síntomas de TDAH, especialmente la hiperactividad visible, disminuyen en número con la maduración neurológica. Sin embargo, el deterioro funcional se mantiene. Los estudios de campo del DSM-5 mostraron que adultos con TDAH clínicamente significativo presentaban promedio 5 síntomas, no 6. El umbral diferenciado (≥6 en niños, ≥5 en ≥17 años) mejora la sensibilidad diagnóstica sin perder especificidad.'},
+
+  {t:'alert',
+   label:'Diagnóstico diferencial — Lo que NO es TDAH',
+   text:'Trastorno bipolar (la distracción y aceleración son episódicas, no crónicas desde la infancia). Ansiedad (la distracción en ansiedad es por preocupaciones, no por distracción del entorno). Depresión (concentración afectada pero sin historia desde la infancia). Trastorno del sueño (somnolencia diurna imita inatención). Trauma/TEPT (hipervigilancia puede parecer hiperactividad). Siempre preguntar: ¿Cómo era en la infancia? — el TDAH es del neurodesarrollo, siempre tiene historia temprana.'},
+
+  {t:'question',
+   q:'Un paciente de 30 años cumple actualmente 5 síntomas de inatención y 3 de hiperactividad-impulsividad, con historia clara desde los 8 años y deterioro laboral y familiar. ¿Cumple criterios de TDAH?',
+   opts:['No, porque no tiene ≥6 síntomas en ninguna categoría','Sí — en ≥17 años el umbral es ≥5 síntomas en uno o ambos dominios, tiene historia de inicio antes de los 12 y deterioro funcional en múltiples contextos','Solo si se confirma con neuroimagen o EEG','No, porque los síntomas de hiperactividad son insuficientes'],
+   cor:1,
+   fb:'Correcto. ≥5 síntomas de inatención (cumplido) es suficiente para presentación predominantemente inatenta en ≥17 años. Además, tiene inicio antes de los 12 años (a los 8) y deterioro funcional. Presentación: predominantemente inatenta (F90.0 / 314.00). El TDAH no requiere neuroimagen ni EEG — es un diagnóstico clínico.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es el cambio fundamental que el DSM-5 y la CIE-11 hicieron respecto al diagnóstico de TDAH en personas con TEA?',
+   opts:['Lo prohibieron — no se puede diagnosticar TDAH si hay TEA','Lo permitieron — anteriormente (DSM-IV, CIE-10) estaba excluido; ahora ambos diagnósticos pueden coexistir','No hubo cambio — siempre se permitió el diagnóstico dual','Solo el DSM-5 lo permite; la CIE-11 aún lo excluye'],
+   cor:1,
+   fb:'Este fue un cambio clínicamente importante. DSM-IV y CIE-10 excluían el diagnóstico de TDAH si había TEA. Los estudios mostraron que un 30-50% de personas con TEA cumplen criterios de TDAH — y que tratar el componente TDAH mejoraba el funcionamiento. DSM-5 y CIE-11 permiten ambos diagnósticos simultáneamente.'},
+  {q:'Felipe tiene 8 años y cumple ≥6 síntomas de inatención e hiperactividad-impulsividad, pero solo se observan en el colegio — en casa, con videojuegos o deportes no hay ningún problema de atención. ¿Cumple criterios de TDAH?',
+   opts:['Sí — el colegio es el contexto más relevante para el diagnóstico','No — el DSM-5 requiere síntomas en al menos 2 contextos diferentes; si solo aparecen en el colegio, se deben buscar otras causas','Sí, si el maestro lo confirma con escala formal','Depende — si los síntomas son muy graves en el colegio, un contexto puede ser suficiente'],
+   cor:1,
+   fb:'El DSM-5 requiere síntomas en ≥2 contextos. Si los síntomas de inatención/hiperactividad solo se presentan en el colegio, el diagnóstico diferencial debe incluir: ambiente escolar inadecuado, relación problemática con docente, trastorno del aprendizaje (que se manifiesta solo con material académico), ansiedad escolar. El TDAH verdadero es pervasivo — está presente en múltiples ambientes.'},
+  {q:'¿Cuál de estas características distingue al TDAH del Trastorno Bipolar cuando ambos cursan con impulsividad y aceleración?',
+   opts:['En TDAH hay grandiosidad; en Bipolar no','En TDAH los síntomas son crónicos y desde la infancia (neurodesarrollo); en Bipolar son episódicos con períodos de funcionamiento normal entre episodios','En Bipolar siempre hay síntomas psicóticos; en TDAH no','No se pueden distinguir — siempre son comórbidos'],
+   cor:1,
+   fb:'El TDAH es del neurodesarrollo: crónico, estable, presente "siempre así" desde la infancia. El Bipolar es episódico: hay episodios maníacos/hipomaníacos con inicio claro, cambio desde funcionamiento previo y períodos de eutimia. La pregunta clave: ¿Siempre fue así o hubo un período previo de funcionamiento diferente? El TDAH y el Bipolar SÍ pueden ser comórbidos — especialmente el Bipolar II con TDAH.'},
+  {q:'¿En qué se diferencia la inatención del TDAH de la dificultad de concentración en el Trastorno de Ansiedad Generalizada?',
+   opts:['No hay diferencia — ambos son inatención del mismo tipo','En TDAH la distracción es por estímulos externos/pensamientos no relacionados (mente que "vaga"); en ansiedad la distracción es por preocupaciones excesivas específicas y el paciente no puede "dejar de pensar" en los temas de preocupación','En ansiedad la concentración solo falla en situaciones de estrés agudo','En TDAH siempre hay hiperactividad acompañante'],
+   cor:1,
+   fb:'La distinción fenomenológica es importante: TDAH → mente que divaga, no puede mantenerse en la tarea, distraída por el entorno, "no puedo acabar nada". TAG → mente ocupada en preocupaciones específicas ("¿Y si me pasa X?"), el paciente quisiera parar de pensar pero no puede. Además: el TDAH tiene historia desde la infancia; la ansiedad puede tener inicio en cualquier momento. Pueden coexistir — hasta el 50% de adultos con TDAH tienen ansiedad comórbida.'},
+  {q:'¿Cuál presentación de TDAH es más frecuente y frecuentemente subdiagnosticada en mujeres?',
+   opts:['Presentación combinada — con hiperactividad visible','Presentación predominantemente hiperactiva-impulsiva','Presentación predominantemente inatenta — sin hiperactividad visible, con mayor tendencia al "ensoñación diurna" y compensación por alto rendimiento académico','No hay diferencias de género en la presentación'],
+   cor:2,
+   fb:'La presentación predominantemente inatenta es más frecuente en mujeres con TDAH. Sin la hiperactividad visible, pasan desapercibidas — "soñadoras", "distraídas pero muy inteligentes". Compensan con alto esfuerzo hasta que las demandas aumentan (universidad, trabajo, maternidad). El diagnóstico promedio en mujeres llega 5-7 años después que en hombres. Esta presentación también tiene mayor comorbilidad con ansiedad y depresión.'}
+ ]
+},
+
+'nd4':{
+ title:'Trastornos del Aprendizaje, Comunicación, Coordinación y Tics',
+ mod:'Neurodesarrollo',
+ sub:'CIE-11 vs DSM-5 — TA, Habla/Lenguaje, TDC, Tourette',
+ bloques:[
+  {t:'text', content:`<p>Este bloque cubre cuatro grupos diagnósticos del neurodesarrollo frecuentemente confundidos entre sí y con otros trastornos: Trastornos del Aprendizaje, Trastornos de la Comunicación, Trastorno del Desarrollo de la Coordinación (dispraxia) y Trastornos de Tics incluyendo Tourette.</p>`},
+
+  {t:'section', content:'Trastorno del Aprendizaje — Dislexia, Discalculia, Disortografía'},
+
+  {t:'text', content:`<p>El <strong>DSM-5</strong> unifica todo bajo un solo diagnóstico con especificadores: <strong>Trastorno Específico del Aprendizaje (315.xx)</strong>. La <strong>CIE-11</strong> mantiene subtipos separados bajo el bloque 6A03.</p>
+  <p><strong>Criterios esenciales (ambos sistemas):</strong><br>
+  1. Dificultades persistentes en habilidades académicas específicas (lectura, escritura, matemáticas) que son <em>sustancialmente</em> por debajo de lo esperado para la edad cronológica.<br>
+  2. Inicio durante el período escolar.<br>
+  3. Persistencia a pesar de intervenciones adecuadas (<strong>DSM-5 exige ≥6 meses</strong>).<br>
+  4. No explicado por DI, déficit sensorial, trastorno neurológico, adversidad psicosocial, o instrucción inadecuada.</p>
+  <p><strong>Especificadores DSM-5:</strong><br>
+  — <em>Con dificultad en la lectura</em> (dislexia): precisión en lectura de palabras, velocidad o fluidez lectora, comprensión lectora.<br>
+  — <em>Con dificultad en la expresión escrita</em>: precisión ortográfica, gramática/puntuación, claridad/organización de la escritura.<br>
+  — <em>Con dificultad matemática</em> (discalculia): sentido numérico, memorización de operaciones aritméticas, cálculo correcto o fluido, razonamiento matemático.</p>`},
+
+  {t:'compare',
+   cie:`<ul>
+    <li><strong>6A03.0:</strong> Trastorno del desarrollo de la lectura (dislexia)</li>
+    <li><strong>6A03.1:</strong> Trastorno del desarrollo de la expresión escrita</li>
+    <li><strong>6A03.2:</strong> Trastorno del desarrollo del aprendizaje de las matemáticas (discalculia)</li>
+    <li><strong>6A03.3:</strong> Otro trastorno del desarrollo del aprendizaje especificado</li>
+    <li>Subtipos separados con códigos individuales</li>
+    <li>Gravedad: leve, moderada, grave</li>
+   </ul>`,
+   dsm:`<ul>
+    <li><strong>315.00:</strong> Con dificultad en la lectura</li>
+    <li><strong>315.2:</strong> Con dificultad en la expresión escrita</li>
+    <li><strong>315.1:</strong> Con dificultad matemática</li>
+    <li>Un solo diagnóstico con especificadores — puede tener múltiples</li>
+    <li>Requiere ≥6 meses de dificultad persistente a pesar de intervención</li>
+    <li>Gravedad: leve, moderado, grave</li>
+   </ul>`},
+
+  {t:'section', content:'Trastornos de la Comunicación — Habla y Lenguaje'},
+
+  {t:'text', content:`<p><strong>DSM-5</strong> tiene cuatro diagnósticos separados; la <strong>CIE-11</strong> los agrupa bajo el bloque 6A01:</p>
+  <p><strong>Trastorno del Lenguaje (CIE-11: 6A01.0 / DSM-5: 315.32):</strong> Dificultades persistentes en la adquisición y uso del lenguaje — vocabulario reducido, estructura de oraciones limitada, deterioro del discurso. <em>Criterio esencial:</em> Habilidades significativamente por debajo de lo esperado para la edad, con inicio en el desarrollo temprano, que interfieren con la comunicación, participación social o logros académicos. No explicado por déficit sensorial/motor, DI u otras condiciones.</p>
+  <p><strong>Trastorno Fonológico (CIE-11: 6A01.1 / DSM-5: 315.39):</strong> Dificultad persistente en la producción fonológica que interfiere con la inteligibilidad del habla o impide la comunicación verbal. El habla es difícil de entender para el oyente.</p>
+  <p><strong>Tartamudeo — Trastorno de la Fluidez de inicio en la Infancia (CIE-11: 6A01.2 / DSM-5: 307.0):</strong> Alteraciones en la fluidez y el ritmo temporal del habla que son inapropiados para la edad: repeticiones de sonidos/sílabas/palabras, prolongaciones de sonidos, pausas en medio de palabras, bloqueos. Causa ansiedad o evitación de situaciones comunicativas.</p>
+  <p><strong>Trastorno de la Comunicación Social — Pragmático (CIE-11: 6A01.3 / DSM-5: 315.39):</strong> Dificultades en el uso social de la comunicación verbal y no verbal — incapacidad para adaptar el estilo comunicativo al contexto, para seguir reglas de conversación, para entender lo implícito o el lenguaje no literal. <em>Diferencial clave con TEA:</em> En el Trastorno Pragmático no hay comportamientos restrictivos/repetitivos — si los hay, el diagnóstico es TEA.</p>`},
+
+  {t:'case',
+   label:'Dislexia en adulto profesional — presentación tardía',
+   text:`<strong>Carlos, 38 años, ingeniero.</strong> Consulta por "procrastinación y dificultades laborales". Al explorar: siempre fue "lento para leer" en el colegio pero "era muy inteligente en cálculo". En ingeniería compensó leyendo más lento. Ahora los reportes escritos son su "pesadilla" — errores ortográficos frecuentes, lee párrafos dos veces, escribe muy despacio. Nunca fue evaluado.
+  <br><br><em>Dislexia en adulto compensado:</em> El diagnóstico de Trastorno del Aprendizaje puede hacerse en adultos que compensaron en la infancia con mayor esfuerzo. Las dificultades emergen cuando las demandas académicas o laborales superan la capacidad de compensación.`},
+
+  {t:'section', content:'Trastorno del Desarrollo de la Coordinación (TDC) — Dispraxia'},
+
+  {t:'text', content:`<p><strong>CIE-11: 6A04 / DSM-5: 315.4</strong></p>
+  <p><strong>Criterios esenciales (idénticos en ambos sistemas):</strong><br>
+  1. La adquisición y ejecución de habilidades motoras coordinadas está sustancialmente por debajo de lo esperado para la edad cronológica y la oportunidad de aprender.<br>
+  2. El déficit interfiere significativamente y de forma persistente con actividades de la vida diaria apropiadas para la edad.<br>
+  3. Inicio en el período de desarrollo temprano.<br>
+  4. No explicado por DI, deterioro visual, ni por una condición neurológica que afecte el movimiento.</p>
+  <p><em>Manifestaciones clínicas:</em> Torpeza motora, lentitud en escritura a mano, dificultad con deportes de equipo, caídas frecuentes, dificultad para anudar zapatos o abotonarse. En adultos: letra ilegible, movimientos torpes, dificultad con herramientas manuales. A veces llamado "dispraxia" aunque este término no es oficial en ninguno de los dos sistemas.</p>`},
+
+  {t:'section', content:'Trastornos de Tics — Tourette y relacionados'},
+
+  {t:'text', content:`<p>Los tics son movimientos o vocalizaciones súbitos, rápidos, recurrentes y no rítmicos. Se clasifican por tipo y duración:</p>`},
+
+  {t:'table',
+   headers:['Diagnóstico','CIE-11','DSM-5','Criterios de duración','Tipo de tics'],
+   rows:[
+    ['Trastorno de Tourette','6A40.0','307.23','> 1 año','Múltiples motores + ≥1 vocal (no necesariamente simultáneos)'],
+    ['Tics motores o vocales persistentes','6A40.1','307.22','> 1 año','Motores O vocales (no ambos)'],
+    ['Tics provisionales','6A40.2','307.21','< 1 año','Motores y/o vocales'],
+   ]},
+
+  {t:'text', content:`<p><strong>Criterios comunes a todos (CIE-11 y DSM-5):</strong><br>
+  — Inicio antes de los 18 años.<br>
+  — No atribuible a efectos fisiológicos de sustancias ni a otra condición médica.<br>
+  — Los tics pueden suprimirse voluntariamente por períodos cortos.<br>
+  — Frecuentemente hay una sensación premonitoria ("urge") antes del tic.</p>
+  <p><strong>Punto clínico importante — Tourette:</strong> La coprolalia (emisión involuntaria de palabras obscenas) es el síntoma más conocido del Tourette pero solo ocurre en el 10-15% de los casos. No es criterio diagnóstico. El diagnóstico no la requiere.</p>
+  <p><strong>Comorbilidades frecuentes en Tourette:</strong> TDAH (50-60%), TOC (30-40%), ansiedad (30%). El TDAH comórbido suele ser más discapacitante que los tics mismos.</p>`},
+
+  {t:'question',
+   q:'Un niño de 10 años tiene tics motores múltiples (parpadeo, encogimiento de hombros) y un tic vocal (aclarar la garganta) durante los últimos 14 meses, con inicio a los 8 años. ¿Cuál es el diagnóstico correcto?',
+   opts:['Tics provisionales — porque los tics son leves','Trastorno de tics motores persistentes — porque el tic vocal es solo uno','Trastorno de Tourette — múltiples tics motores + ≥1 tic vocal durante >1 año, inicio <18 años','TOC con rituales motores — los tics pueden ser compulsiones'],
+   cor:2,
+   fb:'Tourette: múltiples tics motores + ≥1 tic vocal (aunque no simultáneos), durante >1 año, inicio <18 años. No se requiere coprolalia. La duración es 14 meses (>1 año) y el inicio fue a los 8 años (<18). Los tics provisionales duran <1 año; los persistentes son solo motores O solo vocales (no ambos). El diferencial con TOC: las compulsiones son respuesta a obsesiones y son egodistónicas; los tics tienen sensación premonitoria diferente y son más automatizados.'},
+
+  {t:'question',
+   q:'¿Cuál es la diferencia fundamental entre el Trastorno de la Comunicación Social (Pragmático) y el TEA?',
+   opts:['No hay diferencia — son el mismo diagnóstico con diferente nombre','En el Trastorno Pragmático hay déficits en el uso social del lenguaje pero NO hay comportamientos restrictivos/repetitivos; en TEA hay ambos','El Trastorno Pragmático solo afecta el lenguaje oral, no gestual','El Trastorno Pragmático tiene peor pronóstico que el TEA'],
+   cor:1,
+   fb:'Esta es la distinción diagnóstica clave. Si hay déficits en comunicación social + comportamientos restrictivos/repetitivos → TEA. Si hay déficits en comunicación social/pragmática sin CRR → Trastorno de la Comunicación Social Pragmático. Clínicamente: preguntar siempre sobre CRR antes de establecer el diagnóstico pragmático. Si hay CRR aunque sean sutiles, el diagnóstico es TEA.'}
+ ],
+ quiz:[
+  {q:'¿Cuál es el requisito de duración adicional que el DSM-5 exige para el diagnóstico de Trastorno Específico del Aprendizaje que la CIE-11 no especifica de la misma forma?',
+   opts:['Los síntomas deben persistir por al menos 1 año','Los síntomas deben haber estado presentes durante al menos 6 meses a pesar de intervenciones dirigidas a esas dificultades','Los síntomas deben estar presentes desde antes de los 5 años','No hay diferencia — ambos exigen el mismo período'],
+   cor:1,
+   fb:'El DSM-5 explícitamente requiere que las dificultades académicas persistan por ≥6 meses a pesar de intervenciones dirigidas. Esto evita diagnosticar TA por dificultades transitorias que responden a tutorías o intervención pedagógica. La CIE-11 no especifica una duración mínima tan explícita, aunque requiere que las dificultades sean persistentes.'},
+  {q:'¿Cuál de estas manifestaciones NO es criterio diagnóstico del Trastorno de Tourette?',
+   opts:['Tics motores múltiples presentes en algún momento','Al menos un tic vocal presente en algún momento','Duración mayor a 1 año','Coprolalia — emisión involuntaria de palabras obscenas'],
+   cor:3,
+   fb:'La coprolalia ocurre en solo el 10-15% de personas con Tourette y NO es criterio diagnóstico. Los criterios son: múltiples tics motores + ≥1 tic vocal (no necesariamente simultáneos), durante >1 año desde el primer tic, inicio <18 años, no atribuible a sustancias ni condición médica. Muchos pacientes con Tourette nunca desarrollan coprolalia.'},
+  {q:'¿Cuántos diagnósticos de Trastornos de Comunicación reconoce el DSM-5 como categorías separadas?',
+   opts:['2 — trastorno del lenguaje y tartamudeo','3 — lenguaje, fonológico y tartamudeo','4 — lenguaje, fonológico, trastorno de la fluidez (tartamudeo) y trastorno de la comunicación social (pragmático)','5 — incluye mutismo selectivo como trastorno de la comunicación'],
+   cor:2,
+   fb:'El DSM-5 tiene 4 trastornos de la comunicación: (1) Trastorno del Lenguaje, (2) Trastorno Fonológico, (3) Trastorno de la Fluidez de inicio en la Infancia (tartamudeo), y (4) Trastorno de la Comunicación Social (Pragmático). El Mutismo Selectivo está clasificado en el DSM-5 dentro de los Trastornos de Ansiedad, no en comunicación.'},
+  {q:'¿Qué trastorno del neurodesarrollo es más frecuentemente comórbido con el Trastorno de Tourette?',
+   opts:['TEA — presente en el 70% de casos','DI — todos los casos de Tourette tienen DI leve','TDAH — presente en el 50-60% de casos, frecuentemente más discapacitante que los tics mismos','Trastorno del lenguaje — el 80% tiene dificultades lingüísticas'],
+   cor:2,
+   fb:'El TDAH es la comorbilidad más frecuente en Tourette (50-60%). El TOC también es frecuente (30-40%), así como la ansiedad. Clínicamente relevante: en muchos casos el TDAH comórbido genera más deterioro funcional que los tics. El tratamiento del TDAH (con atomoxetina o guanfacina — preferidos sobre metilfenidato en Tourette) puede ser la intervención con mayor impacto funcional.'},
+  {q:'¿Cuál es el criterio diferencial entre el Trastorno del Desarrollo de la Coordinación y la torpeza motora normal?',
+   opts:['El TDC requiere confirmación por EEG y neuroimagen','El TDC es un diagnóstico exclusivamente infantil — en adultos no se diagnostica','En TDC las dificultades motoras interfieren significativamente y de forma persistente con actividades de la vida diaria apropiadas para la edad, y están sustancialmente por debajo de lo esperado','El TDC requiere ausencia total de cualquier habilidad motora'],
+   cor:2,
+   fb:'El criterio funcional es clave: no es simplemente "ser torpe". Para TDC, las dificultades deben estar sustancialmente por debajo de lo esperado para la edad y deben interferir significativamente con actividades cotidianas (escritura, deportes, autocuidado, trabajo). El TDC puede diagnosticarse en adultos — muchos adultos con TDC no diagnosticado tienen antecedente de "siempre fui torpe" y dificultades laborales o sociales relacionadas.'}
+ ]
+}
+
+}; // fin LECCIONES
+
+// ══════════════════════════════════════════
+//  MÓDULOS
+// ══════════════════════════════════════════
+const MODS = [
+  {id:'nd', name:'Neurodesarrollo', ic:'🧠', color:'#5b9bd5',
+   lecciones:[
+     {id:'nd1', title:'Discapacidad Intelectual', sub:'CIE-11 6A00 · DSM-5 317–319', mins:12},
+     {id:'nd2', title:'TEA — Espectro Autista', sub:'CIE-11 6A02 · DSM-5 299.00 · Díada + CRR', mins:15},
+     {id:'nd3', title:'TDAH — 18 síntomas completos', sub:'CIE-11 6A05 · DSM-5 314.xx · Adultos y niños', mins:14},
+     {id:'nd4', title:'TA · Comunicación · TDC · Tics', sub:'Aprendizaje, lenguaje, coordinación, Tourette', mins:13}
+   ]
+  }
+];
+
+// ══════════════════════════════════════════
+//  CASOS DEL JUEGO
+// ══════════════════════════════════════════
+const GAME_CASES = [
+  {id:'g1', lvl:1, pts_base:10,
+   caso:`Rodrigo, 7 años. CI de 61 (WISC-V). En casa: se viste solo, prepara su desayuno, juega con otros niños del barrio, entiende las reglas del juego. En el colegio: dificultades severas con lectura, escritura y matemáticas. El orientador pide "confirmar DI".`,
+   q:'¿Cuál es el diagnóstico más apropiado?',
+   opts:['DI leve — el CI de 61 es suficiente para el diagnóstico','Trastorno del Aprendizaje — el comportamiento adaptativo está preservado, no hay DI','TDAH con afectación académica','TEA nivel 2'],
+   cor:1,
+   fb:'El comportamiento adaptativo de Rodrigo está preservado en los dominios social y práctico. CI bajo + comportamiento adaptativo intacto ≠ DI. El diagnóstico más probable es Trastorno Específico del Aprendizaje. Lección: la DI requiere AMBOS — déficit intelectual Y déficit adaptativo.'},
+
+  {id:'g2', lvl:1, pts_base:10,
+   caso:`Catalina, 24 años, universitaria. Siempre "soñadora". Olvida citas, pierde llaves, empieza 7 tareas sin terminar ninguna. En clase "está presente pero ausente". Historia desde los 6 años. No tiene hiperactividad visible. Rinde mal a pesar de ser "muy inteligente".`,
+   q:'¿Qué presentación de TDAH describe este caso?',
+   opts:['TDAH combinado — hay síntomas en ambos dominios','TDAH predominantemente hiperactivo-impulsivo','TDAH predominantemente inatento — sin hiperactividad visible, frecuente en mujeres','No hay TDAH — son 5 síntomas, insuficientes para el diagnóstico'],
+   cor:2,
+   fb:'Presentación predominantemente inatenta. En adultos (≥17 años) se necesitan ≥5 síntomas — no 6. La hiperactividad en adultos se "internaliza" como inquietud interna. Esta presentación es la más frecuente y subdiagnosticada en mujeres. El CI alto y la compensación pueden enmascarar el diagnóstico hasta que las demandas aumentan.'},
+
+  {id:'g3', lvl:1, pts_base:10,
+   caso:`Tomás, 12 años. Tiene un interés absorbente en trenes — conoce cada modelo, año y ruta ferroviaria de Colombia. Habla de esto con cualquier persona sin notar el desinterés del otro. Le molesta profundamente cambiar la ruta al colegio. No tiene amigos. Sus maestros lo describen como "raro pero brillante".`,
+   q:'¿Qué criterio del TEA representa principalmente el interés en trenes?',
+   opts:['Criterio A — déficit en reciprocidad socioemocional','Criterio B3 — intereses muy restringidos de intensidad o foco anormal (CRR)','Criterio A3 — dificultad para mantener relaciones','No es criterio de TEA — los intereses intensos son normales en la infancia'],
+   cor:1,
+   fb:'El interés absorbente en trenes (con nivel de detalle y tiempo ocupado cualitativamente diferente a lo esperado) corresponde al Criterio B3: intereses muy restringidos de intensidad o foco anormal. Tomás también muestra déficits en Criterio A (no nota el desinterés del otro, no tiene amigos). Este caso ilustra cómo el TEA puede presentarse sin estereotipias motoras evidentes.'},
+
+  {id:'g4', lvl:2, pts_base:15,
+   caso:`Daniela, 9 años. Lenguaje bien desarrollado, vocabulario amplio. Sin embargo, en conversación grupal siempre "se sale del tema", no entiende el sarcasmo ni las metáforas, no adapta cómo habla según si es con un adulto o un par. Disfruta de los juegos con reglas fijas. No tiene intereses restringidos ni comportamientos motores repetitivos.`,
+   q:'¿Qué diagnóstico es más apropiado y por qué NO es TEA?',
+   opts:['TEA nivel 1 — tiene déficits sociales y comunicativos','Trastorno de la Comunicación Social (Pragmático) — hay déficits pragmáticos pero NO hay comportamientos restrictivos/repetitivos, que son criterio obligatorio del TEA','Trastorno del Lenguaje — la gramática y el vocabulario están afectados','TDAH — la distracción en conversación es inatención'],
+   cor:1,
+   fb:'Trastorno de la Comunicación Social (Pragmático): déficits en uso social del lenguaje (pragmática) SIN comportamientos restrictivos/repetitivos. El TEA requiere AMBOS criterios: A (comunicación social) + B (≥2 CRR). Si hay déficits sociales/comunicativos sin ningún CRR, el diagnóstico es el Trastorno Pragmático. Esta distinción es fundamental — determina el plan de intervención.'},
+
+  {id:'g5', lvl:2, pts_base:15,
+   caso:`Miguel, 8 años. Tics motores (parpadeo, encogimiento de hombros, giro de cabeza) y un tic vocal (aclarar la garganta) que aparecen y desaparecen, pero presentes durante los últimos 16 meses. Los tics empeoran con el estrés. El pediatra pregunta si "esto es TOC o Tourette".`,
+   q:'¿Cuál es el diagnóstico correcto y cuál es el criterio diferencial con TOC?',
+   opts:['TOC — los comportamientos repetitivos son compulsiones','Trastorno de Tourette — múltiples tics motores + ≥1 tic vocal, >1 año. Diferencial TOC: los tics tienen sensación premonitoria (urge) y son automatizados; las compulsiones del TOC son respuesta a obsesiones cognitivas y son egodistónicas','Tics provisionales — porque desaparecen y reaparecen','Trastorno de tics motores persistentes — solo cuenta los motores'],
+   cor:1,
+   fb:'Tourette: múltiples motores + ≥1 vocal, >1 año (16 meses cumple). El patrón de aparecer y desaparecer es típico del Tourette — los tics fluctúan. Diferencial con TOC: (1) Los tics tienen sensación premonitoria somática ("urge" en la zona); las compulsiones tienen antecedente de obsesión cognitiva. (2) Los tics son egosintónicos (no los vive como ajenos); las compulsiones son egodistónicas. (3) Los tics no tienen propósito; las compulsiones buscan reducir ansiedad.'},
+
+  {id:'g6', lvl:3, pts_base:20,
+   caso:`Juliana, 16 años. Evaluación por bajo rendimiento académico. CI verbal: 108 (promedio-alto). CI de ejecución: 112. Sin embargo, velocidad de procesamiento: 78 (bajo). Lectura de palabras aisladas: 2.5 años por debajo de su edad. La madre reporta que "siempre fue muy inteligente pero muy lenta para leer". Nunca tuvo evaluación formal.`,
+   q:'¿Qué diagnóstico se debe considerar y qué implica el perfil de CI disociado?',
+   opts:['DI leve — la velocidad de procesamiento baja indica déficit intelectual general','Trastorno Específico del Aprendizaje con dificultad en la lectura (dislexia) — el CI alto en otras áreas descarta DI; la discrepancia CI verbal-velocidad de procesamiento es característica','TDAH — la lentitud es por inatención','Ansiedad académica — el rendimiento bajo es por evitación'],
+   cor:1,
+   fb:'Este es el perfil clásico de dislexia en adolescente compensada: CI verbal e inteligencia general en rango promedio-alto, con velocidad de procesamiento fonológico significativamente baja y rendimiento lector 2.5 años por debajo de la edad. La discrepancia entre CI y rendimiento lector es característica. El CI alto permitió compensar en años anteriores. El TA no requiere CI bajo — de hecho, el CI es normal o alto mientras que la habilidad específica (lectura) es deficitaria.'}
+];
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+let ST = {done:{},pts:0,correct:0,total:0,streak:0,game:{pts:0,unlocked:1,cases:0,correct:0,total:0,history:[]}};
+function save(){try{localStorage.setItem('psicodx_nd',JSON.stringify(ST));}catch(e){}}
+function load(){try{const d=localStorage.getItem('psicodx_nd');if(d)ST=JSON.parse(d);}catch(e){}}
+load();
+
+// ══════════════════════════════════════════
+//  HOME
+// ══════════════════════════════════════════
+function refreshHome(){
+  const done=Object.keys(ST.done).length;
+  const total=MODS.reduce((a,m)=>a+m.lecciones.length,0);
+  document.getElementById('hs-les').textContent=done;
+  document.getElementById('hs-prec').textContent=ST.total>0?Math.round(ST.correct/ST.total*100)+'%':'—';
+  document.getElementById('hs-pts').textContent=ST.pts;
+  document.getElementById('h-les').textContent=done;
+  document.getElementById('h-pts').textContent=ST.pts;
+  document.getElementById('h-str').textContent=(ST.streak||0)+'🔥';
+
+  const el=document.getElementById('home-modules');
+  el.innerHTML='';
+  MODS.forEach(mod=>{
+    const doneLes=mod.lecciones.filter(l=>ST.done[l.id]).length;
+    const pct=Math.round(doneLes/mod.lecciones.length*100);
+    const modEl=document.createElement('div');
+    modEl.className='card';
+    modEl.style.cssText='padding:1rem 1.1rem;margin-bottom:.85rem';
+    modEl.innerHTML=`<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.85rem">
+      <div style="width:38px;height:38px;border-radius:50%;background:${mod.color}22;border:2px solid ${mod.color}44;display:flex;align-items:center;justify-content:center;font-size:1.1rem">${mod.ic}</div>
+      <div style="flex:1">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">${mod.name}</div>
+        <div style="font-size:.65rem;color:var(--text);opacity:.5;margin-top:.05rem">${doneLes}/${mod.lecciones.length} lecciones completadas</div>
+      </div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--blue)">${pct}%</div>
+    </div>`;
+    mod.lecciones.forEach((les,i)=>{
+      const isDone=!!ST.done[les.id];
+      const row=document.createElement('div');
+      row.className='mod-card'+(isDone?' done':'');
+      row.style.cssText='margin-bottom:.5rem';
+      row.innerHTML=`<div class="mod-header">
+        <div class="mod-icon" style="background:${isDone?'#3a9e6f22':'var(--bg)'};border:1.5px solid ${isDone?'var(--ok)':'var(--rl)'}">
+          ${isDone?'✓':'📖'}
+        </div>
+        <div class="mod-info">
+          <div class="mod-title">${les.title}</div>
+          <div class="mod-sub">${les.sub}</div>
+          <div class="mod-prog-wrap"><div class="mod-prog-fill" style="width:${isDone?'100':'0'}%"></div></div>
+        </div>
+      </div>
+      <div class="mod-meta"><span>⏱ ${les.mins} min</span><span>${isDone?'✓ Completada':'Pendiente'}</span></div>`;
+      row.addEventListener('click',()=>openPreLes(les.id));
+      modEl.appendChild(row);
+    });
+    el.appendChild(modEl);
+  });
+}
+
+// ══════════════════════════════════════════
+//  PRE-LECCIÓN
+// ══════════════════════════════════════════
+let currentLesId='';
+function openPreLes(id){
+  currentLesId=id;
+  const l=LECCIONES[id];
+  document.getElementById('pre-mod-name').textContent=l.mod;
+  document.getElementById('pre-title').textContent=l.title;
+  document.getElementById('pre-sub').textContent=l.sub;
+  const nq=l.bloques.filter(b=>b.t==='question').length;
+  document.getElementById('pre-info').innerHTML=`
+    <div class="instr-block">
+      <div class="instr-title">Esta lección incluye</div>
+      <div class="instr-item">
+        <div class="instr-ic">📝</div>
+        <div class="instr-txt"><div class="instr-label">Bloques de contenido</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='text'||b.t==='section').length} bloques de texto clínico profundo</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">📊</div>
+        <div class="instr-txt"><div class="instr-label">Comparaciones CIE-11 vs DSM-5</div><div class="instr-desc">${l.bloques.filter(b=>b.t==='compare').length} tablas comparativas en paralelo</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">⚡</div>
+        <div class="instr-txt"><div class="instr-label">Preguntas intercaladas</div><div class="instr-desc">${nq} preguntas con feedback inmediato</div></div>
+      </div>
+      <div class="instr-item">
+        <div class="instr-ic">🏆</div>
+        <div class="instr-txt"><div class="instr-label">Quiz final</div><div class="instr-desc">${l.quiz.length} preguntas — necesitas ≥80% para maestría</div></div>
+      </div>
+    </div>`;
+  document.getElementById('pre-les').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+//  LECCIÓN
+// ══════════════════════════════════════════
+let lsIdx=0, lsAnswered=[];
+function startLesson(){
+  document.getElementById('pre-les').classList.remove('open');
+  const l=LECCIONES[currentLesId];
+  document.getElementById('ls-title').textContent=l.title;
+  lsIdx=0;
+  lsAnswered=new Array(l.bloques.length).fill(false);
+  renderLesBlock();
+  document.getElementById('ls').classList.add('open');
+}
+
+function renderLesBlock(){
+  const l=LECCIONES[currentLesId];
+  const b=l.bloques[lsIdx];
+  const pct=Math.round((lsIdx+1)/l.bloques.length*100);
+  document.getElementById('ls-prog').style.width=pct+'%';
+  document.getElementById('ls-prev').style.display=lsIdx===0?'none':'';
+  const isLast=lsIdx===l.bloques.length-1;
+  document.getElementById('ls-next').textContent=isLast?'Ir al Quiz →':'Siguiente →';
+
+  const body=document.getElementById('ls-body');
+  body.innerHTML='';
+  body.scrollTop=0;
+
+  const div=document.createElement('div');
+  div.className='les-block';
+
+  if(b.t==='text'){
+    div.innerHTML=`<div class="lb-text">${b.content}</div>`;
+  } else if(b.t==='section'){
+    div.innerHTML=`<div class="lb-section">${b.content}</div>`;
+  } else if(b.t==='case'){
+    div.innerHTML=`<div class="lb-case"><div class="lb-case-label">Caso Clínico</div><div class="lb-case-text">${b.text}</div></div>`;
+  } else if(b.t==='alert'){
+    div.innerHTML=`<div class="lb-alert"><div class="lb-alert-label">⚠ ${b.label}</div><div class="lb-alert-text">${b.text}</div></div>`;
+  } else if(b.t==='tip'){
+    div.innerHTML=`<div class="lb-tip"><div class="lb-tip-label">💡 ${b.label}</div><div class="lb-tip-text">${b.text}</div></div>`;
+  } else if(b.t==='compare'){
+    div.innerHTML=`<div class="compare-box">
+      <div class="compare-hd">
+        <div class="compare-hd-cie">CIE-11</div>
+        <div class="compare-hd-dsm">DSM-5-TR</div>
+      </div>
+      <div class="compare-body">
+        <div class="compare-col">${b.cie}</div>
+        <div class="compare-col">${b.dsm}</div>
+      </div>
+    </div>`;
+  } else if(b.t==='table'){
+    let thead=b.headers.map(h=>`<th>${h}</th>`).join('');
+    let tbody=b.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('');
+    div.innerHTML=`<table class="lb-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
+  } else if(b.t==='question'){
+    const qid=`q-${lsIdx}`;
+    div.innerHTML=`<div class="lb-q" id="${qid}">
+      <div class="lb-q-label">⚡ Pregunta intercalada</div>
+      <div class="lb-q-text">${b.q}</div>
+      <div class="lb-q-opts">${b.opts.map((o,i)=>`<button class="lb-q-opt" data-i="${i}">${o}</button>`).join('')}</div>
+      <div class="lb-q-fb" id="${qid}-fb"></div>
+      <button class="lb-q-cont" id="${qid}-cont">Continuar →</button>
+    </div>`;
+    setTimeout(()=>{
+      const opts=div.querySelectorAll('.lb-q-opt');
+      opts.forEach(opt=>{
+        opt.addEventListener('click',function(){
+          if(lsAnswered[lsIdx]) return;
+          lsAnswered[lsIdx]=true;
+          const chosen=parseInt(this.dataset.i);
+          const ok=chosen===b.cor;
+          opts.forEach(o=>o.disabled=true);
+          opts[b.cor].classList.add('q-cor');
+          if(!ok) this.classList.add('q-wrg');
+          ST.total++;
+          if(ok){ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+5');}
+          else ST.streak=0;
+          save();
+          refreshHome();
+          const fb=div.querySelector(`#${qid}-fb`);
+          fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+b.fb;
+          fb.className='lb-q-fb show '+(ok?'fb-ok':'fb-err');
+          const cont=div.querySelector(`#${qid}-cont`);
+          cont.className='lb-q-cont show';
+          cont.addEventListener('click',()=>{
+            if(lsIdx<LECCIONES[currentLesId].bloques.length-1){lsIdx++;renderLesBlock();}
+            else startQuiz();
+          });
+        });
+      });
+    },50);
+  }
+
+  body.appendChild(div);
+}
+
+// ══════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════
+let qIdx=0, qCorrect=0, qStart=0;
+function startQuiz(){
+  document.getElementById('ls').classList.remove('open');
+  const l=LECCIONES[currentLesId];
+  qIdx=0; qCorrect=0; qStart=Date.now();
+  document.getElementById('qs').classList.add('open');
+  renderQ();
+}
+
+function renderQ(){
+  const l=LECCIONES[currentLesId];
+  const q=l.quiz[qIdx];
+  const pct=Math.round((qIdx)/l.quiz.length*100);
+  document.getElementById('q-prog').style.width=pct+'%';
+  document.getElementById('q-n').textContent=`${qIdx+1}/${l.quiz.length}`;
+  document.getElementById('q-fb').className='qfb';
+  document.getElementById('q-next').style.display='none';
+  document.getElementById('q-body').innerHTML=`
+    <div class="q-mod-badge">Neurodesarrollo · CIE-11 + DSM-5</div>
+    <div class="qq">${q.q}</div>
+    <div class="qopts">${q.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${o}</button>`).join('')}</div>`;
+  document.querySelectorAll('.qopt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.qopt').forEach(o=>o.disabled=true);
+      const chosen=parseInt(this.dataset.i);
+      const ok=chosen===q.cor;
+      document.querySelectorAll('.qopt')[q.cor].classList.add('cor');
+      if(!ok) this.classList.add('wrg');
+      if(ok){qCorrect++;ST.correct++;ST.streak=(ST.streak||0)+1;popXP('+10');}
+      else ST.streak=0;
+      ST.total++;
+      const fb=document.getElementById('q-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+q.fb;
+      fb.className='qfb show '+(ok?'cor-fb':'wrg-fb');
+      const nxt=document.getElementById('q-next');
+      nxt.style.display='block';
+      nxt.textContent=qIdx<l.quiz.length-1?'Siguiente →':'Ver resultados';
+    });
+  });
+}
+
+document.getElementById('q-next').addEventListener('click',()=>{
+  qIdx++;
+  const l=LECCIONES[currentLesId];
+  if(qIdx<l.quiz.length) renderQ();
+  else finishQuiz();
+});
+
+function finishQuiz(){
+  document.getElementById('qs').classList.remove('open');
+  const l=LECCIONES[currentLesId];
+  const pct=Math.round(qCorrect/l.quiz.length*100);
+  const pts=qCorrect*10+(pct>=80?20:0);
+  ST.pts=(ST.pts||0)+pts;
+  ST.done[currentLesId]={pct,pts,date:Date.now()};
+  const elapsed=Math.round((Date.now()-qStart)/1000);
+  save(); refreshHome();
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-v').textContent=pct>=80?'¡Maestría!':pct>=60?'Bien hecho':'Sigue practicando';
+  document.getElementById('res-s').textContent=pct>=80?'Dominas este trastorno. El quiz queda desbloqueado para repasar.':pct>=60?'Buen intento. Repasa las secciones que fallaste.':'Vuelve a la lección y presta atención a los cuadros comparativos.';
+  document.getElementById('res-cor').textContent=`${qCorrect}/${l.quiz.length}`;
+  document.getElementById('res-pts').textContent='+'+pts;
+  document.getElementById('res-time').textContent=elapsed+'s';
+  document.getElementById('res').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+//  JUEGO
+// ══════════════════════════════════════════
+const GAME_LEVELS_DATA=[
+  {id:1,name:'Básico',pts_base:10,n:3,color:'#3a9e6f'},
+  {id:2,name:'Intermedio',pts_base:15,n:3,color:'#c49a3a'},
+  {id:3,name:'Avanzado',pts_base:20,n:3,color:'#c0553a'}
+];
+let gCases=[],gIdx=0,gPts=0,gStreak=0,gCorrect=0;
+
+function renderGameHome(){
+  const el=document.getElementById('game-home-content');
+  const unl=ST.game.unlocked||1;
+  el.innerHTML='';
+  GAME_LEVELS_DATA.forEach(lvl=>{
+    const isUnl=lvl.id<=unl;
+    const cases=GAME_CASES.filter(c=>c.lvl===lvl.id);
+    const div=document.createElement('div');
+    div.className='card';
+    div.style.cssText='padding:1rem 1.1rem;margin-bottom:.75rem;cursor:'+(isUnl?'pointer':'default')+';opacity:'+(isUnl?'1':'.4');
+    div.innerHTML=`<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">
+      <div style="width:36px;height:36px;border-radius:50%;background:${lvl.color}22;border:2px solid ${lvl.color}44;display:flex;align-items:center;justify-content:center;font-size:1rem">
+        ${lvl.id===1?'🎯':lvl.id===2?'💡':'🔥'}
+      </div>
+      <div style="flex:1">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--text)">Nivel ${lvl.id} — ${lvl.name}</div>
+        <div style="font-size:.68rem;color:var(--text);opacity:.5">${cases.length} casos · ${lvl.pts_base} pts c/u</div>
+      </div>
+      <div style="font-size:.75rem;font-weight:700;color:${isUnl?lvl.color:'var(--text)'}">${isUnl?'JUGAR':'🔒'}</div>
+    </div>`;
+    if(isUnl) div.addEventListener('click',()=>startGame(lvl.id));
+    el.appendChild(div);
+  });
+}
+
+function startGame(lvlId){
+  const lvlCases=GAME_CASES.filter(c=>c.lvl===lvlId);
+  gCases=lvlCases.sort(()=>Math.random()-.5).slice(0,GAME_LEVELS_DATA.find(l=>l.id===lvlId).n);
+  gIdx=0; gPts=0; gStreak=0; gCorrect=0;
+  document.getElementById('go-title').textContent='Nivel '+lvlId+' — Diagnóstico en Acción';
+  document.getElementById('go-pts-live').textContent='0';
+  document.getElementById('go-streak-live').textContent='0🔥';
+  document.getElementById('game-overlay').classList.add('open');
+  renderGameCase();
+}
+
+function renderGameCase(){
+  const c=gCases[gIdx];
+  document.getElementById('go-body').innerHTML=`
+    <div class="case-card">
+      <div class="case-label">Caso Clínico ${gIdx+1}/${gCases.length}</div>
+      <div class="case-text">${c.caso}</div>
+    </div>
+    <div class="game-q-label">${c.q}</div>
+    <div class="game-opts">${c.opts.map((o,i)=>`<button class="game-opt" data-i="${i}">${o}</button>`).join('')}</div>
+    <div class="game-fb" id="game-fb"></div>`;
+  document.getElementById('go-ft').innerHTML='';
+  document.querySelectorAll('.game-opt').forEach(opt=>{
+    opt.addEventListener('click',function(){
+      document.querySelectorAll('.game-opt').forEach(o=>o.disabled=true);
+      const chosen=parseInt(this.dataset.i);
+      const ok=chosen===c.cor;
+      document.querySelectorAll('.game-opt')[c.cor].classList.add('g-cor');
+      if(!ok) this.classList.add('g-wrg');
+      const fb=document.getElementById('game-fb');
+      fb.textContent=(ok?'✓ Correcto — ':'✗ Incorrecto — ')+c.fb;
+      fb.className='game-fb show '+(ok?'fb-ok':'fb-err');
+      const lvl=GAME_LEVELS_DATA.find(l=>l.id===c.lvl);
+      if(ok){gPts+=lvl.pts_base;gStreak++;gCorrect++;popXP('+'+lvl.pts_base);}
+      else{gStreak=0;}
+      document.getElementById('go-pts-live').textContent=gPts;
+      document.getElementById('go-streak-live').textContent=gStreak+'🔥';
+      const hasNext=gIdx<gCases.length-1;
+      document.getElementById('go-ft').innerHTML=hasNext
+        ?`<button class="btn btn-p" id="go-next" style="width:100%">Siguiente caso →</button>`
+        :`<button class="btn btn-p" id="go-finish" style="width:100%">Ver resultados</button>`;
+      if(hasNext) document.getElementById('go-next').addEventListener('click',()=>{gIdx++;renderGameCase();});
+      else document.getElementById('go-finish').addEventListener('click',finishGame);
+    });
+  });
+}
+
+function finishGame(){
+  const lvlId=gCases[0].lvl;
+  const g=ST.game;
+  g.pts=(g.pts||0)+gPts;
+  g.correct=(g.correct||0)+gCorrect;
+  g.total=(g.total||0)+gCases.length;
+  const pct=Math.round(gCorrect/gCases.length*100);
+  if(pct>=70&&lvlId<3) g.unlocked=Math.max(g.unlocked||1,lvlId+1);
+  ST.pts=(ST.pts||0)+gPts;
+  save();
+  document.getElementById('go-body').innerHTML=`
+    <div style="text-align:center;padding:1.5rem 1rem">
+      <div style="font-size:2.8rem;margin-bottom:.5rem">${pct>=80?'🎯':pct>=60?'💡':'📚'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--text);margin-bottom:.3rem">${pct>=80?'¡Excelente diagnóstico!':'Ronda completada'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--blue);margin:.3rem 0">+${gPts}</div>
+      <div style="font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;opacity:.5;margin-bottom:.7rem">puntos</div>
+      <div style="font-size:.8rem;opacity:.65;line-height:1.6;margin-bottom:1rem">${gCorrect} de ${gCases.length} casos correctos${pct>=70&&lvlId<3?'<br><strong style="color:var(--ok)">🔓 Nivel '+(lvlId+1)+' desbloqueado</strong>':''}</div>
+    </div>`;
+  document.getElementById('go-ft').innerHTML=`
+    <div style="display:flex;gap:.55rem">
+      <button class="btn btn-g" id="go-exit" style="flex:1">← Salir</button>
+      <button class="btn btn-p" id="go-repeat" style="flex:1">Repetir</button>
+    </div>`;
+  document.getElementById('go-exit').addEventListener('click',()=>{
+    document.getElementById('game-overlay').classList.remove('open');
+    renderGameHome();
+  });
+  document.getElementById('go-repeat').addEventListener('click',()=>startGame(lvlId));
+  refreshHome();
+}
+
+// ══════════════════════════════════════════
+//  PROGRESO
+// ══════════════════════════════════════════
+function renderProg(){
+  const el=document.getElementById('prog-bars');
+  el.innerHTML='<div class="ey" style="margin-bottom:.55rem">Progreso por lección</div>';
+  MODS[0].lecciones.forEach(les=>{
+    const isDone=!!ST.done[les.id];
+    const pct=isDone?100:0;
+    el.innerHTML+=`<div class="prog-bar-row">
+      <div class="pbr-label">${les.title.split(' ').slice(0,2).join(' ')}</div>
+      <div class="pbr-wrap"><div class="pbr-fill" style="width:${pct}%"></div></div>
+      <div class="pbr-pct">${pct}%</div>
+    </div>`;
+  });
+
+  const BADGES=[
+    {ic:'🧠',name:'Primera',earned:Object.keys(ST.done).length>=1},
+    {ic:'⚡',name:'Racha 3',earned:(ST.streak||0)>=3},
+    {ic:'📚',name:'2 Lecciones',earned:Object.keys(ST.done).length>=2},
+    {ic:'🏆',name:'Módulo ✓',earned:Object.keys(ST.done).length>=4},
+    {ic:'💯',name:'90% Precisión',earned:ST.total>=5&&ST.correct/ST.total>=.9},
+    {ic:'🎮',name:'50 Pts Juego',earned:(ST.game.pts||0)>=50},
+    {ic:'🔓',name:'Nivel 2',earned:(ST.game.unlocked||1)>=2},
+    {ic:'⭐',name:'Maestría',earned:Object.keys(ST.done).length>=4&&ST.total>=20}
+  ];
+  document.getElementById('badges-grid').innerHTML=BADGES.map(b=>`<div class="badge-item ${b.earned?'earned':'locked-b'}">
+    <div class="badge-icon">${b.ic}</div>
+    <div class="badge-name">${b.name}</div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  NAV + XP + INIT
+// ══════════════════════════════════════════
+function nav(tab){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sc-'+tab).classList.add('active');
+  if(tab==='home') refreshHome();
+  if(tab==='game') renderGameHome();
+  if(tab==='prog') renderProg();
+}
+
+function popXP(txt){
+  const el=document.createElement('div');
+  el.className='xp-pop';
+  el.textContent=txt;
+  el.style.cssText=`left:${35+Math.random()*30}%;top:${25+Math.random()*20}%`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('[data-tab]').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+      btn.classList.add('active');
+      nav(btn.dataset.tab);
+    });
+  });
+  document.getElementById('pre-close').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-close2').addEventListener('click',()=>document.getElementById('pre-les').classList.remove('open'));
+  document.getElementById('pre-start').addEventListener('click',startLesson);
+  document.getElementById('ls-close').addEventListener('click',()=>document.getElementById('ls').classList.remove('open'));
+  document.getElementById('ls-prev').addEventListener('click',()=>{if(lsIdx>0){lsIdx--;renderLesBlock();}});
+  document.getElementById('ls-next').addEventListener('click',()=>{
+    const l=LECCIONES[currentLesId];
+    const b=l.bloques[lsIdx];
+    if(b.t==='question'&&!lsAnswered[lsIdx]) return;
+    if(lsIdx<l.bloques.length-1){lsIdx++;renderLesBlock();}
+    else startQuiz();
+  });
+  document.getElementById('qs-close').addEventListener('click',()=>{document.getElementById('qs').classList.remove('open');document.getElementById('ls').classList.remove('open');});
+  document.getElementById('go-close').addEventListener('click',()=>{document.getElementById('game-overlay').classList.remove('open');renderGameHome();});
+  document.getElementById('res-home').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');refreshHome();});
+  document.getElementById('res-repeat').addEventListener('click',()=>{document.getElementById('res').classList.remove('open');startQuiz();});
+  refreshHome();
+  renderGameHome();
+});
+</script>
+</body>
+</html>
