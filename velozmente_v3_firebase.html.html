@@ -1780,11 +1780,12 @@ async function finishR(){
   }catch(err){
     console.warn('AI quiz error:', err);
     document.getElementById('ai-loading').style.display='none';
+    const detail = (err && err.message) ? err.message : String(err);
     if(curR.source==='user' && (!curR.questions || !curR.questions.length)){
-      alert('No se pudieron generar las preguntas con IA (revisa tu conexión) y esta lectura no tiene preguntas fijas. Puedes intentar de nuevo.');
+      alert('No se pudieron generar las preguntas con IA.\n\nDetalle: '+detail+'\n\nRevisa tu conexión o tu API key en ⚙️ Ajustes. Puedes intentar de nuevo.');
       showSc('library',document.querySelectorAll('.ni')[1]);renderLib();
     } else {
-      alert('No se pudieron generar preguntas nuevas con IA — se usarán las preguntas originales de esta lectura.');
+      alert('No se pudieron generar preguntas nuevas con IA — se usarán las preguntas originales de esta lectura.\n\nDetalle: '+detail);
       startQ();
     }
   }
