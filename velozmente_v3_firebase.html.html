@@ -1797,7 +1797,7 @@ async function finishR(){
 // La API key ya NO va escrita en el código — se guarda solo en este dispositivo
 // (localStorage) desde el botón ⚙️ Ajustes de la app. Así nunca tienes que tocar
 // el código fuente, y la key no queda visible en tu repo público de GitHub.
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-flash-latest'; // alias que Google mantiene apuntando siempre al Flash vigente
 function getGeminiKey(){ return (localStorage.getItem('vm_gemini_key')||'').trim(); }
 function openSettings(){
   document.getElementById('settings-mo').classList.add('open');
