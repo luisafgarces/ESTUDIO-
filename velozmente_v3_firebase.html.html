@@ -923,6 +923,9 @@ function initFirebase() {
       fbApp = firebase.app();
     }
     db = firebase.firestore();
+    // Persistencia offline: si el iPad/iPhone pierde señal un momento, los cambios
+    // quedan en cola local y se suben solos al reconectar, en vez de perderse.
+    db.enablePersistence({synchronizeTabs:true}).catch(e=>console.warn('Persistencia offline no disponible:', e.code));
     return true;
   } catch(e) {
     console.warn('Firebase init error:', e);
@@ -930,12 +933,44 @@ function initFirebase() {
   }
 }
 
-// Sube el estado completo a Firestore (colección velozmente, doc = syncCode)
+// Combina el estado local con uno remoto sin perder datos de ningún lado —
+// se usa tanto al bajar cambios como al subirlos, para que dos dispositivos
+// escribiendo casi al mismo tiempo no se pisen el uno al otro.
+function mergeState(local, rem){
+  if(!rem) return local;
+  const remTs = rem._ts || 0;
+  const localTs = local._ts || 0;
+  return {
+    ...local,
+    sessions:     mergeArr(local.sessions,     rem.sessions||[],     'id'),
+    wpmHistory:   mergeArr(local.wpmHistory,   rem.wpmHistory||[],   'date'),
+    userBooks:    mergeArr(local.userBooks||[], rem.userBooks||[],   'id'),
+    wishlist:     mergeArr(local.wishlist||[], rem.wishlist||[],     'id'),
+    earnedBadges: [...new Set([...(local.earnedBadges||[]), ...(rem.earnedBadges||[])])],
+    streak:       Math.max(local.streak||0,    rem.streak||0),
+    lastDate:     remTs > localTs ? (rem.lastDate||local.lastDate) : local.lastDate,
+    commitment:   (rem.commitment && remTs > localTs) ? rem.commitment : local.commitment,
+    ackWeeks:     [...new Set([...(local.ackWeeks||[]), ...(rem.ackWeeks||[])])],
+    streakShields:(remTs > localTs && typeof rem.streakShields==='number') ? rem.streakShields : local.streakShields,
+    bookProgress: mergeBookProgress(local.bookProgress, rem.bookProgress),
+    syncCode:     local.syncCode,
+    _ts:          Math.max(localTs, remTs)
+  };
+}
+
+// Sube el estado, pero primero baja lo remoto y hace merge — así un dispositivo
+// nunca sobrescribe cambios que otro dispositivo ya subió y este todavía no vio.
 async function syncUp() {
   if (!ST.syncCode || !db) return;
   try {
-    const payload = { ...ST, _ts: Date.now(), _v: 3 };
-    await db.collection('velozmente').doc(ST.syncCode.toUpperCase()).set(payload);
+    const ref = db.collection('velozmente').doc(ST.syncCode.toUpperCase());
+    const doc = await ref.get();
+    if (doc.exists) {
+      ST = mergeState(ST, doc.data());
+      save();
+    }
+    const payload = { ...ST, _ts: Date.now(), _v: 4 };
+    await ref.set(payload);
   } catch(e) { console.warn('syncUp error:', e); }
 }
 
@@ -945,25 +980,7 @@ async function syncDown() {
   try {
     const doc = await db.collection('velozmente').doc(ST.syncCode.toUpperCase()).get();
     if (doc.exists) {
-      const rem = doc.data();
-      // Merge: tomar el más completo
-      const merged = {
-        ...ST,
-        sessions:     mergeArr(ST.sessions,     rem.sessions||[],     'id'),
-        wpmHistory:   mergeArr(ST.wpmHistory,   rem.wpmHistory||[],   'date'),
-        userBooks:    mergeArr(ST.userBooks||[], rem.userBooks||[],   'id'),
-        earnedBadges: [...new Set([...(ST.earnedBadges||[]), ...(rem.earnedBadges||[])])],
-        streak:       Math.max(ST.streak||0,    rem.streak||0),
-        lastDate:     rem._ts > (ST._ts||0) ? rem.lastDate : ST.lastDate,
-        commitment:   (rem.commitment && rem._ts > (ST._ts||0)) ? rem.commitment : ST.commitment,
-        ackWeeks:     [...new Set([...(ST.ackWeeks||[]), ...(rem.ackWeeks||[])])],
-        streakShields:(rem._ts > (ST._ts||0) && typeof rem.streakShields==='number') ? rem.streakShields : ST.streakShields,
-        bookProgress: mergeBookProgress(ST.bookProgress, rem.bookProgress),
-        wishlist:     mergeArr(ST.wishlist||[], rem.wishlist||[], 'id'),
-        syncCode:     ST.syncCode,
-        _ts:          Date.now()
-      };
-      ST = merged;
+      ST = mergeState(ST, doc.data());
       save();
       refreshAll();
       return true;
@@ -983,23 +1000,7 @@ function startLiveSync() {
       const rem = doc.data();
       // Solo aplicar si el cambio vino de otro dispositivo (ts más reciente)
       if (rem._ts && rem._ts > (ST._ts || 0)) {
-        const merged = {
-          ...ST,
-          sessions:     mergeArr(ST.sessions,   rem.sessions||[],   'id'),
-          wpmHistory:   mergeArr(ST.wpmHistory, rem.wpmHistory||[], 'date'),
-          userBooks:    mergeArr(ST.userBooks||[], rem.userBooks||[], 'id'),
-          earnedBadges: [...new Set([...(ST.earnedBadges||[]), ...(rem.earnedBadges||[])])],
-          streak:       Math.max(ST.streak||0, rem.streak||0),
-          lastDate:     rem.lastDate || ST.lastDate,
-          commitment:   (rem.commitment && rem._ts > (ST._ts||0)) ? rem.commitment : ST.commitment,
-          ackWeeks:     [...new Set([...(ST.ackWeeks||[]), ...(rem.ackWeeks||[])])],
-          streakShields:(rem._ts > (ST._ts||0) && typeof rem.streakShields==='number') ? rem.streakShields : ST.streakShields,
-          bookProgress: mergeBookProgress(ST.bookProgress, rem.bookProgress),
-          wishlist:     mergeArr(ST.wishlist||[], rem.wishlist||[], 'id'),
-          syncCode:     ST.syncCode,
-          _ts:          rem._ts
-        };
-        ST = merged;
+        ST = mergeState(ST, rem);
         save();
         refreshAll();
         setSyncStatus('☁ ✓ Sincronizado', true);
